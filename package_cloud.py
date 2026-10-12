@@ -14,6 +14,7 @@ FILES = (
     "wheelbot/nested_model.xml",
     "tests/test_rl_velocity_model.py",
     "tests/test_rl_heading_rate.py",
+    "tests/test_rl_actions.py",
 )
 
 
@@ -36,7 +37,8 @@ def main():
         if bundle.testzip() is not None:
             raise RuntimeError("Bundle CRC validation failed")
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
-    target.with_suffix(".zip.sha256").write_text(f"{digest}  {target.name}\n", encoding="ascii")
+    target.with_suffix(".zip.sha256").write_text(
+        f"{digest}  {target.name}\n", encoding="ascii", newline="\n")
     print(f"{target}\n{target.stat().st_size:,} bytes\nSHA256 {digest}")
 
 

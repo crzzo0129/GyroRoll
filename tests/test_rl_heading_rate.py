@@ -18,8 +18,8 @@ class HeadingRateTests(unittest.TestCase):
         quat = np.array([0.9, 0.3, -0.2, 0.15])
         quat /= np.linalg.norm(quat)
         omega_w = np.array([0.4, -0.3, 0.7])
-        data = SimpleNamespace(root_link_quat_w=torch.tensor([quat], dtype=torch.float32),
-                              root_link_ang_vel_w=torch.tensor([omega_w], dtype=torch.float32))
+        data = SimpleNamespace(root_link_quat_w=torch.tensor(quat[None, :], dtype=torch.float32),
+                              root_link_ang_vel_w=torch.tensor(omega_w[None, :], dtype=torch.float32))
         env = SimpleNamespace(num_envs=1, device="cpu", scene={"robot": SimpleNamespace(data=data)})
         dt = 1e-6
         delta = np.zeros(4)

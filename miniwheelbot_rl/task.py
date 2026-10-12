@@ -130,7 +130,9 @@ def make_env_cfg(num_envs: int = 256, stage: str = "warmup", *,
     for key, joint, limit in (("flywheel", "reaction", settings.flywheel_speed_limit),
                               ("rolling", "drive", settings.rolling_speed_limit)):
         actions[key] = JointVelocityActionCfg(entity_name="robot",
-            actuator_names=(f"{joint}_velocity",), scale=limit, offset=0.0,
+            # MJLab 1.3.0 resolves this field against actuated joint names,
+            # although its public name is actuator_names.
+            actuator_names=(joint,), scale=limit, offset=0.0,
             use_default_offset=False, clip={".*": (-limit, limit)})
     return ManagerBasedRlEnvCfg(
         scene=SceneCfg(num_envs=num_envs, env_spacing=4.0, entities={"robot": robot},
@@ -169,7 +171,7 @@ def make_env_cfg(num_envs: int = 256, stage: str = "warmup", *,
         viewer=ViewerConfig(origin_type=ViewerConfig.OriginType.ASSET_BODY,
                             entity_name="robot", body_name="base", distance=1.5),
         sim=SimulationCfg(nconmax=96, njmax=384,
-                         mujoco=MujocoCfg(timestep=settings.timestep, iterations=30,
+                         mujoco=MujocoCfg(timestep=settings.timestep, integrator="implicitfast", iterations=30,
                                           ls_iterations=10, cone="elliptic")),
         decimation=settings.decimation, episode_length_s=settings.episode_seconds,
     )

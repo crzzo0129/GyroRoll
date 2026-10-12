@@ -14,6 +14,11 @@ def velocity_model_xml(settings: Settings = Settings(), *, ground: bool = False,
     root = ET.parse(model_path).getroot()
     world = root.find("worldbody")
     if not ground:
+        # Entity options do not propagate through MjSpec.attach(). MJLab's
+        # MujocoCfg owns the global integrator, timestep and gravity instead.
+        option = root.find("option")
+        if option is not None:
+            root.remove(option)
         # MJLab adds one terrain entity; don't import a second robot-owned plane.
         for node in list(world):
             if node.tag in ("geom", "light"):

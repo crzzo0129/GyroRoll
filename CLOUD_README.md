@@ -31,6 +31,8 @@ python -m miniwheelbot_rl train --num-envs 4 --iterations 2 --stage warmup --log
 
 `smoke` 检查 15 维观测、两维动作顺序、有限数值和电机力矩上限。最后一条只进行两次 PPO 更新，确认训练和保存通路。首次 Warp 编译会比后续启动慢。确认没有报错且 `logs/cloud_check/` 保存 checkpoint 后再开始正式训练；这些检查不代表机器人已经学会平衡或转向。
 
+单元检查也包含无需 GPU 仿真的真实 MJLab `Entity` / `ActionManager` 集成测试，验证动作关节匹配、顺序、正反转缩放、饱和与零目标速度。MJLab 1.3.0 的 `JointVelocityActionCfg.actuator_names` 实际匹配被驱动关节名（`reaction`、`drive`），不是 XML 电机名（`reaction_velocity`、`drive_velocity`）。仿真的积分器、步长和重力由全局 `MujocoCfg` 指定，机器人实体不单独携带这些选项。
+
 ## 3. 正式训练与续训
 
 ```bash
@@ -92,6 +94,7 @@ python -m miniwheelbot_rl evaluate --num-envs 8 --duration 15 --checkpoint logs/
 
 - 显存不足：减小 `--num-envs`，如 256 → 128 → 64。
 - CUDA 不可用：先修复驱动与 CUDA PyTorch，再运行任务。
+- 报 `reaction_velocity: []`：更新到仓库最新版，再重跑单元检查和 `smoke`；早期版本错误地使用了 XML 电机名。
 - 模型载入/动作检查/PPO 更新报错：保留完整报错和安装版本，先排除环境问题。
 - 未安装 MJLab 1.3.0：入口会拒绝运行其他版本，按固定依赖重新安装。
 - 打包更新：修改代码后运行 `python package_cloud.py`，重新上传 `dist/` 中的 zip。
