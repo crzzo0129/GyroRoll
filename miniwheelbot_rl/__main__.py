@@ -14,7 +14,7 @@ from .settings import Settings, STAGES
 
 def parser():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("mode", choices=("train", "smoke", "play", "evaluate"))
+    p.add_argument("mode", choices=("train", "smoke", "play", "evaluate", "video"))
     p.add_argument("--stage", choices=STAGES, help="default: checkpoint stage, otherwise warmup")
     p.add_argument("--num-envs", type=int, help="default: train 256, smoke 4, play 1, evaluate 8")
     p.add_argument("--iterations", type=int, default=3000)
@@ -30,6 +30,9 @@ def parser():
     p.add_argument("--viewer", choices=("viser", "native"), default="viser")
     p.add_argument("--viewer-host", default="127.0.0.1")
     p.add_argument("--viewer-port", type=int, default=8080)
+    p.add_argument("--video", type=Path, default=Path("results/nested_rl/rollout.mp4"))
+    p.add_argument("--speed", type=float, default=0.5, help="video forward command, m/s")
+    p.add_argument("--turn", type=float, default=0.0, help="video heading-rate command, rad/s")
     return p
 
 
@@ -70,15 +73,19 @@ def build(args):
             raise ValueError("Checkpoint geometry snapshot does not match task.json")
     args.stage = args.stage or "warmup"
     env_settings = (replace(settings, episode_seconds=max(settings.episode_seconds, args.duration + 1))
-                    if args.mode == "evaluate" else settings)
+                    if args.mode in ("evaluate", "video") else settings)
     cfg = make_env_cfg(args.num_envs, args.stage, settings=env_settings,
-                       play=args.mode in ("evaluate", "play"), randomize=args.randomize,
+                       play=args.mode in ("evaluate", "play", "video"), randomize=args.randomize,
                        model_path=model_path)
-    if args.mode == "evaluate":
+    if args.mode in ("evaluate", "video"):
         cfg.commands["twist"].resampling_time_range = (1e8, 1e8)
         cfg.commands["twist"].rel_standing_envs = 0.0
     cfg.seed = args.seed
-    env = ManagerBasedRlEnv(cfg, device=args.device)
+    if args.mode == "video":
+        cfg.viewer.width, cfg.viewer.height = 960, 544
+        cfg.viewer.azimuth, cfg.viewer.elevation = 135.0, -20.0
+    env = ManagerBasedRlEnv(cfg, device=args.device,
+                           render_mode="rgb_array" if args.mode == "video" else None)
     wrapped = RslRlVecEnvWrapper(env, clip_actions=1.0)
     agent = make_agent_cfg(args.iterations)
     agent.seed = args.seed
@@ -179,9 +186,16 @@ def evaluate(args, env, wrapped, runner):
 def main():
     args = parser().parse_args()
     if args.num_envs is None:
-        args.num_envs = {"train": 256, "smoke": 4, "play": 1, "evaluate": 8}[args.mode]
-    if args.mode in ("play", "evaluate") and args.checkpoint is None:
-        raise ValueError("play/evaluate requires --checkpoint")
+        args.num_envs = {"train": 256, "smoke": 4, "play": 1, "evaluate": 8, "video": 1}[args.mode]
+    if args.mode in ("play", "evaluate", "video") and args.checkpoint is None:
+        raise ValueError("play/evaluate/video requires --checkpoint")
+    if args.mode == "video":
+        if args.num_envs != 1:
+            raise ValueError("video requires --num-envs 1")
+        if args.video.suffix.lower() != ".mp4":
+            raise ValueError("--video must end in .mp4")
+        if os.name != "nt":
+            os.environ.setdefault("MUJOCO_GL", "egl")
     # EGL is a Linux renderer. MJLab's launch_training sets it unconditionally;
     # construct its runner directly to support native Windows.
     if os.name == "nt":
@@ -195,6 +209,9 @@ def main():
             runner.learn(num_learning_iterations=args.iterations, init_at_random_ep_len=False)
         elif args.mode == "evaluate":
             evaluate(args, env, wrapped, runner)
+        elif args.mode == "video":
+            from .video import record_video
+            record_video(args, env, wrapped, runner)
         else:
             policy = runner.get_inference_policy(device=env.device)
             if args.viewer == "native":

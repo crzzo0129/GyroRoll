@@ -60,6 +60,15 @@ python -m miniwheelbot_rl train --stage full --randomize --num-envs 256 --iterat
 
 ## 4. 看训练曲线和运动效果
 
+无需网页访问时，可以在已配置训练环境的 GPU 实例直接导出 MP4，再通过平台文件管理器下载播放。更新项目代码后，在训练用 Python 环境安装录像依赖：
+
+```bash
+python -m pip install imageio==2.37.0 imageio-ffmpeg==0.6.0
+MUJOCO_GL=egl python -m miniwheelbot_rl video --checkpoint logs/rsl_rl/nested_velocity_mjlab130/RUN/model_XXX.pt --duration 15 --speed 0.5 --turn 0 --video results/nested_rl/forward.mp4
+```
+
+把 checkpoint 路径换成实际文件，并保留旁边的 `task.json`、`geometry.xml` 和 `agent.json`。默认单环境、960×544、30 fps、跟随相机，不启动网页服务器。`--speed` 单位为 m/s，`--turn` 单位为 rad/s；warmup 建议先看 0.5 m/s 直行，后续可测试 `--speed 0.8 --turn 0.3`。发生跌倒等回合终止时录像提前停止，不把自动重置后的动作拼成连续成功运动；同名 JSON 记录实际时长与终止状态。依赖已安装后，录像本身不需要外网或 TensorBoard。Linux 无窗口渲染需要 NVIDIA EGL 支持。
+
 训练曲线在云端启动：
 
 ```bash

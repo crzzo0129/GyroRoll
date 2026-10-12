@@ -8,3 +8,5 @@ tensordict==0.10.0
 viser==1.0.26
 mjviser==0.0.11
 numpy==2.2.6
+imageio==2.37.0
+imageio-ffmpeg==0.6.0
