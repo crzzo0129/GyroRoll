@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>转向独轮车的 LQR：从会倒到会扶正</title>
+  <style>
+    :root { color-scheme:light; font-family:system-ui,"Noto Sans CJK SC",sans-serif; color:#1b2c31; background:#f6f8f7; }
+    * { box-sizing:border-box; }
+    body { margin:0; }
+    a { color:#087567; }
+    header { background:#164349; color:white; padding:14px max(20px,calc((100% - 1120px)/2)); display:flex; align-items:center; justify-content:space-between; gap:18px; }
+    header strong { font-size:16px; }
+    header nav { display:flex; gap:18px; font-size:13px; }
+    header a { color:#e4f3ee; text-decoration:none; }
+    main { max-width:1120px; padding:30px 20px 80px; margin:auto; }
+    h1 { font-size:32px; line-height:1.25; margin:9px 0 12px; }
+    h2 { font-size:23px; line-height:1.35; margin:44px 0 15px; padding-bottom:9px; border-bottom:1px solid #c9d5d2; }
+    h3 { font-size:17px; margin:26px 0 9px; }
+    p,li { line-height:1.75; }
+    p { max-width:90ch; }
+    .kicker { color:#287269; font-size:12px; font-weight:750; text-transform:uppercase; }
+    .lede { font-size:18px; line-height:1.65; max-width:70ch; margin:0 0 25px; }
+    .thesis { background:#e5f1ec; border-left:4px solid #16856d; padding:15px 20px; line-height:1.8; margin:24px 0 32px; }
+    .thesis strong { font-size:18px; }
+    .split { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr); gap:24px; align-items:start; }
+    video { display:block; width:100%; aspect-ratio:960/544; background:#101b1f; border-radius:4px; }
+    figcaption,.caption { font-size:13px; color:#526a6a; line-height:1.6; margin-top:8px; }
+    figure { margin:0; }
+    .facts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; margin:26px 0; }
+    .facts > div { border-top:3px solid #16856d; padding-top:12px; }
+    .facts > div:nth-child(2) { border-color:#c46e39; }
+    .facts > div:nth-child(3) { border-color:#487fa8; }
+    .facts b,.facts span { display:block; }
+    .facts span { font-size:14px; line-height:1.65; margin-top:6px; }
+    .flow { display:flex; flex-wrap:wrap; align-items:stretch; gap:9px; margin:18px 0 8px; }
+    .flow .node { background:white; border:1px solid #c9d7d3; padding:13px; min-width:135px; flex:1; line-height:1.55; }
+    .flow .arrow { align-self:center; font-size:23px; color:#6c8381; }
+    .flow small { color:#536d6d; }
+    .return { color:#536d6d; font-size:14px; margin:4px 0 25px; }
+    .row-label { font-weight:750; color:#126b5b; }
+    .row-label.steering { color:#aa5c32; }
+    .analogy { padding-left:23px; }
+    .analogy li { margin:10px 0; }
+    .toy { display:grid; grid-template-columns:minmax(240px,1fr) minmax(300px,1fr); gap:26px; align-items:center; border-top:1px solid #cfdbd6; border-bottom:1px solid #cfdbd6; padding:22px 0; }
+    .toy-view { position:relative; height:285px; background:#e9f2ef; overflow:hidden; border-radius:4px; }
+    .ground { position:absolute; left:0; right:0; bottom:55px; height:3px; background:#566865; }
+    .body-lean { position:absolute; left:50%; bottom:56px; width:55px; height:161px; margin-left:-27px; transform-origin:50% 100%; transition:transform .2s ease; }
+    .mast { position:absolute; left:8px; bottom:14px; width:39px; height:130px; background:#4a9ac1; border:2px solid #275f7c; }
+    .center-mass { position:absolute; left:20px; bottom:93px; width:15px; height:15px; border-radius:50%; background:#e5a744; border:2px solid #624423; }
+    .wheel { position:absolute; left:50%; bottom:37px; width:40px; height:40px; margin-left:-20px; border-radius:50%; background:#222c30; border:5px solid #68757a; }
+    .toy-view .label { position:absolute; left:16px; top:16px; font-size:13px; font-weight:700; }
+    .toy-view .left { position:absolute; bottom:13px; left:18px; font-size:13px; }
+    .toy-view .right { position:absolute; bottom:13px; right:18px; font-size:13px; }
+    .toy-controls label { display:block; margin:0 0 22px; font-weight:650; }
+    .toy-controls input { display:block; width:100%; margin-top:10px; accent-color:#147b6c; }
+    .toy-output { font-size:17px; font-weight:700; color:#126b5b; min-height:54px; }
+    .note { border-left:3px solid #c46e39; background:#f7ede5; padding:12px 16px; margin:18px 0; }
+    .steps { counter-reset:steps; padding:0; list-style:none; }
+    .steps li { position:relative; padding:0 0 16px 48px; margin:12px 0; border-bottom:1px solid #d8e1de; }
+    .steps li::before { counter-increment:steps; content:counter(steps); position:absolute; left:0; top:0; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; color:#fff; background:#21796b; font-size:14px; font-weight:700; }
+    .terms { width:100%; border-collapse:collapse; font-size:14px; }
+    .terms th,.terms td { text-align:left; vertical-align:top; border-bottom:1px solid #d5dfdc; padding:11px 9px; line-height:1.55; }
+    .terms th { background:#e7eeeb; }
+    .table-wrap { overflow-x:auto; }
+    code { background:#e5ece9; padding:2px 4px; overflow-wrap:anywhere; }
+    .equation { font-size:18px; line-height:1.7; padding:14px 16px; background:#e7eeeb; overflow-wrap:anywhere; font-family:ui-monospace,monospace; margin:15px 0; }
+    .toc { display:flex; flex-wrap:wrap; gap:10px 20px; border-top:1px solid #cad6d2; border-bottom:1px solid #cad6d2; padding:11px 0; margin:26px 0 8px; font-size:14px; }
+    .derivation { border-left:3px solid #247d6d; padding:2px 0 2px 16px; margin:19px 0 24px; }
+    .derivation .why { font-weight:750; margin:10px 0 6px; }
+    .formula { background:#e7eeeb; padding:12px 16px; margin:8px 0 10px; overflow-x:auto; }
+    .formula .math { display:block; width:max-content; max-width:100%; min-width:0; font:18px/1.7 Georgia,"Noto Serif CJK SC",serif; white-space:nowrap; }
+    .formula .math + .math { margin-top:4px; }
+    .formula small { display:block; font:13px/1.55 system-ui,sans-serif; color:#45615f; }
+    .matrix { font:14px/1.5 ui-monospace,monospace; white-space:pre; }
+    details { border-top:1px solid #cad6d2; padding:13px 0; }
+    details:last-child { border-bottom:1px solid #cad6d2; }
+    summary { cursor:pointer; font-weight:750; }
+    pre { padding:14px 16px; background:#e7eeeb; overflow:auto; line-height:1.65; font-size:13px; }
+    pre code { padding:0; background:transparent; overflow-wrap:normal; }
+    .limits { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+    .limits div { border-top:2px solid #c46e39; }
+    .limits strong { display:block; margin-top:12px; }
+    footer { padding-top:25px; margin-top:35px; border-top:1px solid #cad6d2; color:#526a6a; font-size:13px; }
+    @media(max-width:800px) {
+      .split,.facts,.toy,.limits { grid-template-columns:1fr; }
+      header { flex-wrap:wrap; }
+      h1 { font-size:27px; }
+      .flow { display:grid; grid-template-columns:1fr; }
+      .flow .arrow { justify-self:center; transform:rotate(90deg); line-height:1; }
+      .toy-view { height:260px; }
+      .formula .math { width:auto; max-width:none; white-space:normal; overflow-wrap:anywhere; font-size:16px; }
+      pre { white-space:pre-wrap; overflow-wrap:anywhere; }
+      pre code { overflow-wrap:anywhere; }
+    }
+  </style>
+</head>
+<body>
+  <header><strong>STEERBOT / 控制器图解</strong><nav><a href="report.html">实验报告</a><a href="hill_model.xml">缓丘模型</a></nav></header>
+  <main>
+    <div class="kicker">先懂直觉，再看数学</div>
+    <h1>一个转向电机，怎么同时转弯和扶正？</h1>
+    <p class="lede">这是一辆只有一个接地轮的机器人。它没有“扶住左右倾斜”的专用电机。前进时，它通过转向改变轮子与地面的作用，借地面的横向反力把自己扶正。LQR 是决定<strong>此刻该转多少、朝哪边转</strong>的计算方法。</p>
+    <div class="thesis"><strong>先记住一句话：</strong>像用手指顶着一根竖起来的扫帚，扫帚向一边倒，就要让下面的支撑点及时跟过去。这个机器人不能直接横着推机身；它要先向前走，再用转向和轮地接触实现这件事。</div>
+    <nav class="toc" aria-label="推导目录"><a href="#mechanics">① 横滚动力学</a><a href="#loops">② 速度/俯仰环</a><a href="#identify">③ 线性化 A、B</a><a href="#lqr">④ 积分增广与 Riccati</a><a href="#result">⑤ 结果与边界</a></nav>
+
+    <section aria-labelledby="watch"><h2 id="watch">先看一次真实受力</h2>
+      <div class="split"><figure><video controls muted playsinline preload="metadata" src="../results/steerbot_side_force/rollout.mp4"></video><figcaption>8.5–8.7 秒，对机身施加世界 +y 方向 1 N 外力；左上角只在受力时显示标记。视频使用 LQR，不是 PPO。</figcaption></figure>
+      <div><p>如果你推它一下，车身先倾、运动方向也会偏。控制器每隔 2 毫秒观察一次姿态和运动，再改变转向电机的力矩，让行进中的轮地反力参与扶正。</p><p>五个质量/摩擦随机种子均未跌倒；但把受力瞬间的偏航误差也严格考核时，只有 <strong>3/5</strong> 通过。它能恢复横滚，不等于能自动回到原来的路线。</p></div></div>
+      <div class="facts"><div><b>1 个接地轮</b><span>轮子转动负责向前跑；只有轮胎与地面接触。</span></div><div><b>1 个转向电机</b><span>同时影响左右倾斜和朝向；没有额外的横滚电机。</span></div><div><b>必须运动</b><span>这套控制器从 0.8 m/s 初速起步，不是零速站立方案。</span></div></div>
+    </section>
+
+    <section aria-labelledby="mechanics"><h2 id="mechanics">第一步：为什么会倒，转向为什么有用？</h2>
+      <ol class="analogy"><li><strong>为什么会倒：</strong>重心很高，接地点很窄。车身稍向右倾，重力就会继续把它往右拉。</li>
+        <li><strong>转向做了什么：</strong>电机转的是轮子相对机身的方向，并不是直接掰正机身。车在前进时，轮地接触会产生横向作用力，方向改变也带来偏航。</li>
+        <li><strong>怎么扶正：</strong>地面作用力发生在重心下方，所以它有使机身横滚的力臂。控制器选取合适的转向，让这个作用与重力造成的倾倒趋势对抗。</li></ol>
+      <p class="note">转向轴的<strong>位置固定</strong>在轮轴后方约 0.145 m（负拖距）；控制过程中改变的是转向角和转向力矩，绝不是移动转向轴。这个负拖距几何是当前验收构型，不是最初的正拖距模型。</p>
+      <p>为了谈清左右：机器人朝前是 +x，左边是 +y，向上是 +z。此页把“向右倾”记作横滚角 φ&gt;0，把“向左转”记作偏航速度 r&gt;0。向左转弯时，正常的稳态身体应向左倾一点；这不是快摔倒，而是在抵消转弯所需的侧向力。</p>
+      <div class="toy"><div class="toy-view" aria-label="从车头看，机身随目标转弯向内倾的简化示意"><span class="label">从车头看 · 稳态示意</span><div class="ground"></div><div class="body-lean" id="leanBody"><div class="mast"></div><div class="center-mass"></div></div><div class="wheel"></div><span class="left">← 左</span><span class="right">右 →</span></div>
+        <div class="toy-controls"><label>前进速度：<output id="speedOut">2.0 m/s</output><input id="speed" type="range" min="0.6" max="2.2" step="0.1" value="2"></label><label>转弯速度：<output id="turnOut">向左 0.20 rad/s</output><input id="turn" type="range" min="-0.35" max="0.35" step="0.01" value="0.2"></label><div class="toy-output" id="leanOut" aria-live="polite"></div><p class="caption">示意图使用 φ≈−atan(v·r/g)，小角度下约为 −v·r/g。它<strong>不是</strong> LQR 在代码里的目标角公式，也不是 MuJoCo 的完整动力学。</p></div></div>
+      <h3>从受力写出横滚方程</h3>
+      <p>设接地点比重心低 <code>h</code>，质量为 <code>m</code>，横滚角为 <code>φ</code>，绕前进方向的惯量为 <code>I<sub>roll</sub></code>。小角度时，接地点相对重心的位置可近似写为 <code>r<sub>接触/重心</sub>≈(0,hφ,−h)</code>。地面对轮子的力是 <code>F≈(0,F<sub>y</sub>,N)</code>，其中 <code>N≈mg</code>。沿 x 轴的力矩由叉乘 <code>τ=r×F</code> 得到：</p>
+      <div class="derivation"><div class="why">接触力矩 = 重力引发的倾倒趋势 + 横向反力产生的力矩</div><div class="formula"><span class="math">τ<sub>x</sub> = r<sub>y</sub>N − r<sub>z</sub>F<sub>y</sub> ≈ hφN + hF<sub>y</sub></span><span class="math">I<sub>roll</sub>φ̈ ≈ mghφ + hF<sub>y</sub></span></div><p>φ&gt;0 表示向右倒。此时第一项为正、会越倒越快；需要足够的右向轮地反力 <code>F<sub>y</sub>&lt;0</code> 来抵消。电机没有直接输出横滚力矩，它只能通过转向改变轮地反力。</p></div>
+      <p>若以近似恒速 <code>v<sub>x</sub></code> 转弯，且轮胎不严重侧滑，侧向向心力约为 <code>F<sub>y</sub>≈mv<sub>x</sub>r</code>。令稳态的 <code>φ̈=0</code>，得出：</p>
+      <div class="formula"><span class="math">0 ≈ mghφ<sub>eq</sub> + mhv<sub>x</sub>r</span><span class="math">φ<sub>eq</sub> ≈ −v<sub>x</sub>r / g</span><small>向左转 r&gt;0，所以身体应向左倾 φ<sub>eq</sub>&lt;0；这解释了上方滑杆示意。</small></div>
+      <p class="note">这只是受力与稳态方向的推导，<strong>不是</strong>完整机器人方程。实际 <code>F<sub>y</sub></code> 取决于转向角、速度、轮胎接触和负拖距；单轮不能直接照搬自行车的“转角 → 曲率”公式。下面用 MuJoCo 对这些耦合进行局部辨识。</p>
+    </section>
+
+    <section aria-labelledby="loops"><h2 id="loops">第二步：两台电机，各自忙什么？</h2>
+      <p>先让车保持前进，才能谈利用转向扶正。两个反馈环同时运行，物理运动仍然互相耦合。</p>
+      <div class="row-label">前后方向：驱动轮管速度和俯仰</div><div class="flow"><div class="node">手柄说“跑多快”<br><small>目标速度 v<sub>cmd</sub></small></div><span class="arrow">→</span><div class="node">速度不够？<br><small>生成一个小的目标俯仰角</small></div><span class="arrow">→</span><div class="node">俯仰 PD 反馈<br><small>驱动轮力矩，最多 ±2.4 N·m</small></div><span class="arrow">→</span><div class="node">车速和俯仰变化</div></div><p class="return">↶ 测量前向速度、俯仰角和俯仰角速度，不断回到前面比较。</p>
+      <div class="derivation"><div class="why">先稳住前后：速度误差变成目标俯仰，俯仰误差变成轮电机力矩</div>
+        <div class="formula"><span class="math">v<sub>ref,k+1</sub> = v<sub>ref,k</sub> + clip(v<sub>cmd</sub> − v<sub>ref,k</sub>, −2Δt, 2Δt)</span><span class="math">θ<sub>ref</sub> = clip(0.77439(v<sub>ref</sub> − v<sub>x</sub>), −0.6, 0.6)</span><span class="math">u<sub>drive</sub> = clip(9.00904(θ − θ<sub>ref</sub>) + 0.45210 θ̇, −1, 1)</span><span class="math">τ<sub>drive</sub> = 2.4u<sub>drive</sub> N·m</span></div>
+        <p><code>clip(a,l,h)</code> 表示把 <code>a</code> 限制在 <code>[l,h]</code>；第一行使目标速度最多每秒变化 2 m/s。θ 是实测俯仰角，θ̇ 是俯仰角速度。正负号按本模型的角度、电机方向定义。这里使用既有优化控制器的<strong>驱动轮输出</strong>，它计算出的原转向输出被丢弃。</p></div>
+      <div class="row-label steering">左右方向：转向电机同时管平衡和朝向</div><div class="flow"><div class="node">手柄说“往哪转”<br><small>目标偏航速度 r<sub>cmd</sub></small></div><span class="arrow">→</span><div class="node">平滑目标 + 转弯前馈</div><span class="arrow">→</span><div class="node">LQR 综合六种状态<br><small>转向力矩，最多 ±2.4 N·m</small></div><span class="arrow">→</span><div class="node">轮地横向力<br><small>横滚、侧滑、偏航一起变</small></div></div><p class="return">↶ 测量横滚角与速度、侧向速度、偏航速度、转向角与速度；再加一项偏航误差的短期记忆。</p>
+      <p>所以“我要求左转”和“我正在向右倒”可能同时到来，甚至互相冲突。LQR 的作用就是对这些误差做统一权衡，而不是两个互不相干的转向按钮。</p>
+    </section>
+
+    <section aria-labelledby="identify"><h2 id="identify">第三步：怎么知道转一点会发生什么？</h2>
+      <p>我们没有假装只用一个扫帚公式就能描述轮胎、负拖距和三维运动。实际做法像<strong>轻轻试探，再记账</strong>：</p>
+      <ol class="steps"><li>把当前机器人调到约 2 m/s 的行进状态，驱动轮的速度/俯仰反馈继续工作；记录此时的六个侧向状态。</li>
+        <li>分别给每个状态一点点正扰动、负扰动，比较 20 ms 之后的状态差；得到矩阵 <code>A</code>，表示状态之间怎样互相影响。</li>
+        <li>给转向电机一点点正输入、负输入，再比较 20 ms 后的差；得到单列矩阵 <code>B</code>，表示这个电机能怎样改变六个状态。</li>
+        <li>在这个局部模型上算“可控秩”：结果为 6。意思是<strong>在约 2 m/s 的局部模型里</strong>，单个转向输入经多步耦合能够影响这六个状态；绝不意味着零速或所有姿态都稳定。</li></ol>
+      <div class="table-wrap"><table class="terms"><thead><tr><th>记录的量</th><th>人话解释</th><th>为什么要看</th></tr></thead><tbody>
+        <tr><td>φ：横滚角</td><td>现在往哪边斜</td><td>直接判断会不会倒</td></tr><tr><td>φ̇：横滚角速度</td><td>正在越倒越快，还是正在扶回来</td><td>不能只看当前倾角</td></tr><tr><td>v<sub>y</sub>：机身侧向速度</td><td>有没有横向滑走</td><td>防止只顾转向、实际侧滑</td></tr><tr><td>r：偏航角速度</td><td>现在每秒转多少</td><td>跟踪手柄左右指令</td></tr><tr><td>δ：转向角</td><td>轮子相对车身朝向哪里</td><td>防止转向过大</td></tr><tr><td>δ̇：转向角速度</td><td>转向还在往哪边加速</td><td>抑制来回猛摆</td></tr>
+      </tbody></table></div>
+      <h3>把仿真当作一个可测量的函数</h3>
+      <p>令 <code>x=[φ, φ̇, v<sub>y</sub>, r, δ, δ̇]ᵀ</code>，<code>u</code> 是归一化转向电机指令。记 <code>F<sub>T</sub>(x,u)</code> 为在驱动轮闭环工作、转向指令保持不变时，经过 <code>T=0.02 s</code> 后观测到的六维状态。程序先以 0.8 m/s 起步、目标 2 m/s 行驶 4.8 s，取此时状态 <code>x<sub>0</sub></code> 和 <code>u<sub>0</sub>=0</code> 作为工作点。</p>
+      <div class="derivation"><div class="why">正负各碰一下：斜率就是局部雅可比</div>
+        <div class="formula"><span class="math">A<sub>:,i</sub> ≈ [F<sub>T</sub>(x<sub>0</sub>+εe<sub>i</sub>,0) − F<sub>T</sub>(x<sub>0</sub>−εe<sub>i</sub>,0)]/(2ε)</span><span class="math">B ≈ [F<sub>T</sub>(x<sub>0</sub>,+ε) − F<sub>T</sub>(x<sub>0</sub>,−ε)]/(2ε)</span><small>ε=10<sup>−4</sup>；代码逐一扰动对应的姿态/广义速度/关节变量，因此 x±εe<sub>i</sub> 是观测坐标中的局部记号。</small></div>
+        <p>这是“微分≈两次试验的输出差/输入差”。六个 <code>A</code> 列分别回答六个状态自身被推一点会怎样；单列 <code>B</code> 回答转向电机被推一点会怎样。每次 20 ms 测量包含 10 个 2 ms 的 MuJoCo 步。</p></div>
+      <div class="formula"><span class="math">x<sub>k+1</sub> ≈ F<sub>T</sub>(x<sub>0</sub>,0) + A(x<sub>k</sub>−x<sub>0</sub>) + Bu<sub>k</sub></span><span class="math">ξ<sub>k+1</sub> ≈ Aξ<sub>k</sub> + Bu<sub>k</sub> + d,　ξ=x−x<sub>0</sub></span><small>d=F<sub>T</sub>(x<sub>0</sub>,0)−x<sub>0</sub>：不是严格稳态就不能悄悄删掉这项。</small></div>
+      <p>本次辨识的前进速度约 1.996 m/s，工作点偏航速度约 −0.134 rad/s。所以它是<strong>行进轨迹上的局部模型</strong>，不是数学上精确直行的平衡点。LQR 求增益时忽略常值残差 <code>d</code>，并以有界积分和反馈处理实际偏差；这一点会限制前馈的精确度。</p>
+      <div class="formula"><span class="math">𝒞 = [B, AB, A²B, A³B, A⁴B, A⁵B],　rank(𝒞)=6</span><small>一个输入不等于只能改变一个状态：多步演化后，转向、横滚、侧向速度与偏航通过耦合互相传递。</small></div>
+      <p class="caption">可控秩只说明这个线性近似在约 2 m/s 处具有局部可控性，不是大范围非线性稳定性证明；实际回放每 2 ms 重算控制，而此处 <code>A、B</code> 对应 20 ms。</p>
+      <details><summary>附录：本次局部模型的数值 A、B（行/列顺序均为上述六个状态）</summary><pre class="matrix">A ≈ [[ 0.99825,  0.00228, -0.05720,  0.00147,  0.12829, -0.00664],
+     [-0.12196,  0.01379, -3.59226,  0.15334,  8.54687, -0.33972],
+     [-0.14570, -0.01824,  0.91215, -0.03099,  0.16726, -0.00669],
+     [-1.31044, -0.21948, -0.00398,  0.98850,  1.31836,  0.01986],
+     [ 0.01741,  0.00243,  0.01194, -0.00181,  0.93999,  0.01921],
+     [ 1.49831,  0.13737,  0.73495, -0.16346, -4.71714,  0.87018]]
+B ≈ [-0.06373, -6.07400, -0.36059, -7.17258, 0.19301, 17.18231]ᵀ</pre><p>数值由当前负拖距、质量和电机参数算出；换构型或换速度必须重新辨识。</p></details>
+    </section>
+
+    <section aria-labelledby="lqr"><h2 id="lqr">第四步：LQR 如何选转向力度？</h2>
+      <p>给控制器一张“扣分表”：<strong>倾倒扣得最重</strong>，侧滑、偏航误差、转向过猛也要扣分。控制器计算一组增益 <code>K</code>，让长期预计扣分尽量小。这个求解叫离散 LQR；它解 Riccati 方程，而不是 PPO 训练神经网络。</p>
+      <div class="facts"><div><b>优先站稳</b><span>横滚角权重约 386；越倾斜，越急于纠正。</span></div><div><b>仍要按指令转弯</b><span>偏航速度、侧向速度和积分误差一起计入。</span></div><div><b>别把电机打满</b><span>转向力度也有代价，最终命令限在 −1 到 +1。</span></div></div>
+      <h3>4.1 加一个“记住没转够”的状态</h3>
+      <p>只看瞬时偏航误差，受模型偏差影响，长时间可能总差一点。定义积分状态 <code>I</code> 为“目标偏航速度减实际偏航速度”逐步累积。为求增益，先考虑一个固定目标 <code>r<sub>cmd</sub></code>，忽略限幅，把六维偏差 <code>ξ</code> 和这个记忆合成 <code>z=[ξᵀ,I]ᵀ</code>。</p>
+      <div class="formula"><span class="math">I<sub>k+1</sub> = I<sub>k</sub> + T(r<sub>cmd</sub> − r<sub>k</sub>),　T=0.02 s</span><span class="math">z<sub>k+1</sub> ≈ Āz<sub>k</sub> + B̄Δu<sub>k</sub> + 目标/偏置项</span><span class="math">Ā = [ A　0 ; −T e<sub>r</sub>ᵀ　1 ],　B̄ = [ B ; 0 ],　e<sub>r</sub>=[0,0,0,1,0,0]ᵀ</span><small>把第 4 个状态 r 的系数变为 −T，是因为实际转得越快，“还没转够”的记忆增长越少。</small></div>
+      <p>代码求 <code>K</code> 时使用上式的齐次部分 <code>z<sub>k+1</sub>=Āz<sub>k</sub>+B̄Δu<sub>k</sub></code>，参考目标及非平衡残差属于仿射项。<code>Δu</code> 是相对参考转向输入的修正；实际实现最后还有前馈、平滑和限幅。</p>
+      <h3>4.2 把“好控制”写成一道最小化题</h3>
+      <div class="formula"><span class="math">J = Σ<sub>k=0…∞</sub> [ z<sub>k</sub>ᵀQz<sub>k</sub> + R(Δu<sub>k</sub>)² ]</span><span class="math">Q = diag(385.966, 2, 37.250, 6.589, 2, 0.2, 4.322),　R=3.671</span><small>七项依次处罚横滚角、横滚速度、侧向速度、偏航速度、转向角、转向角速度、偏航积分；R 处罚电机修正力度。</small></div>
+      <p>把未来每一步的扣分相加，越早纠正倾倒越划算，但猛打电机也要付代价。<code>Q、R</code> 是本项目仿真调出的设计权重，不是用质量与重力直接算出的自然常数；状态的单位不同，不能单看数字大小解释真实物理量的绝对重要性。</p>
+      <h3>4.3 从 Bellman 方程推到 K</h3>
+      <p>猜测从当前状态出发的最小未来代价是二次型 <code>V(z)=zᵀPz</code>。把“本步扣分 + 下一步最小代价”展开，并对当前电机修正量 <code>Δu</code> 求导令其为零：</p>
+      <div class="formula"><span class="math">V(z) = min<sub>Δu</sub> { zᵀQz + R(Δu)² + (Āz+B̄Δu)ᵀP(Āz+B̄Δu) }</span><span class="math">0 = (R+B̄ᵀPB̄)Δu + B̄ᵀPĀz</span><span class="math">Δu* = −Kz,　K = (R+B̄ᵀPB̄)⁻¹B̄ᵀPĀ</span><small>导数中的公共因子 2 已约去；这里 R 是一个标量，K 是 1×7 行向量。</small></div>
+      <p>把最优的 <code>Δu*</code> 再代回去，就得到离散代数 Riccati 方程（DARE）。求出满足稳定条件的 <code>P</code>，再代入上面的 <code>K</code> 式：</p>
+      <div class="formula"><span class="math">P = Q + ĀᵀPĀ − ĀᵀPB̄(R+B̄ᵀPB̄)⁻¹B̄ᵀPĀ</span><span class="math">K ≈ [0.92254, 0.02022, −0.52983, 0.01040, 1.26286, 0.05606, 0.07551]</span></div>
+      <p>这个 <code>K</code> 就是代码用 <code>solve_discrete_are</code> 求得的增益。理想的 20 ms 增广线性模型中，开环 <code>Ā</code> 的最大特征值模约 1.00256，闭环 <code>Ā−B̄K</code> 约 0.99164（小于 1），表示<strong>该局部线性、未限幅的离散近似</strong>收敛；它不构成 2 ms 实际非线性回放的全局稳定性证明。</p>
+      <h3>4.4 从 K 到真正在执行的力矩</h3>
+      <p>转弯时不能总把目标设成直立，否则要转弯和要扶正会一直打架。用近似定常关系 <code>ξ<sub>k+1</sub>=ξ<sub>k</sub></code>，暂时忽略前面说过的残差 <code>d</code>，算持续转向输入对应的六维状态变化：</p>
+      <div class="formula"><span class="math">ξ = Aξ + Bu　⇒　G = (I<sub>6</sub>−A)⁻¹B,　ξ ≈ Gu</span><span class="math">G ≈ [2.47510, 0.11097, 15.54951, −25.57572, 7.74587, −0.18262]ᵀ</span><small>G<sub>r</sub>=−25.57572 是第 4 项。负号是此模型转向电机方向及耦合的结果，不应凭“向左转”直觉擅自改号。</small></div>
+      <p>假如希望偏航速度改变 <code>r<sub>f</sub></code>，粗略地取 <code>u<sub>ff</sub>=r<sub>f</sub>/G<sub>r</sub></code>；程序还乘上调参系数 1.15，生成六维参考状态 <code>x<sub>ref</sub></code>。然后用刚算出的 <code>K</code> 修正参考与实测的偏差：</p>
+      <div class="formula"><span class="math">r<sub>f</sub> ← r<sub>f</sub> + Δt(r<sub>cmd</sub>−r<sub>f</sub>)/(0.125+Δt)</span><span class="math">I ← clip(I+Δt(r<sub>f</sub>−r), −0.078695, 0.078695)</span><span class="math">u<sub>ff</sub> = 1.15r<sub>f</sub>/G<sub>r</sub>,　x<sub>ref</sub> = x<sub>0</sub>+Gu<sub>ff</sub></span><span class="math">u<sub>steer</sub> = clip(u<sub>ff</sub>−K<sub>1:6</sub>(x−x<sub>ref</sub>)−K<sub>7</sub>I, −1, 1)</span><span class="math">τ<sub>steer</sub> = 2.4u<sub>steer</sub> N·m</span><small>实际仿真 Δt=0.002 s；K<sub>1:6</sub> 是前六个反馈系数，K<sub>7</sub> 是积分项系数。</small></div>
+      <p>一句话读法：<strong>预备转向 − 六维状态反馈 − 没转够的累计修正</strong>，最后限幅。尤其要注意，<code>x<sub>ref</sub></code> 是局部模型推算的近似参考，工作点本身偏航约 −0.134 rad/s、并非精确直行，所以这个前馈并不保证指定转弯半径；积分修正也有边界。</p>
+      <p class="note">辨识时俯仰目标的限幅为 ±0.3 rad，运行时驱动环为 ±0.6 rad；在局部微小扰动附近通常都不触发，但大动作不能用此线性推导直接外推。实际系统也包含速度目标斜坡、命令滤波、饱和与轮地非线性。</p>
+    </section>
+
+    <section aria-labelledby="result"><h2 id="result">第五步：它确实做到什么，还没做到什么？</h2>
+      <div class="split"><figure><video controls muted playsinline preload="metadata" src="../results/steerbot_hill.mp4"></video><figcaption>6 cm 连续缓丘的 2 m/s 名义回放，仍是同一个 LQR 控制器。</figcaption></figure><div><p>缓丘直行测试在五个质量/摩擦随机种子中 <strong>5/5</strong> 通过；1 N、0.2 s 机身侧向力实验五个种子均未跌倒，但严格偏航综合阈值为 <strong>3/5</strong>。这些数字证明的是指定仿真条件，不是任意地形与冲击。</p><p>更重要的是：它的状态里没有世界坐标 y 位置，也没有绝对航向角目标。外力之后横滚和偏航<strong>速度</strong>恢复，并不自动驶回原路线。</p></div></div>
+      <div class="limits"><div><strong>零速不保证平衡</strong><p>控制器依赖行进中的转向—轮地接触耦合；测试从非零前进速度起步。</p></div><div><strong>只在局部设计</strong><p>增益来自约 2 m/s 的理想状态模型；高速猛打方向、坡上强外力组合未通过普适验收。</p></div><div><strong>不是强化学习成果</strong><p>这三段主演示加载的是 LQR。项目确实训练过 PPO，但该策略没有取得这里的主验收结果。</p></div><div><strong>还不是实物证明</strong><p>没有传感噪声、转向机构柔度、轮胎形变、执行器延迟和温升模型。</p></div></div>
+    </section>
+
+    <section aria-labelledby="run"><h2 id="run">自己运行，再对照代码</h2>
+      <p>在项目根目录、有桌面图形环境的终端：</p>
+      <pre><code>PY=/home/legged-ma/miniforge3/envs/zhu_mjlab/bin/python
+$PY sim.py steerbot --model steerbot/hill_model.xml --controller lqr --lqr-tuning steerbot/negative_candidate.json --speed 2 --turn 0 --duration 60</code></pre>
+      <p>左摇杆上下改变前进速度（中位 0.6 m/s、最高 2.2 m/s），左右改变目标偏航速度（±0.35 rad/s）；键盘方向键也可操纵，空格回正转向，<code>R</code> 重置。约把左摇杆上推 87.5% 对应 2.0 m/s。</p>
+      <p>核对实现：<a href="../control.py">状态观测与双环控制</a>、<a href="../linearize_steer.py">局部动力学辨识与 LQR</a>、<a href="negative_candidate.json">本页参数</a>、<a href="validated_model.xml">验收几何</a>、<a href="report.html">逐种子实验报告</a>。</p>
+    </section>
+    <footer>说明对象是当前固定负拖距 MuJoCo 构型；示意图和小角度关系用于理解，测试结论以物理回放 JSON 和视频为准。</footer>
+  </main>
+  <script>
+    const speed = document.getElementById('speed');
+    const turn = document.getElementById('turn');
+    const leanBody = document.getElementById('leanBody');
+    function updateToy() {
+      const v = Number(speed.value), r = Number(turn.value);
+      const degrees = -Math.atan(v * r / 9.81) * 180 / Math.PI;
+      document.getElementById('speedOut').textContent = `${v.toFixed(1)} m/s`;
+      document.getElementById('turnOut').textContent = Math.abs(r) < .005 ? '直行 0.00 rad/s' : `${r > 0 ? '向左' : '向右'} ${Math.abs(r).toFixed(2)} rad/s`;
+      document.getElementById('leanOut').textContent = Math.abs(degrees) < .05 ? '稳态示意：保持直立' : `稳态示意：向${degrees < 0 ? '左' : '右'}倾约 ${Math.abs(degrees).toFixed(1)}°`;
+      leanBody.style.transform = `rotate(${degrees}deg)`;
+    }
+    speed.addEventListener('input', updateToy);
+    turn.addEventListener('input', updateToy);
+    updateToy();
+  </script>
+</body>
+</html>

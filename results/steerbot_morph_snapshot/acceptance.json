@@ -1,0 +1,85 @@
+{
+  "model": "steerbot",
+  "controller": "optimized",
+  "seeds": 5,
+  "pass_rate": 0.0,
+  "mean_steady_speed_rmse": 0.0888352324135794,
+  "mean_turn_yaw_rmse": 0.20784052543595113,
+  "individual": [
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.19957225968238645,
+      "steady_speed_rmse": 0.08897595964703506,
+      "turn_yaw_rmse": 0.20782728455591426,
+      "max_abs_roll": 0.274,
+      "pass_2m_turn": false,
+      "final_xy": [
+        13.843738370788547,
+        -9.556199014560123
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.19925447532834828,
+      "steady_speed_rmse": 0.08865888007123932,
+      "turn_yaw_rmse": 0.2113048071102761,
+      "max_abs_roll": 0.279,
+      "pass_2m_turn": false,
+      "final_xy": [
+        13.971786721200559,
+        -9.654977325585573
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.19894451882026673,
+      "steady_speed_rmse": 0.08892099031104363,
+      "turn_yaw_rmse": 0.2047334904498877,
+      "max_abs_roll": 0.287,
+      "pass_2m_turn": false,
+      "final_xy": [
+        14.313619164635098,
+        -10.087518454515665
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.19855888006216346,
+      "steady_speed_rmse": 0.08883036879176241,
+      "turn_yaw_rmse": 0.20381009732332633,
+      "max_abs_roll": 0.293,
+      "pass_2m_turn": false,
+      "final_xy": [
+        14.646234857514761,
+        -10.394644710055404
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.19993597714764394,
+      "steady_speed_rmse": 0.08878996324681664,
+      "turn_yaw_rmse": 0.21152694774035113,
+      "max_abs_roll": 0.266,
+      "pass_2m_turn": false,
+      "final_xy": [
+        13.640233845744874,
+        -9.305663752555802
+      ]
+    }
+  ]
+}

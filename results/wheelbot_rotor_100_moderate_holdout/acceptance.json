@@ -1,0 +1,223 @@
+{
+  "model": "wheelbot",
+  "controller": "thin",
+  "policy_yaw_scale": 1.0,
+  "model_path": "/home/legged-ma/workspace_zhu/ballbot/wheelBot/miniwheelbot/wheelbot/validated_model.xml",
+  "com_offset": null,
+  "trail": null,
+  "tilt": null,
+  "head_mass": null,
+  "body_mass": null,
+  "body_offset_z": null,
+  "tire_halfwidth": 0.004,
+  "reaction_gear": 2.4,
+  "steer_gear": null,
+  "rotor_friction_scale": null,
+  "recovery_rotor_gain": 0.0,
+  "recovery_yaw_gain": -0.5,
+  "recovery_yaw_integral_gain": 0.02,
+  "pre_turn_yaw_gain": 0.0,
+  "pre_turn_rotor_gain": 0.0,
+  "speed_slew": 2.5,
+  "roll_ff_scale": 1.0,
+  "yaw_kp_scale": 1.0,
+  "controller_params": null,
+  "lqr_tuning": null,
+  "rotor_speed": 100.0,
+  "mirror": false,
+  "domain_randomization": true,
+  "disturbance": true,
+  "kick_scale": 0.6,
+  "test_turn_amplitude": 0.35,
+  "test_cruise_speed": 2.0,
+  "seeds": 10,
+  "seed_start": 5,
+  "pass_rate": 0.9,
+  "mean_steady_speed_rmse": 0.23324725128418194,
+  "mean_straight_yaw_rmse": 0.08448088654758609,
+  "mean_turn_yaw_rmse": 0.1050577937380234,
+  "mean_recovery_yaw_rmse": 0.04647825764944891,
+  "mean_turn_lateral_rmse": 0.016755646656617322,
+  "individual": [
+    {
+      "kind": "wheelbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.48303454446701777,
+      "steady_speed_rmse": 0.2323181625903776,
+      "turn_yaw_rmse": 0.10775330898993694,
+      "straight_yaw_rmse": 0.09178126916596556,
+      "recovery_yaw_rmse": 0.0152060509711141,
+      "turn_lateral_rmse": 0.016792379038976134,
+      "max_abs_roll": 0.065,
+      "pass_2m_turn": true,
+      "final_xy": [
+        12.923659684954817,
+        17.80524216048879
+      ]
+    },
+    {
+      "kind": "wheelbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.48352033811097,
+      "steady_speed_rmse": 0.23473758381664775,
+      "turn_yaw_rmse": 0.08066721993435017,
+      "straight_yaw_rmse": 0.03021266397265326,
+      "recovery_yaw_rmse": 0.023274217390711446,
+      "turn_lateral_rmse": 0.015540877282515887,
+      "max_abs_roll": 0.067,
+      "pass_2m_turn": true,
+      "final_xy": [
+        13.790004879113372,
+        17.08128414314831
+      ]
+    },
+    {
+      "kind": "wheelbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.4865971176465812,
+      "steady_speed_rmse": 0.23176709353535557,
+      "turn_yaw_rmse": 0.10320733821830058,
+      "straight_yaw_rmse": 0.0737232886754664,
+      "recovery_yaw_rmse": 0.03524932050950818,
+      "turn_lateral_rmse": 0.016669207312039934,
+      "max_abs_roll": 0.066,
+      "pass_2m_turn": true,
+      "final_xy": [
+        11.77136079723629,
+        18.483025389107915
+      ]
+    },
+    {
+      "kind": "wheelbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.49182662450443715,
+      "steady_speed_rmse": 0.2315107596963055,
+      "turn_yaw_rmse": 0.09916085641760722,
+      "straight_yaw_rmse": 0.12776145440274997,
+      "recovery_yaw_rmse": 0.07241078281147756,
+      "turn_lateral_rmse": 0.016634782464365092,
+      "max_abs_roll": 0.068,
+      "pass_2m_turn": true,
+      "final_xy": [
+        10.277798009034072,
+        19.150208585991173
+      ]
+    },
+    {
+      "kind": "wheelbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.4797007777088273,
+      "steady_speed_rmse": 0.23530311786989858,
+      "turn_yaw_rmse": 0.11614116335932488,
+      "straight_yaw_rmse": 0.08931297938882488,
+      "recovery_yaw_rmse": 0.011549659186568724,
+      "turn_lateral_rmse": 0.017152363070811173,
+      "max_abs_roll": 0.063,
+      "pass_2m_turn": true,
+      "final_xy": [
+        14.556993823919615,
+        16.563780470605742
+      ]
+    },
+    {
+      "kind": "wheelbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.47863728423509166,
+      "steady_speed_rmse": 0.23506536126269126,
+      "turn_yaw_rmse": 0.11813750900710047,
+      "straight_yaw_rmse": 0.10697949316007996,
+      "recovery_yaw_rmse": 0.014780039264009679,
+      "turn_lateral_rmse": 0.017287264102716634,
+      "max_abs_roll": 0.062,
+      "pass_2m_turn": true,
+      "final_xy": [
+        14.7611149784783,
+        16.41008230399757
+      ]
+    },
+    {
+      "kind": "wheelbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.4883527734871063,
+      "steady_speed_rmse": 0.23283106454648775,
+      "turn_yaw_rmse": 0.10447007236763241,
+      "straight_yaw_rmse": 0.05406250424069045,
+      "recovery_yaw_rmse": 0.1886933011247829,
+      "turn_lateral_rmse": 0.017027954493609963,
+      "max_abs_roll": 0.086,
+      "pass_2m_turn": false,
+      "final_xy": [
+        11.271059481614545,
+        17.829496896383883
+      ]
+    },
+    {
+      "kind": "wheelbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.4926355193263685,
+      "steady_speed_rmse": 0.23191437931946526,
+      "turn_yaw_rmse": 0.10006923548877099,
+      "straight_yaw_rmse": 0.10829922555720745,
+      "recovery_yaw_rmse": 0.08032112938580037,
+      "turn_lateral_rmse": 0.016605655694082015,
+      "max_abs_roll": 0.067,
+      "pass_2m_turn": true,
+      "final_xy": [
+        10.214516864776563,
+        19.13933013335312
+      ]
+    },
+    {
+      "kind": "wheelbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.48276487628068815,
+      "steady_speed_rmse": 0.23163464277435292,
+      "turn_yaw_rmse": 0.1059808240981911,
+      "straight_yaw_rmse": 0.08122293966447595,
+      "recovery_yaw_rmse": 0.012349285802882944,
+      "turn_lateral_rmse": 0.016762385124938845,
+      "max_abs_roll": 0.065,
+      "pass_2m_turn": true,
+      "final_xy": [
+        12.758027265111734,
+        17.933788148619282
+      ]
+    },
+    {
+      "kind": "wheelbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.4801957015266857,
+      "steady_speed_rmse": 0.23539034743023704,
+      "turn_yaw_rmse": 0.11499040949901923,
+      "straight_yaw_rmse": 0.08145304724774706,
+      "recovery_yaw_rmse": 0.010948790047633236,
+      "turn_lateral_rmse": 0.017083597982117497,
+      "max_abs_roll": 0.063,
+      "pass_2m_turn": true,
+      "final_xy": [
+        14.462140560031807,
+        16.633162129935364
+      ]
+    }
+  ]
+}

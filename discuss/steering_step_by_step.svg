@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" role="img" aria-labelledby="title desc">
+  <title id="title">Wheelbot 转向的四步物理示意</title>
+  <desc id="desc">上轮转动获得沿横滚轴的角动量；下轮动作让机身短暂俯仰；轮轴方向变化引起偏航方向的陀螺反作用；控制器扶正并调节偏航速度，接地轮沿新的朝向前进。</desc>
+  <defs>
+    <marker id="head" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="none" stroke="#7ce5d7" stroke-width="2"/></marker>
+    <marker id="orange" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="none" stroke="#ffbd88" stroke-width="2"/></marker>
+    <marker id="green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="none" stroke="#b7ed88" stroke-width="2"/></marker>
+    <style>text{font-family:system-ui,'Noto Sans SC',sans-serif}.title{font-size:22px;font-weight:700;fill:#e7f6f5}.small{font-size:15px;fill:#bad0d1}.formula{font-size:17px;font-weight:700;fill:#a9eee5}.num{font-size:18px;font-weight:800;fill:#ffbd88}</style>
+  </defs>
+  <rect width="1200" height="500" rx="20" fill="#0c1720"/>
+  <text x="31" y="47" fill="#e7f6f5" font-family="system-ui,'Noto Sans SC',sans-serif" font-size="25" font-weight="800">一个转弯动作里，力矩是怎样传到偏航轴的？</text>
+  <g fill="#142832" stroke="#385260" stroke-width="2">
+    <rect x="30" y="91" width="263" height="319" rx="16"/>
+    <rect x="322" y="91" width="263" height="319" rx="16"/>
+    <rect x="614" y="91" width="263" height="319" rx="16"/>
+    <rect x="906" y="91" width="263" height="319" rx="16"/>
+  </g>
+  <g>
+    <path d="M294 248H316M586 248H608M878 248H900" stroke="#7ce5d7" stroke-width="4" marker-end="url(#head)"/>
+    <text x="50" y="128" class="num">01</text><text x="89" y="128" class="title">先有旋转的上轮</text>
+    <ellipse cx="150" cy="236" rx="73" ry="43" fill="#21434d" stroke="#7ce5d7" stroke-width="10"/>
+    <ellipse cx="150" cy="236" rx="24" ry="14" fill="#ffbd88"/>
+    <path d="M151 235H257" stroke="#7ce5d7" stroke-width="4" marker-end="url(#head)"/>
+    <text x="49" y="324" class="small">反作用轮绕横滚轴转动，</text>
+    <text x="49" y="350" class="small">具有角动量 H，方向沿轮轴。</text>
+  </g>
+  <g>
+    <text x="342" y="128" class="num">02</text><text x="381" y="128" class="title">机身发生俯仰</text>
+    <path d="M451 151L467 244" stroke="#b2c7ca" stroke-width="19" stroke-linecap="round"/>
+    <ellipse cx="469" cy="256" rx="54" ry="27" fill="#21434d" stroke="#7ce5d7" stroke-width="9"/>
+    <path d="M400 290H542" stroke="#748e93" stroke-width="3"/>
+    <path d="M514 157C543 173 548 211 531 233" fill="none" stroke="#ffbd88" stroke-width="4" marker-end="url(#orange)"/>
+    <text x="342" y="324" class="small">接地轮的力矩能让身体前后动；</text>
+    <text x="342" y="350" class="small">此时轮轴被带着改变方向。</text>
+  </g>
+  <g>
+    <text x="634" y="128" class="num">03</text><text x="673" y="128" class="title">出现偏航反作用</text>
+    <path d="M676 237H780" stroke="#7ce5d7" stroke-width="4" marker-end="url(#head)"/>
+    <path d="M676 237V162" stroke="#ffbd88" stroke-width="4" marker-end="url(#orange)"/>
+    <circle cx="676" cy="237" r="31" fill="none" stroke="#b7ed88" stroke-width="4"/><circle cx="676" cy="237" r="7" fill="#b7ed88"/>
+    <text x="786" y="235" class="small">H</text><text x="691" y="171" class="small">俯仰</text>
+    <text x="628" y="290" class="formula">转轮速度 × 俯仰速度</text>
+    <text x="634" y="350" class="small">轮子需要侧向力矩改变 H；</text>
+    <text x="634" y="376" class="small">机身受到相反的偏航作用。</text>
+  </g>
+  <g>
+    <text x="926" y="128" class="num">04</text><text x="965" y="128" class="title">反馈扶正并定向</text>
+    <path d="M961 311C1001 283 1026 268 1049 229C1069 197 1105 205 1135 183" fill="none" stroke="#b7ed88" stroke-width="6" marker-end="url(#green)"/>
+    <circle cx="1006" cy="278" r="12" fill="#7ce5d7"/><circle cx="1080" cy="216" r="12" fill="#7ce5d7"/>
+    <path d="M1006 278L1021 241M1080 216L1111 185" stroke="#ffbd88" stroke-width="4" marker-end="url(#orange)"/>
+    <text x="926" y="350" class="small">控制器修正两台电机力矩，</text>
+    <text x="926" y="376" class="small">让身体稳定、朝向停在目标值。</text>
+  </g>
+  <text x="32" y="453" fill="#9fb6bd" font-family="system-ui,'Noto Sans SC',sans-serif" font-size="14">图示的是“力从哪里来”的思考实验。真实控制器没有固定的四拍转弯时序，也不能仅凭图确定左转电流的正负号。</text>
+</svg>

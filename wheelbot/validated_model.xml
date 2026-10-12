@@ -1,0 +1,42 @@
+<mujoco model="wheelbot_narrow_tire">
+  <compiler angle="radian" autolimits="true"/>
+  <option timestep="0.002" integrator="implicitfast" gravity="0 0 -9.81"/>
+  <default>
+    <joint damping="0.002" armature="0.00002"/>
+    <geom condim="3" friction="1.6 0.03 0.003" solref="0.008 1"/>
+  </default>
+  <visual>
+    <global azimuth="135" elevation="-18"/>
+    <headlight ambient=".55 .55 .55" diffuse=".85 .85 .85" specular=".15 .15 .15"/>
+  </visual>
+  <asset>
+    <texture name="checker" type="2d" builtin="checker" width="256" height="256" rgb1=".17 .2 .22" rgb2=".22 .25 .27"/>
+    <material name="floor_mat" texture="checker" texrepeat="12 12"/>
+  </asset>
+  <contact>
+    <exclude body1="base" body2="drive_wheel"/>
+  </contact>
+  <worldbody>
+    <light pos="0 0 3"/>
+    <geom name="ground" type="plane" size="20 20 .1" material="floor_mat"/>
+    <body name="base" pos="0 0 .28">
+      <freejoint name="root"/>
+      <geom name="body" type="box" size=".052 .044 .132" pos="0 0 .018" mass=".68" rgba=".19 .57 .57 1"/>
+      <geom name="front" type="box" size=".017 .034 .018" pos=".057 0 .07" mass=".015" rgba=".96 .65 .18 1"/>
+      <body name="drive_wheel" pos="0 0 -.16">
+        <joint name="drive" axis="0 1 0"/>
+        <geom name="tire" type="cylinder" size=".12 .004" euler="1.57079632679 0 0" mass=".30" rgba=".12 .14 .16 1"/>
+        <geom name="hub" type="cylinder" size=".035 .019" euler="1.57079632679 0 0" mass=".012" rgba=".65 .67 .68 1" contype="0" conaffinity="0"/>
+      </body>
+      <body name="reaction_wheel" pos="0 0 .185">
+        <joint name="reaction" axis="1 0 0" damping=".0012"/>
+        <geom name="flywheel" type="cylinder" size=".083 .011" euler="0 1.57079632679 0" mass=".44" rgba=".88 .35 .23 1"/>
+        <geom name="flywheel_hub" type="cylinder" size=".022 .017" euler="0 1.57079632679 0" mass=".018" rgba=".1 .13 .15 1" contype="0" conaffinity="0"/>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <motor name="drive_motor" joint="drive" gear="2.4" ctrllimited="true" ctrlrange="-1 1"/>
+    <motor name="reaction_motor" joint="reaction" gear="2.4" ctrllimited="true" ctrlrange="-1 1"/>
+  </actuator>
+</mujoco>

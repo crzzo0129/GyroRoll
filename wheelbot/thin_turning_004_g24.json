@@ -1,0 +1,29 @@
+{
+  "score": 0.5612270170408553,
+  "speed_rmse": 0.23899280443567264,
+  "yaw_rmse": 0.07285933559778834,
+  "lateral_rmse": 0.01539843510953265,
+  "duration": 15.000000000001679,
+  "fallen": false,
+  "tire_halfwidth": 0.004,
+  "reaction_gear": 2.4,
+  "initial_rotor_speed": 100.0,
+  "recovery_rotor_gain": 0.0,
+  "recovery_yaw_gain": -0.3,
+  "recovery_yaw_integral_gain": 0.02,
+  "speed_slew": 2.5,
+  "turn_min_speed": 1.1,
+  "turn_full_speed": 1.8,
+  "startup_seconds": 2.0,
+  "startup_speed_limit": 1.0,
+  "roll_ff_scale": 1.0,
+  "params": [
+    0.10083617072944451,
+    9.897686261431971,
+    2.4038662546744964,
+    3.631801288376667,
+    1.1509459280556058,
+    -0.2038367855942218,
+    0.011617408137989393
+  ]
+}

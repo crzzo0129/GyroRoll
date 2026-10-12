@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wheelbot 飞轮独轮车 · 控制器设计与手柄仿真</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, "Noto Sans CJK SC", sans-serif; color: #1b3033; background: #f7faf8; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; line-height: 1.72; }
+    a { color: #146b6b; text-underline-offset: 3px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    code { background: #e9f0ed; font-size: .9em; padding: 2px 4px; overflow-wrap: anywhere; }
+    button { font: inherit; cursor: pointer; }
+    header { color: #f0faf7; background: #1b3b3a; }
+    .header-inner { max-width: 1320px; min-height: 60px; margin: auto; padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+    header strong { font-size: 16px; }
+    header nav { display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; }
+    header a { color: #c5e5d9; text-decoration: none; }
+    .shell { max-width: 1320px; margin: auto; padding: 0 24px; display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 40px; }
+    aside { border-right: 1px solid #d6e2dd; }
+    .toc { position: sticky; top: 0; padding: 28px 14px 24px 0; display: grid; gap: 7px; font-size: 13px; }
+    .label { color: #5f7976; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+    .toc a { text-decoration: none; color: #4a6865; padding: 4px 0; }
+    .toc a:hover, .toc a:focus-visible { color: #a14429; text-decoration: underline; }
+    main { min-width: 0; padding-bottom: 60px; }
+    .intro { padding: 32px 0 28px; border-bottom: 1px solid #d6e2dd; }
+    h1 { font-size: clamp(28px, 3vw, 38px); letter-spacing: 0; line-height: 1.3; margin: 9px 0 11px; }
+    .intro > p { font-size: 16px; max-width: 82ch; margin: 0; }
+    .verdict { display: flex; gap: 14px; align-items: flex-start; margin-top: 22px; padding: 14px 18px; max-width: 940px; border-left: 4px solid #18836f; background: #e7f2eb; }
+    .verdict b { color: #08624f; white-space: nowrap; }
+    section { padding: 25px 0 13px; border-bottom: 1px solid #d6e2dd; scroll-margin-top: 18px; }
+    h2 { font-size: 21px; line-height: 1.4; margin: 0 0 12px; }
+    h3 { font-size: 16px; margin: 24px 0 8px; }
+    p { max-width: 88ch; margin: 10px 0; }
+    ol, ul { padding-left: 24px; max-width: 88ch; }
+    li { margin: 6px 0; }
+    .media { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(260px, .85fr); gap: 24px; align-items: start; }
+    figure { margin: 0; min-width: 0; }
+    video { width: 100%; aspect-ratio: 960 / 544; display: block; background: #122a2d; border-radius: 4px; }
+    figcaption { font-size: 12px; color: #607774; margin-top: 7px; }
+    .facts { border-top: 2px solid #b7ccc3; }
+    .fact { display: grid; grid-template-columns: 100px 1fr; gap: 10px; border-bottom: 1px solid #d7e3dd; padding: 9px 0; font-size: 13px; }
+    .fact b { color: #4d7168; }
+    .signal-map { border-top: 2px solid #248b77; border-bottom: 1px solid #c9d9d1; padding: 12px 0 15px; margin: 18px 0; }
+    .map-head { display: grid; grid-template-columns: minmax(95px,.8fr) 20px minmax(165px,1.45fr) 20px minmax(75px,.6fr) 20px minmax(155px,1.25fr) 20px minmax(110px,.9fr); gap: 6px; color: #5a7470; font-size: 11px; font-weight: 800; margin-bottom: 7px; }
+    .map-row { display: grid; grid-template-columns: minmax(95px,.8fr) 20px minmax(165px,1.45fr) 20px minmax(75px,.6fr) 20px minmax(155px,1.25fr) 20px minmax(110px,.9fr); gap: 6px; align-items: stretch; margin-bottom: 8px; }
+    .map-head span:nth-child(1), .map-row > :nth-child(1) { grid-column: 1; }
+    .map-head span:nth-child(2), .map-row > :nth-child(3) { grid-column: 3; }
+    .map-head span:nth-child(3), .map-row > :nth-child(5) { grid-column: 5; }
+    .map-head span:nth-child(4), .map-row > :nth-child(7) { grid-column: 7; }
+    .map-head span:nth-child(5), .map-row > :nth-child(9) { grid-column: 9; }
+    .map-cell { background: #fff; border: 1px solid #cbdad3; border-top: 2px solid #248b77; padding: 10px; min-width: 0; font-size: 12px; line-height: 1.42; }
+    .map-row.roll .map-cell { border-top-color: #d26c3f; }
+    .map-cell b { display: block; font-size: 12px; }
+    .map-cell small { display: block; color: #5b746d; font-size: 11px; }
+    .map-arrow { align-self: center; justify-self: center; font-size: 18px; color: #618079; line-height: 1; }
+    .map-coupling { background: #f3f0e8; border-left: 3px solid #bb8144; margin-top: 14px; padding: 11px 14px; font-size: 13px; }
+    .map-coupling b { color: #72481f; }
+    .map-feedback { background: #e9f2ed; border-left: 3px solid #248b77; margin-top: 8px; padding: 10px 14px; font-size: 12px; }
+    .formula { overflow-x: auto; margin: 13px 0; padding: 11px 15px; border-left: 3px solid #248b77; background: #eaf2ed; font: 15px/1.8 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: nowrap; }
+    .formula.roll { border-color: #d26c3f; background: #f8eee8; }
+    .formula small { display: block; white-space: normal; color: #526e64; font: 12px/1.5 system-ui, sans-serif; }
+    .callout { background: #f9eee8; border-left: 3px solid #c7673c; padding: 11px 16px; max-width: 88ch; }
+    .small { font-size: 13px; color: #546e69; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border-bottom: 1px solid #d9e4df; padding: 10px 11px; text-align: left; vertical-align: top; }
+    th { background: #e8f0ec; }
+    .command { border-top: 1px solid #c9d9d1; margin: 18px 0; padding-top: 12px; }
+    .command-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .command-head h3 { margin: 0 0 6px; }
+    .copy { padding: 5px 10px; white-space: nowrap; border: 1px solid #a2c2b7; background: #fff; border-radius: 4px; color: #145e51; font-size: 12px; }
+    .copy:hover { background: #e4f0e9; }
+    pre { padding: 15px; margin: 6px 0; overflow-x: auto; background: #213738; color: #edf8f3; border-radius: 4px; font-size: 12px; line-height: 1.65; }
+    pre code { background: transparent; color: inherit; font-size: inherit; padding: 0; overflow-wrap: normal; }
+    footer { color: #6a8078; font-size: 12px; padding: 25px 0; }
+    @media (max-width: 900px) { .shell { display: block; } aside { border-right: 0; border-bottom: 1px solid #d6e2dd; } .toc { position: static; padding: 11px 0; display: flex; flex-wrap: wrap; gap: 0 17px; } .toc .label { width: 100%; } .media { grid-template-columns: 1fr; } }
+    @media (max-width: 1140px) { .map-head { display: none; } .map-row { grid-template-columns: 1fr; gap: 4px; margin: 12px 0; } .map-row > * { grid-column: 1 !important; } .map-arrow { transform: rotate(90deg); } }
+    @media (max-width: 630px) { .header-inner { flex-direction: column; align-items: flex-start; gap: 3px; } .shell { padding: 0 16px; } .intro { padding-top: 22px; } .verdict { display: block; } .verdict b { display: block; } .formula { font-size: 12px; } .fact { grid-template-columns: 85px 1fr; } }
+  </style>
+</head>
+<body>
+  <header><div class="header-inner"><strong>Wheelbot · 飞轮控制说明</strong><nav><a href="report.html">实验报告</a><a href="validated_model.xml">验收模型</a><a href="thin_turning_004_g24.json">控制参数</a></nav></div></header>
+  <div class="shell">
+    <aside aria-label="页面目录"><nav class="toc"><span class="label">阅读路径</span><a href="#answer">现在用的是什么</a><a href="#physical">机械与物理直觉</a><a href="#diagram">控制框图</a><a href="#speed">速度和俯仰</a><a href="#turn">横滚和转弯</a><a href="#recovery">回正与预旋</a><a href="#source">参数如何得到</a><a href="#run">启动与手柄</a><a href="#scope">验证与限制</a></nav></aside>
+    <main>
+      <div class="intro" id="answer">
+        <div class="label">Wheelbot / 接地驱动轮 + 上方正交反作用飞轮</div>
+        <h1>飞轮独轮车的控制器设计</h1>
+        <p>这里说的是 <code>wheelbot</code>，不是带竖直转向关节的 <code>steerbot</code>。下轮负责前进与前后平衡，上飞轮负责左右平衡；偏航来自飞轮、姿态运动和轮地接触的耦合，没有独立偏航电机。</p>
+        <div class="verdict"><b>明确结论</b><span>当前验收和下面的手柄仿真用 <code>--controller thin</code>：<strong>不是 PPO，也不是 LQR</strong>。它是七个主要增益加起步、限速和回正逻辑组成的显式状态反馈，参数在 MuJoCo 轨迹上优化。<code>--checkpoint</code> 才切换到 PPO 网络回放；本项目没有为 wheelbot 定义 LQR 控制器。</span></div>
+      </div>
+
+      <section id="physical">
+        <h2>01 · 两台电机分别能做什么</h2>
+        <div class="media"><figure><video controls muted playsinline preload="metadata" src="../results/wheelbot/rollout.mp4">浏览器不支持视频播放。</video><figcaption>仓库中的 15 秒窄胎飞轮版验收录屏：固定指令回放，控制器为 thin，而非 PPO。</figcaption></figure><div class="facts"><div class="fact"><b>坐标</b><span>机身 +x 前方、+y 左方、+z 上方。</span></div><div class="fact"><b>主轮</b><span>绕局部 y 轴，半径 0.12 m、半宽 0.004 m；电机最大约 2.4 N·m。</span></div><div class="fact"><b>上飞轮</b><span>绕局部 x 轴，半径 0.083 m、质量 0.44 kg；电机最大约 2.4 N·m。</span></div><div class="fact"><b>初始条件</b><span>飞轮预旋 100 rad/s；此值是仿真重置时直接设定的。</span></div><div class="fact"><b>控制周期</b><span>物理步长 0.002 s；显式反馈每步计算一次，约 500 Hz。</span></div></div></div>
+        <p>从正面看，机身像一个倒立摆。前后倾时，下轮移动接地点，把支撑点带到重心附近；左右倾时，上飞轮电机加速转子，机身受到绕 x 轴的<strong>反向</strong>反作用力矩。因此飞轮可以直接帮助横滚平衡，却不能像方向盘一样直接指定绕 z 轴的偏航力矩。</p>
+        <p>飞轮沿 x 轴转动时有角动量 <em>H ≈ J<sub>R</sub> Ω<sub>R</sub> e<sub>x</sub></em>。如果机身同时俯仰，飞轮轴方向改变，<em>dH/dt</em> 中会出现 <em>ω × H</em> 项，其偏航力矩量级约为 <em>J<sub>R</sub>|Ω<sub>R</sub>q|</em>。但车轮滚动、横滚、机身惯性与轮地接触也参与偏航；这个项<strong>存在</strong>不等于它在当前轨迹中<strong>占主导</strong>。</p>
+      </section>
+
+      <section id="diagram">
+        <h2>02 · 从手柄到电机的控制框图</h2>
+        <p>图中上两行是<strong>软件控制器</strong>，方框里的 <code>u<sub>D</sub></code> 和 <code>u<sub>R</sub></code> 是它输出的两个归一化电机命令；下方黄色区域是<strong>MuJoCo 被控对象内部的物理耦合</strong>，不是代码里另外写的一条控制律。</p>
+        <div class="signal-map" role="group" aria-label="Wheelbot 输入、控制器、电机、被控对象与反馈信号框图">
+          <div class="map-head"><span>用户输入</span><span>软件控制器</span><span>电机输出</span><span>被控对象</span><span>测得状态</span></div>
+          <div class="map-row"><div class="map-cell"><b>v<sub>cmd</sub></b><small>期望前向速度</small></div><span class="map-arrow">→</span><div class="map-cell"><b>斜率限制 → θ<sub>ref</sub> → 俯仰 PD</b><small>使用 v<sub>x</sub>、θ、q 反馈</small></div><span class="map-arrow">→</span><div class="map-cell"><b>u<sub>D</sub></b><small>下轮力矩命令</small></div><span class="map-arrow">→</span><div class="map-cell"><b>主轮 + 机身</b><small>下轮滚动，机身俯仰</small></div><span class="map-arrow">→</span><div class="map-cell"><b>v<sub>x</sub>, θ, q</b><small>前进、俯仰状态</small></div></div>
+          <div class="map-row roll"><div class="map-cell"><b>r<sub>cmd</sub></b><small>期望偏航角速度</small></div><span class="map-arrow">→</span><div class="map-cell"><b>低速门控 → φ<sub>ref</sub> → 横滚反馈</b><small>使用 v<sub>x</sub>、r、φ、p、Ω<sub>R</sub> 反馈</small></div><span class="map-arrow">→</span><div class="map-cell"><b>u<sub>R</sub></b><small>飞轮力矩命令</small></div><span class="map-arrow">→</span><div class="map-cell"><b>飞轮 + 机身</b><small>机身受反力矩；飞轮速度变化</small></div><span class="map-arrow">→</span><div class="map-cell"><b>φ, p, Ω<sub>R</sub></b><small>横滚、飞轮状态</small></div></div>
+          <div class="map-coupling"><b>被控对象内部的交叉通道（不是控制器中的显式乘法）：</b><br>来自上行的俯仰速度 q + 来自下行的飞轮速度 Ω<sub>R</sub> → 陀螺耦合；横滚 φ + 轮胎运动 → 轮地接触力与其他惯性耦合。它们共同影响机身偏航角速度 <strong>r</strong>。不能仅从控制律判断每一项占比。</div>
+          <div class="map-feedback"><b>反馈闭环：</b>v<sub>x</sub> → 速度误差与转弯低速门控；θ、q → 俯仰 PD；φ、p、Ω<sub>R</sub> → 飞轮反馈；<strong>r → 横滚参考 φ<sub>ref</sub></strong>。对用户直接追踪的输出是前进速度 v<sub>x</sub> 与偏航角速度 r；姿态和飞轮速度是内部状态。</div>
+        </div>
+        <p class="callout"><strong>这条现有控制器没有 r<sub>cmd</sub> → θ<sub>ref</sub>、没有“命令 q”的偏航通道，也没有转弯时锁定 Ω<sub>R</sub> 的速度环。</strong>俯仰速度由前进平衡环、指令变化和接触扰动产生；飞轮转速由历史电机力矩演化。这正是它与显式设计陀螺转向轨迹的非线性控制器不同的地方。</p>
+      </section>
+
+      <section id="speed">
+        <h2>03 · 前进：速度外环与俯仰内环</h2>
+        <p>以下是这份 <a href="thin_turning_004_g24.json">验收参数</a>在 <code>ThinWheelController</code> 中的实际计算。<em>Δt=0.002 s</em>，<em>v<sub>x</sub></em> 为机身坐标系前向速度，<em>q</em> 为绕 y 轴的机身俯仰角速度；<code>clip(x,a,b)</code> 表示把数值限制在 [a,b]。</p>
+        <div class="formula">前 2 s：v<sub>cmd,used</sub> = min(v<sub>cmd</sub>, 1.0 m/s)</div>
+        <div class="formula">v<sub>target,k+1</sub> = v<sub>target,k</sub> + clip(v<sub>cmd,used</sub> − v<sub>target,k</sub>, −2.5Δt, 2.5Δt)</div>
+        <div class="formula">θ<sub>ref</sub> = clip[0.100836(v<sub>target</sub> − v<sub>x</sub>), −0.3, 0.3]</div>
+        <div class="formula">u<sub>D</sub> = clip[9.897686(θ − θ<sub>ref</sub>) + 2.403866q, −1, 1]<small>u<sub>D</sub> 为归一化下轮电机命令；绝对值 1 对应模型中的约 2.4 N·m 关节力矩。</small></div>
+        <p>物理直觉：目标速度比实际速度高，就要求一个相应的俯仰参考；下轮既要防止倒下，也要让车逐渐达到目标速度。角速度项相当于抑制俯仰摆动。系数不是从一个通用倒立摆解析式直接推出来的，而是为当前构型在仿真中调出来的。</p>
+      </section>
+
+      <section id="turn">
+        <h2>04 · 转弯：偏航误差变为横滚目标</h2>
+        <p>记手柄转弯输入为 <em>r<sub>cmd</sub></em>，实测偏航角速度为 <em>r</em>。低速时先将转弯命令衰减：速度低于 1.1 m/s 时为 0，达到 1.8 m/s 时才是全量。</p>
+        <div class="formula roll">g(v<sub>x</sub>) = clip[(v<sub>x</sub> − 1.1)/(1.8 − 1.1), 0, 1],　r<sub>c</sub> = g(v<sub>x</sub>)r<sub>cmd</sub></div>
+        <div class="formula roll">φ<sub>ref</sub> = clip[−0.203837r<sub>c</sub> + 0.011617(r<sub>c</sub> − r), −0.4, 0.4]</div>
+        <div class="formula roll">u<sub>R,base</sub> = clip[3.631801(φ − φ<sub>ref</sub>) + 1.150946p + 0.0005Ω<sub>R</sub>, −1, 1]<small>p 为横滚角速度，Ω<sub>R</sub> 为飞轮相对机身转速；0.0005 = 0.0012 / 2.4，是按模型阻尼与电机力矩写的补偿。</small></div>
+        <h3>为什么飞轮转速前面是正号？</h3>
+        <p>模型里飞轮关节的黏性阻尼总是<strong>反对当前转动</strong>：飞轮正转时阻尼为负力矩，反转时阻尼为正力矩。电机模型则以 <em>2.4u<sub>R</sub></em> N·m 对飞轮施力。因此控制器用同号电机力矩抵消阻尼：</p>
+        <div class="formula roll">τ<sub>motor</sub> = 2.4u<sub>R</sub>,　τ<sub>damping</sub> = −0.0012Ω<sub>R</sub></div>
+        <div class="formula roll">u<sub>friction</sub> = (0.0012/2.4)Ω<sub>R</sub> = 0.0005Ω<sub>R</sub></div>
+        <p>例如 <em>Ω<sub>R</sub>=100 rad/s</em>、姿态误差和角速度项暂为零时，命令 <em>u<sub>R</sub>=0.05</em>，电机作用 <em>+0.12 N·m</em>，关节阻尼 <em>−0.12 N·m</em>，两项相消。<strong>它的符号看起来像“速度越大、越给正命令”，但在这个理想模型下只是阻尼前馈抵消，不是把速度误差放大的正反馈控制。</strong>它也不提供速度收敛：忽略其他耦合时，飞轮近似满足 <em>J<sub>R</sub>Ω̇<sub>R</sub> ≈ 2.4u<sub>balance</sub></em>。因此飞轮转速可以累积漂移、饱和；真实阻尼不准时还可能欠补偿或过补偿。</p>
+        <p><strong>举个量级例子。</strong> 前进约 2 m/s、要求左转 <em>+0.35 rad/s</em>，偏航误差很小时，横滚目标约 <em>−0.071 rad</em>，即向左倾约 4.1°。协调转弯的量级 <em>|φ| ≈ v|r|/g</em> 恰好也约为 0.071 rad；<strong>数值接近并不能证明该机器依靠“自行车式倾斜转向”，也不能证明陀螺项是主因</strong>。它只是帮助理解这个参考角的大小，代码没有实时计算此式。</p>
+        <h3>你指出的俯仰–飞轮耦合究竟在哪里？</h3>
+        <p>用局部机身坐标作简化：飞轮角动量主要沿 +x，机身以 <em>q=θ̇</em> 绕 +y 俯仰，则 <em>(q e<sub>y</sub>) × (J<sub>R</sub>Ω<sub>R</sub> e<sub>x</sub>) = −J<sub>R</sub>Ω<sub>R</sub>q e<sub>z</sub></em> 是改变<strong>飞轮</strong>角动量所需的陀螺力矩，机身受相反作用。实际运动可以概括成：</p>
+        <div class="formula roll">I<sub>z</sub>·ṙ ≈ J<sub>R</sub>Ω<sub>R</sub>q + τ<sub>contact,z</sub> + 其他惯性/约束项<small>教学性分解，不是此 MuJoCo 模型的完整偏航方程；各项大小与符号依赖实际姿态、接触和坐标。</small></div>
+        <p>然而 <code>ThinWheelController.act()</code> 中 <em>r<sub>cmd</sub></em> 只进入 <em>φ<sub>ref</sub></em>，<strong>没有</strong>进入 <em>θ<sub>ref</sub></em> 或一条单独的俯仰摆动轨迹。所以上述乘积是<strong>物理被控对象内发生的效应</strong>，不是控制器明确规定“转左时让 q 和 Ω<sub>R</sub> 取什么值”。偏航误差通过横滚目标间接改变飞轮力矩；下轮继续按速度和平衡需要驱动俯仰。当前回放能跟踪偏航，但仅凭这段代码和 RMSE 不能断言陀螺项与接触项各占多少，更不能把它等同于显式陀螺偏航 MPC。</p>
+        <p><strong>“俯仰角为零”与“俯仰速度为零”是两回事。</strong>机身刚经过 <em>θ=0</em> 时仍可能有 <em>q=θ̇≠0</em>，陀螺项不会因此消失。如果 <em>θ</em> 在一段时间严格恒为 0，则 <em>q=0</em>，上式的 <em>Ω<sub>R</sub>q</em> 项确实为零。此时是否还有偏航，必须看完整的轮地接触和其他耦合，不能由这一个项推出“绝对无法转向”；反过来，也不能因此宣称现有控制器能在俯仰锁死后正常转弯。</p>
+        <p>当前测试没有锁住俯仰。下轮速度误差常使 <em>θ<sub>ref</sub></em> 非零；正常行驶中姿态和接触也会持续扰动 <em>q</em>。在一条不加随机化/冲击的名义 15 s 回放中，<em>t=6 s</em> 记录为 <em>θ≈0.0145 rad、q≈−0.0192 rad/s、Ω<sub>R</sub>≈+99 rad/s、r≈+0.331 rad/s</em>；<em>t=10 s</em> 为 <em>θ≈0.0074 rad、q≈−0.0116 rad/s、Ω<sub>R</sub>≈−130 rad/s、r≈−0.343 rad/s</em>。这证明该回放并非 <em>θ=q=0</em>；左右转时飞轮转速与偏航速度各自变号，也<strong>不能单独证明</strong>陀螺项占主导。力矩对应角加速度，不能直接从角速度符号反推。</p>
+        <p>此外，若 <em>θ</em> 保持非零但 <em>q=0</em>，上式的旋转角动量项暂时没有了；不过机身倾斜会使绕机身 x 轴的电机反力矩在世界竖直方向出现约 <em>τ<sub>R</sub>sinθ</em> 的投影，轮地接触也可能提供偏航力矩。具体加速度仍须使用完整动力学计算。</p>
+        <p class="callout"><strong>如果要显式设计陀螺转向：</strong>需要让偏航外环依据当前 Ω<sub>R</sub>、俯仰状态和轮地约束，规划下轮与飞轮两台电机的联合动作，使期望的 <em>q·Ω<sub>R</sub></em> 耦合在保持平衡、速度和力矩限制下出现。这是另一种待实现的控制架构，不是将现有 <em>φ<sub>ref</sub></em> 公式改个名字。<a href="https://arxiv.org/html/2502.04582">Mini Wheelbot 论文</a> 使用非线性 MPC / 近似 MPC 探索这种偏航控制；论文硬件与本仓库概念模型的几何和参数并不相同。</p>
+      </section>
+
+      <section id="recovery">
+        <h2>05 · 为什么要预旋、如何回正</h2>
+        <p>启动仿真时，代码把飞轮关节初速度直接设成 <strong>100 rad/s</strong>，因此一开始就有非零角动量。这是验收<strong>初始条件</strong>，不是控制器已证明能从静止飞轮自行起旋到该状态；也不能据此断言“没有这 100 rad/s 就一定不会转弯”。运行中 Ω<sub>R</sub> 还会随电机力矩变化。</p>
+        <p>当有效转弯指令绝对值大于 0.02，控制器置位 <code>has_turned</code>，并清空回正积分。转弯结束后（指令小于阈值），积分实测偏航角速度并在 ±1 截断：</p>
+        <div class="formula roll">I<sub>k+1</sub> = clip(I<sub>k</sub> + Δt·r<sub>k</sub>, −1, 1)</div>
+        <div class="formula roll">u<sub>R</sub> = clip[u<sub>R,base</sub> + 0.3r − 0.02I, −1, 1]<small>按当前 JSON：recovery_rotor_gain = 0，recovery_yaw_gain = −0.3，recovery_yaw_integral_gain = 0.02。正负号是代入原始代码后的结果。</small></div>
+        <p>这个修正旨在让转向指令归零后偏航角速度回落。由于飞轮不是直接的偏航电机，不能凭“+0.3r”单项的符号判断它会直接加速还是制动偏航。当前默认的转弯前偏航/飞轮转速附加增益均为 0；回正项也不保证飞轮转速回到 100 rad/s。<strong>回正表示停止转动，不表示返回原航向或原路径。</strong></p>
+      </section>
+
+      <section id="source">
+        <h2>06 · 控制器从哪里来；PPO、LQR各在哪里</h2>
+        <div class="table-wrap"><table><thead><tr><th>运行方式</th><th>动作如何产生</th><th>这份验收/手柄命令在用？</th></tr></thead><tbody><tr><td><code>wheelbot --controller thin</code></td><td>上述速度、俯仰、横滚、偏航状态反馈；七个主要系数在 MuJoCo 轨迹上优化，另有起步/回正参数</td><td><strong>是</strong></td></tr><tr><td><code>wheelbot --checkpoint ...</code></td><td>PPO 策略网络从观测预测两个电机动作；仿真分支每 10 个物理步更新动作</td><td><strong>否</strong>，只有明确传 checkpoint 才走网络</td></tr><tr><td><code>wheelbot --controller lqr</code></td><td>仓库没有为 wheelbot 实现 LQR；<code>sim.py</code> 会拒绝这个组合</td><td><strong>不能使用</strong></td></tr><tr><td><code>wheelbot</code>（未指定控制器）</td><td>早期直行平衡 baseline；不按转弯指令闭环跟踪偏航</td><td><strong>否</strong></td></tr></tbody></table></div>
+        <p><code>thin</code> 的七个主要系数最初由 <a href="../optimize_wheel_rounded.py">optimize_wheel_rounded.py</a> 的差分进化轨迹评分寻找，后续配置还加入了启动和偏航恢复设置；这是<strong>基于仿真调参的显式反馈</strong>，不是用 Riccati 方程根据线性模型求得的 LQR，也不是神经网络推理。PPO 的 <a href="../train.py">train.py</a> 与 <a href="../policy.py">policy.py</a> 是独立路线，不能把下面的 thin 验收数字说成 PPO 的成绩。</p>
+        <p>每一步 <a href="../control.py">control.py</a> 的 <code>observe()</code> 从 MuJoCo 真值读姿态、速度与飞轮关节速度，再由 <code>ThinWheelController.act()</code> 算出两个归一化动作。当前不是带有传感器噪声、IMU 融合和硬件通信时延的实机控制软件。</p>
+      </section>
+
+      <section id="run">
+        <h2>07 · 正确目录下启动手柄仿真</h2>
+        <p><code>sim.py</code> 在 <code>miniwheelbot/</code>，不在 <code>miniwheelbot/wheelbot/</code>。以下命令使用绝对路径切换到正确目录；有图形桌面时可用手柄或键盘操作。<strong>不带 <code>--checkpoint</code></strong>，因此用的始终是显式反馈控制器。</p>
+        <div class="command"><div class="command-head"><h3>手柄试驾（推荐）</h3><button class="copy" type="button" data-copy="cmd-drive">复制命令</button></div><pre id="cmd-drive"><code>cd /home/legged-ma/workspace_zhu/ballbot/wheelBot/miniwheelbot
+PY=/home/legged-ma/miniforge3/envs/zhu_mjlab/bin/python
+$PY sim.py wheelbot --controller thin --speed 1 --turn 0 --duration 60</code></pre><p class="small">默认自动加载 <code>wheelbot/validated_model.xml</code> 与 <code>wheelbot/thin_turning_004_g24.json</code>；飞轮以 100 rad/s 预旋。速度请先升至约 1.8–2 m/s，再尝试轻度转弯。关闭窗口可提前退出。</p></div>
+        <div class="command"><div class="command-head"><h3>固定 15 秒转弯与扰动复现（非手柄）</h3><button class="copy" type="button" data-copy="cmd-test">复制命令</button></div><pre id="cmd-test"><code>cd /home/legged-ma/workspace_zhu/ballbot/wheelBot/miniwheelbot
+PY=/home/legged-ma/miniforge3/envs/zhu_mjlab/bin/python
+$PY sim.py wheelbot --controller thin --headless --test \
+  --duration 15 --dr --disturbance</code></pre><p class="small"><code>--test</code> 让脚本接管速度和转弯指令；<code>--dr</code> 改变质量/摩擦，<code>--disturbance</code> 在 8.5 s 和 11.5 s 加速度冲击。该命令不操纵手柄，也不覆盖原有结果文件。</p></div>
+        <div class="table-wrap"><table><thead><tr><th>输入</th><th>效果</th><th>注意</th></tr></thead><tbody><tr><td>手柄 1 左摇杆 ↑ / ↓</td><td>速度指令 −2 至 +2 m/s；中位为 0</td><td>当前验收只覆盖正向行驶任务，中位/倒车不保证平衡</td></tr><tr><td>手柄 1 左摇杆 ← / →</td><td>偏航角速度指令 +0.35 至 −0.35 rad/s</td><td>低于 1.1 m/s 的转向指令被控制器抑制</td></tr><tr><td>键盘 ↑ / ↓</td><td>每次速度 +0.2 / −0.2 m/s</td><td>界限 −1 至 +2 m/s</td></tr><tr><td>键盘 ← / →</td><td>每次偏航指令 +0.1 / −0.1 rad/s</td><td>界限 ±0.35 rad/s</td></tr><tr><td>空格 / R</td><td>转向归零 / 重置机器人</td><td>重置飞轮仍预旋，但保留当前手动速度和转向指令</td></tr></tbody></table></div>
+        <p>接通且被 GLFW 识别为 joystick 1 的手柄会每个物理步覆盖键盘设定。若只想用键盘，先拔掉手柄并把焦点放到 MuJoCo 窗口。单独运行 <code>python -m mujoco.viewer --mjcf wheelbot/validated_model.xml</code> 只会打开模型，没有控制器，按播放会倒。</p>
+      </section>
+
+      <section id="scope">
+        <h2>08 · 验收证明了什么，没证明什么</h2>
+        <p>已有固定 15 秒测试按 1 m/s 起步、2 m/s 直线、左右各 3 秒 ±0.35 rad/s 转弯、最后降至 1.5 m/s 回正；在机身质量 ±15%、轮地滑动摩擦 1.1–1.9 和两次侧向/横滚角速度冲击下，种子 0–4 的预定顺序 <strong>5/5 通过</strong>。该组平均稳态速度 RMSE 约 0.234 m/s，转向偏航 RMSE 约 0.112 rad/s；数值是 <code>thin</code> 的 CPU 仿真回放，绝不是 PPO 或 LQR 的成绩。</p>
+        <p class="callout">不要把 5/5 理解成任意手柄轨迹都安全。预旋 100 rad/s、窄刚性圆柱胎、高飞轮力矩和理想状态观测都是测试条件。持续同向转弯可能令飞轮角动量积累，额外测试曾在约 10–17 秒跌倒；瞬时偏航速度也可能显著超出指令。模型未包含轮胎形变、电机温升、传感噪声与硬件延迟。</p>
+        <p class="small">原始模型 <a href="model.xml">model.xml</a> 是半宽 16 mm、飞轮电机最大 0.48 N·m 的不同对照构型。这里的控制器与验收结果只对应 <a href="validated_model.xml">validated_model.xml</a> 的半宽 4 mm、飞轮电机最大 2.4 N·m 构型。完整数据和图表见 <a href="report.html">wheelbot 实验报告</a>。</p>
+      </section>
+      <footer>本页为可离线打开的项目说明；视频和源码链接均是仓库内相对路径。</footer>
+    </main>
+  </div>
+  <script>
+    document.querySelectorAll('[data-copy]').forEach(button => {
+      button.addEventListener('click', async () => {
+        const pre = document.getElementById(button.dataset.copy);
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(pre.textContent.trim());
+          } else {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(pre);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            if (!document.execCommand('copy')) throw new Error('copy unavailable');
+            selection.removeAllRanges();
+          }
+          button.textContent = '已复制';
+          setTimeout(() => { button.textContent = '复制命令'; }, 1800);
+        } catch {
+          const selection = window.getSelection();
+          const range = document.createRange();
+          range.selectNodeContents(pre);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          button.textContent = '已选中，请手动复制';
+          setTimeout(() => { button.textContent = '复制命令'; }, 2400);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

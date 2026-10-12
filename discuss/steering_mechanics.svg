@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" role="img" aria-labelledby="title desc">
+  <title id="title">Mini Wheelbot 转向的结构与陀螺耦合示意</title>
+  <desc id="desc">左侧显示两个正交轮和三种机身姿态；中间显示反作用轮角动量与机身俯仰角速度的叉乘带来偏航方向的陀螺反作用；右侧显示机身改变朝向后接地轮的前进方向改变。</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101f2b"/><stop offset="1" stop-color="#0a121b"/></linearGradient>
+    <linearGradient id="body" x2="1" y2="1"><stop stop-color="#657f88"/><stop offset="1" stop-color="#243b48"/></linearGradient>
+    <marker id="arrowC" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9" fill="none" stroke="#7fe7dc" stroke-width="1.6"/></marker>
+    <marker id="arrowO" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9" fill="none" stroke="#ffc18c" stroke-width="1.6"/></marker>
+    <marker id="arrowG" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9" fill="none" stroke="#b4ec8b" stroke-width="1.6"/></marker>
+  </defs>
+  <rect width="1200" height="500" rx="20" fill="url(#bg)"/>
+  <path d="M400 40V458M800 40V458" stroke="#34505c" stroke-width="2"/>
+  <g font-family="system-ui,'Noto Sans SC',sans-serif" fill="#eaf7f6">
+    <text x="32" y="47" font-size="20" font-weight="700">① 结构：两轮轴正交</text>
+    <text x="432" y="47" font-size="20" font-weight="700">② 耦合：转动中的轮轴改变方向</text>
+    <text x="832" y="47" font-size="20" font-weight="700">③ 结果：航向改变，路径跟着弯</text>
+  </g>
+  <!-- Mechanical concept -->
+  <g transform="translate(23 0)">
+    <path d="M20 399H355" stroke="#55737d" stroke-width="3"/>
+    <ellipse cx="181" cy="348" rx="83" ry="52" fill="#183c48" stroke="#82e5db" stroke-width="11"/>
+    <ellipse cx="181" cy="348" rx="25" ry="16" fill="#f2bf8c"/>
+    <path d="M148 292L161 153H201L215 292" fill="url(#body)" stroke="#a0b9bf" stroke-width="4"/>
+    <ellipse cx="181" cy="148" rx="36" ry="77" fill="#1a3c48" stroke="#82e5db" stroke-width="10"/>
+    <ellipse cx="181" cy="148" rx="12" ry="27" fill="#f2bf8c"/>
+    <path d="M216 119H330" stroke="#7fe7dc" stroke-width="3" marker-end="url(#arrowC)"/>
+    <text x="218" y="103" fill="#9eece5" font-family="system-ui,'Noto Sans SC',sans-serif" font-size="14">上轮：反作用轮</text>
+    <path d="M247 340H345" stroke="#ffc18c" stroke-width="3" marker-end="url(#arrowO)"/>
+    <text x="250" y="327" fill="#ffc18c" font-family="system-ui,'Noto Sans SC',sans-serif" font-size="14">下轮：接地驱动</text>
+    <text x="51" y="440" fill="#a7bac3" font-family="system-ui,'Noto Sans SC',sans-serif" font-size="14">输入：驱动轮力矩 τD、反作用轮力矩 τR</text>
+  </g>
+  <!-- Gyro vector concept -->
+  <g font-family="system-ui,'Noto Sans SC',sans-serif">
+    <text x="432" y="89" fill="#9fb5bf" font-size="14">局部坐标示意：x 前、y 左、z 上</text>
+    <circle cx="598" cy="255" r="7" fill="#d7eded"/>
+    <path d="M598 255H746" stroke="#7fe7dc" stroke-width="5" marker-end="url(#arrowC)"/>
+    <path d="M598 255V127" stroke="#ffc18c" stroke-width="5" marker-end="url(#arrowO)"/>
+    <circle cx="598" cy="255" r="38" fill="none" stroke="#b4ec8b" stroke-width="3"/>
+    <circle cx="598" cy="255" r="9" fill="#b4ec8b"/>
+    <text x="690" y="238" fill="#9eece5" font-size="16">H R ∥ x</text>
+    <text x="613" y="156" fill="#ffc18c" font-size="16">Ω pitch ∥ y</text>
+    <text x="644" y="305" fill="#b4ec8b" font-size="15">机身受偏航方向的反作用</text>
+    <text x="435" y="359" fill="#dcecea" font-size="15">正在旋转的反作用轮 + 机身俯仰运动</text>
+    <text x="435" y="391" fill="#dcecea" font-size="15">→ 轮角动量方向变化 → 偏航耦合</text>
+    <text x="435" y="438" fill="#9fb5bf" font-size="12">箭头仅解释一个陀螺项；完整动力学还有惯性、接触和摩擦项。</text>
+  </g>
+  <!-- Ground path top view -->
+  <g font-family="system-ui,'Noto Sans SC',sans-serif">
+    <text x="832" y="89" fill="#9fb5bf" font-size="14">地面俯视图</text>
+    <path d="M877 392 C923 359 933 309 966 281 C1001 250 1051 258 1108 185" fill="none" stroke="#b4ec8b" stroke-width="7" stroke-linecap="round" marker-end="url(#arrowG)"/>
+    <circle cx="929" cy="325" r="12" fill="#7fe7dc"/>
+    <circle cx="1036" cy="252" r="12" fill="#7fe7dc"/>
+    <path d="M929 325L944 275" stroke="#ffc18c" stroke-width="4" marker-end="url(#arrowO)"/>
+    <path d="M1036 252L1090 212" stroke="#ffc18c" stroke-width="4" marker-end="url(#arrowO)"/>
+    <text x="842" y="311" fill="#ffc18c" font-size="14">初始航向 ψ₀</text>
+    <text x="1025" y="298" fill="#ffc18c" font-size="14">新航向 ψ₁</text>
+    <text x="842" y="440" fill="#a7bac3" font-size="14">改变偏航角 ψ 后，接地轮滚动的方向随之改变</text>
+  </g>
+</svg>

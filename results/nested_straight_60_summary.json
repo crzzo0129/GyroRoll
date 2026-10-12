@@ -1,0 +1,28 @@
+{
+  "command": "./run_nested.ps1 -Headless -Speed 1 -Duration 60",
+  "model": "wheelbot/nested_model.xml",
+  "configuration": "wheelbot/nested_controller.json",
+  "initial_rotor_speed": 20.0,
+  "domain_randomization": false,
+  "disturbance": false,
+  "summary": {
+    "kind": "wheelbot",
+    "duration": 60.0,
+    "fallen": false,
+    "samples": 2882,
+    "speed_rmse": 0.22308350726675072,
+    "steady_speed_rmse": 0.12480590935370725,
+    "turn_yaw_rmse": 0.0021120327953944276,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": 0.00014108728031793705,
+    "max_abs_roll": 0.004,
+    "pass_2m_turn": null,
+    "final_xy": [51.20799948783863, -0.7700364800521748]
+  },
+  "metric_windows": {
+    "steady_speed_rmse": "3 to 60 seconds",
+    "turn_yaw_rmse": "5.5 to 10.8 seconds only (straight command)",
+    "turn_lateral_rmse": "5.5 to 10.8 seconds only (straight command)"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "model": "steerbot",
+  "controller": "optimized",
+  "model_path": "/home/legged-ma/workspace_zhu/ballbot/wheelBot/miniwheelbot/steerbot/model.xml",
+  "com_offset": 0.04798065771489547,
+  "controller_params": "/home/legged-ma/workspace_zhu/ballbot/wheelBot/miniwheelbot/steerbot/morph_candidate.json",
+  "rotor_speed": 0.0,
+  "domain_randomization": true,
+  "disturbance": true,
+  "seeds": 5,
+  "pass_rate": 0.0,
+  "mean_steady_speed_rmse": 0.08778145362355273,
+  "mean_turn_yaw_rmse": 0.22002178220273877,
+  "individual": [
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.19670813312075924,
+      "steady_speed_rmse": 0.08761120435147815,
+      "turn_yaw_rmse": 0.2231125267738022,
+      "max_abs_roll": 0.277,
+      "pass_2m_turn": false,
+      "final_xy": [
+        13.801768337321576,
+        -9.8138025799342
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.19682000265567048,
+      "steady_speed_rmse": 0.08845915828139926,
+      "turn_yaw_rmse": 0.21915395678325697,
+      "max_abs_roll": 0.279,
+      "pass_2m_turn": false,
+      "final_xy": [
+        13.781577090667856,
+        -9.538532531006988
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.1959953873864145,
+      "steady_speed_rmse": 0.08731843090888226,
+      "turn_yaw_rmse": 0.2163352926033982,
+      "max_abs_roll": 0.289,
+      "pass_2m_turn": false,
+      "final_xy": [
+        14.416904981532978,
+        -10.481068952585186
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.19559636595640048,
+      "steady_speed_rmse": 0.08722607449953255,
+      "turn_yaw_rmse": 0.21376739961660932,
+      "max_abs_roll": 0.296,
+      "pass_2m_turn": false,
+      "final_xy": [
+        14.806033334988765,
+        -10.810826910618394
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.197373417932716,
+      "steady_speed_rmse": 0.08829240007647142,
+      "turn_yaw_rmse": 0.22773973523662736,
+      "max_abs_roll": 0.266,
+      "pass_2m_turn": false,
+      "final_xy": [
+        13.425321119945115,
+        -9.198110992577732
+      ]
+    }
+  ]
+}

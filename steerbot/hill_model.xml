@@ -1,0 +1,49 @@
+<mujoco model="steerbot_gentle_hill">
+  <compiler angle="radian" autolimits="true"/>
+  <option timestep="0.002" integrator="implicitfast" gravity="0 0 -9.81"/>
+  <default>
+    <joint damping="0.002" armature="0.00002"/>
+    <geom condim="3" friction="1.6 0.03 0.003" solref="0.008 1"/>
+  </default>
+  <visual>
+    <global azimuth="135" elevation="-18"/>
+    <map znear=".00001"/>
+    <headlight ambient=".55 .55 .55" diffuse=".85 .85 .85" specular=".15 .15 .15"/>
+  </visual>
+  <asset>
+    <texture name="checker" type="2d" builtin="checker" width="256" height="256" rgb1=".17 .2 .22" rgb2=".22 .25 .27"/>
+    <material name="floor_mat" texture="checker" texrepeat="80 12"/>
+    <hfield name="hill" file="hill_height.png" size="200 100 .06 .1"/>
+  </asset>
+  <contact>
+    <exclude body1="base" body2="drive_wheel"/>
+  </contact>
+  <worldbody>
+    <light pos="0 0 3"/>
+    <geom name="ground" type="hfield" hfield="hill" material="floor_mat"/>
+    <geom name="hill_entry_left" type="sphere" size=".027" pos="2 .55 .04" rgba=".92 .66 .20 1" contype="0" conaffinity="0"/>
+    <geom name="hill_entry_right" type="sphere" size=".027" pos="2 -.55 .04" rgba=".92 .66 .20 1" contype="0" conaffinity="0"/>
+    <geom name="hill_crest_left" type="sphere" size=".027" pos="4 .55 .10" rgba=".25 .82 .62 1" contype="0" conaffinity="0"/>
+    <geom name="hill_crest_right" type="sphere" size=".027" pos="4 -.55 .10" rgba=".25 .82 .62 1" contype="0" conaffinity="0"/>
+    <geom name="hill_exit_left" type="sphere" size=".027" pos="6 .55 .04" rgba=".92 .66 .20 1" contype="0" conaffinity="0"/>
+    <geom name="hill_exit_right" type="sphere" size=".027" pos="6 -.55 .04" rgba=".92 .66 .20 1" contype="0" conaffinity="0"/>
+    <body name="base" pos="0 0 .28">
+      <freejoint name="root"/>
+      <geom name="body" type="box" size=".052 .044 .132" pos="0 0 .026820192048178466" mass=".7369897166452781" rgba=".24 .49 .68 1"/>
+      <geom name="front" type="box" size=".017 .034 .018" pos=".057 0 .07" mass=".015" rgba=".96 .65 .18 1"/>
+      <body name="fork" pos="-.1453498657219891 0 -.16">
+        <joint name="steer" axis="0 0 1" range="-.8 .8" damping=".006"/>
+        <geom name="steering_head" type="cylinder" size=".019 .035" pos="0 0 .04" mass=".009347738449963656" rgba=".7 .7 .72 1" contype="0" conaffinity="0"/>
+        <body name="drive_wheel" pos=".1453498657219891 0 0">
+          <joint name="drive" axis="0 1 0"/>
+          <geom name="tire" type="cylinder" size=".12 .004" euler="1.57079632679 0 0" mass=".30" rgba=".12 .14 .16 1"/>
+          <geom name="hub" type="cylinder" size=".035 .019" euler="1.57079632679 0 0" mass=".012" rgba=".65 .67 .68 1" contype="0" conaffinity="0"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <motor name="drive_motor" joint="drive" gear="2.4" ctrllimited="true" ctrlrange="-1 1"/>
+    <motor name="steer_motor" joint="steer" gear="2.4" ctrllimited="true" ctrlrange="-1 1"/>
+  </actuator>
+</mujoco>

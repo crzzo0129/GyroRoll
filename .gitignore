@@ -1,0 +1,14 @@
+.venv/
+.venv-mjlab/
+.reference/
+.cache/
+*.egg-info/
+__pycache__/
+*.pyc
+logs/
+*.pt
+*.pth
+*.onnx
+.env
+.env.*
+!.env.example

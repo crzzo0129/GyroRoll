@@ -1,0 +1,102 @@
+{
+  "model": "steerbot",
+  "controller": "optimized",
+  "model_path": "/home/legged-ma/workspace_zhu/ballbot/wheelBot/miniwheelbot/steerbot/model.xml",
+  "com_offset": null,
+  "trail": 0.5,
+  "tilt": null,
+  "head_mass": 0.005,
+  "controller_params": "/home/legged-ma/workspace_zhu/ballbot/wheelBot/miniwheelbot/steerbot/lightfork.json",
+  "lqr_tuning": null,
+  "rotor_speed": 0.0,
+  "mirror": false,
+  "domain_randomization": true,
+  "disturbance": true,
+  "seeds": 5,
+  "pass_rate": 0.0,
+  "mean_steady_speed_rmse": 0.15912876043090463,
+  "mean_turn_yaw_rmse": 0.40550022700866,
+  "mean_turn_lateral_rmse": 0.11296389302611698,
+  "individual": [
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.22119821712777027,
+      "steady_speed_rmse": 0.14321103971301868,
+      "turn_yaw_rmse": 0.35704438979458364,
+      "turn_lateral_rmse": 0.09583215131979812,
+      "max_abs_roll": 0.698,
+      "pass_2m_turn": false,
+      "final_xy": [
+        15.967351501137152,
+        10.300955053760177
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.23052790773895165,
+      "steady_speed_rmse": 0.15963889870385328,
+      "turn_yaw_rmse": 0.47556663441041225,
+      "turn_lateral_rmse": 0.12386776208327324,
+      "max_abs_roll": 0.704,
+      "pass_2m_turn": false,
+      "final_xy": [
+        8.244097870239294,
+        12.417603114481636
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.23494001558774474,
+      "steady_speed_rmse": 0.16762085589562215,
+      "turn_yaw_rmse": 0.3754934250000452,
+      "turn_lateral_rmse": 0.11551901990594024,
+      "max_abs_roll": 0.707,
+      "pass_2m_turn": false,
+      "final_xy": [
+        19.162716532266927,
+        -2.234267588978218
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.23122255458302324,
+      "steady_speed_rmse": 0.1615441272909383,
+      "turn_yaw_rmse": 0.3892509962832947,
+      "turn_lateral_rmse": 0.1215781499703312,
+      "max_abs_roll": 0.693,
+      "pass_2m_turn": false,
+      "final_xy": [
+        18.172972831393405,
+        -3.6692985325276837
+      ]
+    },
+    {
+      "kind": "steerbot",
+      "duration": 15.0,
+      "fallen": false,
+      "samples": 714,
+      "speed_rmse": 0.23318758753499758,
+      "steady_speed_rmse": 0.16362888055109065,
+      "turn_yaw_rmse": 0.43014568955496446,
+      "turn_lateral_rmse": 0.10802238185124198,
+      "max_abs_roll": 0.711,
+      "pass_2m_turn": false,
+      "final_xy": [
+        12.02397455042836,
+        11.836530813883936
+      ]
+    }
+  ]
+}

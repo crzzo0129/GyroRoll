@@ -1,0 +1,10 @@
+# Install CUDA-enabled torch separately (see training guide).
+mjlab==1.3.0
+torch==2.7.1
+mujoco==3.7.0
+mujoco-warp==3.7.0.1
+warp-lang==1.12.0
+tensordict==0.10.0
+viser==1.0.26
+mjviser==0.0.11
+numpy==2.2.6

@@ -1,0 +1,522 @@
+[
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_3200.pt",
+    "score": 1.0125107154102257,
+    "kind": "steerbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.2045963642612145,
+    "steady_speed_rmse": 0.17773016085040103,
+    "turn_yaw_rmse": 0.33671883139939296,
+    "straight_yaw_rmse": 0.04863696586072859,
+    "recovery_yaw_rmse": 0.12207381922252403,
+    "turn_lateral_rmse": 0.03926907253851485,
+    "max_abs_roll": 0.136,
+    "pass_2m_turn": false,
+    "final_xy": [
+      -13.679194553689142,
+      -16.40633405104512
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_2700.pt",
+    "score": 1.2179840796678736,
+    "kind": "steerbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.17754109872560403,
+    "steady_speed_rmse": 0.10056066923302268,
+    "turn_yaw_rmse": 0.369748818349196,
+    "straight_yaw_rmse": 0.14780779036722053,
+    "recovery_yaw_rmse": 0.27054435080337635,
+    "turn_lateral_rmse": 0.10738142293308262,
+    "max_abs_roll": 0.124,
+    "pass_2m_turn": false,
+    "final_xy": [
+      19.719413653161848,
+      -11.514656066441958
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_2800.pt",
+    "score": 1.7120235247131892,
+    "kind": "steerbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.2411663796823173,
+    "steady_speed_rmse": 0.12203151605883684,
+    "turn_yaw_rmse": 0.4903398043612672,
+    "straight_yaw_rmse": 0.32870806340669234,
+    "recovery_yaw_rmse": 0.5717446864125639,
+    "turn_lateral_rmse": 0.03756771351925407,
+    "max_abs_roll": 0.498,
+    "pass_2m_turn": false,
+    "final_xy": [
+      2.9474219855803674,
+      -9.4461181500668
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_3300.pt",
+    "score": 1.7625200839859263,
+    "kind": "steerbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.20255242085267042,
+    "steady_speed_rmse": 0.16330099091011674,
+    "turn_yaw_rmse": 0.4564233347175113,
+    "straight_yaw_rmse": 0.27296612383302704,
+    "recovery_yaw_rmse": 0.524676474749202,
+    "turn_lateral_rmse": 0.16169594889158506,
+    "max_abs_roll": 0.179,
+    "pass_2m_turn": false,
+    "final_xy": [
+      12.280291788308045,
+      -2.812519608651936
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_3400.pt",
+    "score": 2.311198813727798,
+    "kind": "steerbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.22434611178076713,
+    "steady_speed_rmse": 0.13973222448711461,
+    "turn_yaw_rmse": 0.6957249661816131,
+    "straight_yaw_rmse": 0.6059584946383124,
+    "recovery_yaw_rmse": 0.5579607730070842,
+    "turn_lateral_rmse": 0.22205588387037278,
+    "max_abs_roll": 0.264,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.0268972887257148,
+      -0.32443910423878436
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_2500.pt",
+    "score": 5.610375911115044,
+    "kind": "steerbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.1584420605603886,
+    "steady_speed_rmse": 0.10835819257340888,
+    "turn_yaw_rmse": 1.748772006992656,
+    "straight_yaw_rmse": 1.0165985751211732,
+    "recovery_yaw_rmse": 1.5108867929835115,
+    "turn_lateral_rmse": 0.49358691157281287,
+    "max_abs_roll": 0.249,
+    "pass_2m_turn": false,
+    "final_xy": [
+      13.447458493773096,
+      4.158264786098304
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_2600.pt",
+    "score": 29.288,
+    "kind": "steerbot",
+    "duration": 2.712,
+    "fallen": true,
+    "samples": 133,
+    "speed_rmse": 0.28803855736049605,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.788,
+    "pass_2m_turn": false,
+    "final_xy": [
+      2.7886511600892745,
+      -1.8753347807722736
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_3500.pt",
+    "score": 29.722,
+    "kind": "steerbot",
+    "duration": 2.278,
+    "fallen": true,
+    "samples": 113,
+    "speed_rmse": 0.4771159299577714,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.448,
+    "pass_2m_turn": false,
+    "final_xy": [
+      0.9193640159000519,
+      -0.8276207570589529
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_3600.pt",
+    "score": 29.986,
+    "kind": "steerbot",
+    "duration": 2.014,
+    "fallen": true,
+    "samples": 101,
+    "speed_rmse": 0.26883744950699434,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.581,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.3711062579598658,
+      -0.9584098947290771
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_2900.pt",
+    "score": 30.002000000000002,
+    "kind": "steerbot",
+    "duration": 1.998,
+    "fallen": true,
+    "samples": 100,
+    "speed_rmse": 0.3006159343747434,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.408,
+    "pass_2m_turn": false,
+    "final_xy": [
+      2.219828703581319,
+      -1.17477885976322
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_3000.pt",
+    "score": 30.128,
+    "kind": "steerbot",
+    "duration": 1.872,
+    "fallen": true,
+    "samples": 94,
+    "speed_rmse": 0.25089596894737576,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.399,
+    "pass_2m_turn": false,
+    "final_xy": [
+      2.083843657554985,
+      -0.9084690873244129
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_3800.pt",
+    "score": 30.164,
+    "kind": "steerbot",
+    "duration": 1.836,
+    "fallen": true,
+    "samples": 92,
+    "speed_rmse": 0.23711254436586052,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.364,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.1051893561612005,
+      -0.699924275173662
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_3700.pt",
+    "score": 30.17,
+    "kind": "steerbot",
+    "duration": 1.83,
+    "fallen": true,
+    "samples": 92,
+    "speed_rmse": 0.23463201994316268,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.348,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.1981417394998257,
+      -0.7709695011638198
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_3100.pt",
+    "score": 30.22,
+    "kind": "steerbot",
+    "duration": 1.78,
+    "fallen": true,
+    "samples": 89,
+    "speed_rmse": 0.3185249536024073,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.359,
+    "pass_2m_turn": false,
+    "final_xy": [
+      2.1106373460447174,
+      -0.932406603198848
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_3900.pt",
+    "score": 30.332,
+    "kind": "steerbot",
+    "duration": 1.668,
+    "fallen": true,
+    "samples": 84,
+    "speed_rmse": 0.21648589528452622,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.41,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.4199856664189952,
+      -0.6513660924783072
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_4300.pt",
+    "score": 30.338,
+    "kind": "steerbot",
+    "duration": 1.662,
+    "fallen": true,
+    "samples": 84,
+    "speed_rmse": 0.21913102190676872,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.297,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.1322795845952631,
+      -0.6430401126676516
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_4700.pt",
+    "score": 30.378,
+    "kind": "steerbot",
+    "duration": 1.622,
+    "fallen": true,
+    "samples": 82,
+    "speed_rmse": 0.34320151585883896,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.394,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.065538340039138,
+      -0.6283764560235255
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_4100.pt",
+    "score": 30.406,
+    "kind": "steerbot",
+    "duration": 1.594,
+    "fallen": true,
+    "samples": 80,
+    "speed_rmse": 0.2680241826776084,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.246,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.0892714464769782,
+      -0.6384414516402328
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_4600.pt",
+    "score": 30.42,
+    "kind": "steerbot",
+    "duration": 1.58,
+    "fallen": true,
+    "samples": 79,
+    "speed_rmse": 0.24840029963902918,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.65,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.0731164841633278,
+      -0.6018549738409182
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_4996.pt",
+    "score": 30.442,
+    "kind": "steerbot",
+    "duration": 1.558,
+    "fallen": true,
+    "samples": 78,
+    "speed_rmse": 0.20140296384649814,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.244,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.278523050130876,
+      -0.5954249468546504
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_4200.pt",
+    "score": 30.496000000000002,
+    "kind": "steerbot",
+    "duration": 1.504,
+    "fallen": true,
+    "samples": 76,
+    "speed_rmse": 0.23066106371858575,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.479,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.2238482440763423,
+      -0.5220309514984035
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_4900.pt",
+    "score": 30.5,
+    "kind": "steerbot",
+    "duration": 1.5,
+    "fallen": true,
+    "samples": 75,
+    "speed_rmse": 0.2892612659863052,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.581,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.1878973190103725,
+      -0.5257432260274784
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_4800.pt",
+    "score": 30.538,
+    "kind": "steerbot",
+    "duration": 1.462,
+    "fallen": true,
+    "samples": 74,
+    "speed_rmse": 0.24240470403962985,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.797,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.2498004432069705,
+      -0.4647059147856012
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_4400.pt",
+    "score": 30.542,
+    "kind": "steerbot",
+    "duration": 1.458,
+    "fallen": true,
+    "samples": 73,
+    "speed_rmse": 0.24559762169211233,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.649,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.1945672436033776,
+      -0.4685180218216622
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_4500.pt",
+    "score": 30.612000000000002,
+    "kind": "steerbot",
+    "duration": 1.388,
+    "fallen": true,
+    "samples": 70,
+    "speed_rmse": 0.2692224253024147,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.281,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.178218257151211,
+      -0.4879382709000639
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/steerbot_v2_tire004_steer24/2026-10-09_20-05-46_stage8/model_4000.pt",
+    "score": 30.674,
+    "kind": "steerbot",
+    "duration": 1.326,
+    "fallen": true,
+    "samples": 67,
+    "speed_rmse": 0.2760339855779173,
+    "steady_speed_rmse": null,
+    "turn_yaw_rmse": null,
+    "straight_yaw_rmse": null,
+    "recovery_yaw_rmse": null,
+    "turn_lateral_rmse": null,
+    "max_abs_roll": 0.444,
+    "pass_2m_turn": false,
+    "final_xy": [
+      1.25140218835928,
+      -0.3810001164283874
+    ]
+  }
+]

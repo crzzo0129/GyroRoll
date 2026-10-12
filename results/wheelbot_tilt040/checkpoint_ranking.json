@@ -1,0 +1,200 @@
+[
+  {
+    "checkpoint": "logs/rsl_rl/wheelbot_tilt040/2026-10-09_18-21-59_stage6/model_2160.pt",
+    "score": 1.045376271520135,
+    "kind": "wheelbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.32790856440575666,
+    "steady_speed_rmse": 0.1913289765261478,
+    "turn_yaw_rmse": 0.42290605182185104,
+    "turn_lateral_rmse": 0.008235191350284943,
+    "max_abs_roll": 0.009,
+    "pass_2m_turn": false,
+    "final_xy": [
+      25.65463743963944,
+      3.1642984042918423
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/wheelbot_tilt040/2026-10-09_18-21-59_stage6/model_2060.pt",
+    "score": 1.0473736500893573,
+    "kind": "wheelbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.37534069304345585,
+    "steady_speed_rmse": 0.24415309152884238,
+    "turn_yaw_rmse": 0.3993911274956906,
+    "turn_lateral_rmse": 0.00443830356913386,
+    "max_abs_roll": 0.011,
+    "pass_2m_turn": false,
+    "final_xy": [
+      25.937306226596704,
+      3.4853286429314525
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/wheelbot_tilt040/2026-10-09_18-21-59_stage6/model_2660.pt",
+    "score": 1.0612373831703261,
+    "kind": "wheelbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.30158151296720004,
+    "steady_speed_rmse": 0.17396114453141917,
+    "turn_yaw_rmse": 0.4384038736642621,
+    "turn_lateral_rmse": 0.010468491310382721,
+    "max_abs_roll": 0.008,
+    "pass_2m_turn": false,
+    "final_xy": [
+      25.875761085376514,
+      3.272842615680312
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/wheelbot_tilt040/2026-10-09_18-21-59_stage6/model_2460.pt",
+    "score": 1.0708240438924397,
+    "kind": "wheelbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.30813037911282437,
+    "steady_speed_rmse": 0.17895598922769987,
+    "turn_yaw_rmse": 0.44102595527576277,
+    "turn_lateral_rmse": 0.009816144113214383,
+    "max_abs_roll": 0.012,
+    "pass_2m_turn": false,
+    "final_xy": [
+      25.63799882646402,
+      4.694048822129256
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/wheelbot_tilt040/2026-10-09_18-21-59_stage6/model_2360.pt",
+    "score": 1.0923006481582511,
+    "kind": "wheelbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.3002791208528626,
+    "steady_speed_rmse": 0.16403768474942126,
+    "turn_yaw_rmse": 0.4586585644073161,
+    "turn_lateral_rmse": 0.010945834594197556,
+    "max_abs_roll": 0.01,
+    "pass_2m_turn": false,
+    "final_xy": [
+      25.51023059014586,
+      4.038259567697078
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/wheelbot_tilt040/2026-10-09_18-21-59_stage6/model_2859.pt",
+    "score": 1.09711684782919,
+    "kind": "wheelbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.34427731518050847,
+    "steady_speed_rmse": 0.2558381220581064,
+    "turn_yaw_rmse": 0.4172747724995746,
+    "turn_lateral_rmse": 0.006729180771934255,
+    "max_abs_roll": 0.011,
+    "pass_2m_turn": false,
+    "final_xy": [
+      27.128712800748392,
+      3.8958397355161143
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/wheelbot_tilt040/2026-10-09_18-21-59_stage6/model_2560.pt",
+    "score": 1.0982923181580633,
+    "kind": "wheelbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.32561092762755395,
+    "steady_speed_rmse": 0.2005510335052863,
+    "turn_yaw_rmse": 0.4443955953557684,
+    "turn_lateral_rmse": 0.008950093941240224,
+    "max_abs_roll": 0.012,
+    "pass_2m_turn": false,
+    "final_xy": [
+      25.90342994845873,
+      4.59596903065925
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/wheelbot_tilt040/2026-10-09_18-21-59_stage6/model_2760.pt",
+    "score": 1.1030345072909875,
+    "kind": "wheelbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.32782533395061453,
+    "steady_speed_rmse": 0.21134909013823566,
+    "turn_yaw_rmse": 0.4409405316472296,
+    "turn_lateral_rmse": 0.009804353858292545,
+    "max_abs_roll": 0.012,
+    "pass_2m_turn": false,
+    "final_xy": [
+      26.239317366415165,
+      4.542128557219537
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/wheelbot_tilt040/2026-10-09_18-21-59_stage6/model_1960.pt",
+    "score": 1.1137962395317378,
+    "kind": "wheelbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.3698498048549715,
+    "steady_speed_rmse": 0.2334369752443526,
+    "turn_yaw_rmse": 0.43548824993500307,
+    "turn_lateral_rmse": 0.00938276441737903,
+    "max_abs_roll": 0.008,
+    "pass_2m_turn": false,
+    "final_xy": [
+      26.169968813134794,
+      3.148231675327053
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/wheelbot_tilt040/2026-10-09_18-21-59_stage6/model_2260.pt",
+    "score": 1.1148375777856387,
+    "kind": "wheelbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.30680080947526506,
+    "steady_speed_rmse": 0.20606884041894707,
+    "turn_yaw_rmse": 0.44871652056500666,
+    "turn_lateral_rmse": 0.0113356962366785,
+    "max_abs_roll": 0.008,
+    "pass_2m_turn": false,
+    "final_xy": [
+      26.518125897468707,
+      3.504678835043497
+    ]
+  },
+  {
+    "checkpoint": "logs/rsl_rl/wheelbot_tilt040/2026-10-09_18-21-59_stage6/model_1860.pt",
+    "score": 1.2845515292239644,
+    "kind": "wheelbot",
+    "duration": 15.0,
+    "fallen": false,
+    "samples": 714,
+    "speed_rmse": 0.4244641786247389,
+    "steady_speed_rmse": 0.20383826514014497,
+    "turn_yaw_rmse": 0.5343808055001393,
+    "turn_lateral_rmse": 0.011951653083540804,
+    "max_abs_roll": 0.019,
+    "pass_2m_turn": false,
+    "final_xy": [
+      22.30239062411104,
+      6.761008954905767
+    ]
+  }
+]
