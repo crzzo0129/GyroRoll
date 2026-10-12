@@ -8,9 +8,9 @@ from pathlib import Path
 import numpy as np
 
 from linearize_steer import identify
-from optimize_steer import evaluate
+from optimize.optimize_steer import evaluate
 from probe_tilted_flywheel import evaluate as evaluate_tilted, model_at
-import optimize_wheel_rounded as wheel_probe
+from optimize import optimize_wheel_rounded as wheel_probe
 from sim import joystick_axes, run
 
 

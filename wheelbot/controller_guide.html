@@ -157,7 +157,7 @@
       <section id="source">
         <h2>06 · 控制器从哪里来；PPO、LQR各在哪里</h2>
         <div class="table-wrap"><table><thead><tr><th>运行方式</th><th>动作如何产生</th><th>这份验收/手柄命令在用？</th></tr></thead><tbody><tr><td><code>wheelbot --controller thin</code></td><td>上述速度、俯仰、横滚、偏航状态反馈；七个主要系数在 MuJoCo 轨迹上优化，另有起步/回正参数</td><td><strong>是</strong></td></tr><tr><td><code>wheelbot --checkpoint ...</code></td><td>PPO 策略网络从观测预测两个电机动作；仿真分支每 10 个物理步更新动作</td><td><strong>否</strong>，只有明确传 checkpoint 才走网络</td></tr><tr><td><code>wheelbot --controller lqr</code></td><td>仓库没有为 wheelbot 实现 LQR；<code>sim.py</code> 会拒绝这个组合</td><td><strong>不能使用</strong></td></tr><tr><td><code>wheelbot</code>（未指定控制器）</td><td>早期直行平衡 baseline；不按转弯指令闭环跟踪偏航</td><td><strong>否</strong></td></tr></tbody></table></div>
-        <p><code>thin</code> 的七个主要系数最初由 <a href="../optimize_wheel_rounded.py">optimize_wheel_rounded.py</a> 的差分进化轨迹评分寻找，后续配置还加入了启动和偏航恢复设置；这是<strong>基于仿真调参的显式反馈</strong>，不是用 Riccati 方程根据线性模型求得的 LQR，也不是神经网络推理。PPO 的 <a href="../train.py">train.py</a> 与 <a href="../policy.py">policy.py</a> 是独立路线，不能把下面的 thin 验收数字说成 PPO 的成绩。</p>
+        <p><code>thin</code> 的七个主要系数最初由 <a href="../optimize/optimize_wheel_rounded.py">optimize_wheel_rounded.py</a> 的差分进化轨迹评分寻找，后续配置还加入了启动和偏航恢复设置；这是<strong>基于仿真调参的显式反馈</strong>，不是用 Riccati 方程根据线性模型求得的 LQR，也不是神经网络推理。PPO 的 <a href="../train.py">train.py</a> 与 <a href="../policy.py">policy.py</a> 是独立路线，不能把下面的 thin 验收数字说成 PPO 的成绩。</p>
         <p>每一步 <a href="../control.py">control.py</a> 的 <code>observe()</code> 从 MuJoCo 真值读姿态、速度与飞轮关节速度，再由 <code>ThinWheelController.act()</code> 算出两个归一化动作。当前不是带有传感器噪声、IMU 融合和硬件通信时延的实机控制软件。</p>
       </section>
 

@@ -2,15 +2,20 @@
 
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import mujoco
 import numpy as np
 from scipy.optimize import differential_evolution
 
-import optimize_steer
+from optimize import optimize_steer
 
 
-ROOT = Path(__file__).resolve().parent
 MODEL_PATH = ROOT / "steerbot" / "model.xml"
 BASE = np.array(json.loads((ROOT / "steerbot" / "optimized_controller.json").read_text())["params"])
 if len(BASE) == 11:

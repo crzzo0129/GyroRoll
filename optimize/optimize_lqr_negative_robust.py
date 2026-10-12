@@ -2,16 +2,21 @@
 
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import mujoco
 import numpy as np
 from scipy.optimize import differential_evolution
 
-import optimize_lqr
+from optimize import optimize_lqr
 from linearize_steer import identify
 
 
-ROOT = Path(__file__).resolve().parent
 PATH = ROOT / "steerbot/lqr_negative_015_robust.json"
 ANCHOR = np.asarray(json.loads((ROOT / "steerbot/lqr_negative_015.json").read_text())["params"])
 

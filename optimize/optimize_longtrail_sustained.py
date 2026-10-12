@@ -2,6 +2,12 @@
 
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import numpy as np
 from scipy.optimize import differential_evolution
@@ -9,7 +15,6 @@ from scipy.optimize import differential_evolution
 from probe_longtrail_turn import evaluate
 
 
-ROOT = Path(__file__).resolve().parent
 SOURCE = json.loads((ROOT / "steerbot/longtrail_turn.json").read_text())
 BOUNDS = [(-3., 3.), (-4., 4.), (-24., 12.), (-5., 5.),
           (.2, 10.), (.05, 3.), (.01, 1.)]

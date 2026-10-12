@@ -4,6 +4,8 @@ GyroRoll 是一个使用滚动轮与正交飞轮的两电机独轮机器人仿�
 
 项目同时保留早期模型、传统控制器、转向机构对照与实验记录。当前新构型的 RL 策略尚未训练，旧控制器结果与新 RL 任务分开评估。
 
+离线优化脚本统一放在 [`optimize/`](optimize/)，用途与运行方法见 [优化脚本说明](optimize/README.md)。从项目根目录使用 `python optimize/optimize_nested.py --help`，或 `python -m optimize.optimize_nested --help`。
+
 ## 早期对照构型
 
 本目录有两个独立构型：`wheelbot/validated_model.xml`（接地驱动轮 + 横滚反作用轮）；`steerbot/model.xml` 加上 `steerbot/negative_candidate.json` 中的几何覆盖（接地驱动轮 + 负拖距竖直转向关节）。`wheelbot/model.xml` 保留最初的宽胎/低力矩对照，单独的 `steerbot/model.xml` 则是最初的正拖距对照。都使用一个自由机身、一个圆柱轮胎/平面接触、两个有限力矩电机；不是预设轨迹曲率的运动学动画。
@@ -47,7 +49,7 @@ py -3.12 -m venv .venv
 
 当前开放布局使用 20 rad/s 飞轮预旋转，1 m/s 无扰动直行回放 60 秒未跌倒，3–60 秒速度 RMSE 0.027 m/s，采样最大横滚角 0.004 rad；完整轨迹在 `results/wheelbot_nested_open/straight_60.json`。视频对应的 12 秒回放和轨迹在同目录的 `straight_12.json`。偏航/侧向误差仍按 `sim.py` 原有的 5.5–10.8 秒窗口计算，不能解释为整段 60 秒指标。
 
-当前开放布局的 2 m/s 左右转向验收在质量/摩擦随机化下五种子均在约 3.7–3.9 秒加速阶段跌倒，尚未进入 5 秒开始的转向阶段，也未施加 8.5 秒的首次冲击，完整验收 **0/5**。结果在 `results/wheelbot_nested_open/acceptance.json`。目前验证范围为名义 1 m/s 直行。键盘/手柄转向入口用于实验；几何改变、直行不跌倒和完整操纵验收必须分开判断。`optimize_nested.py` 可通过统一的 `sim.py` 回放继续调参，候选先保存在 `results/nested_tuning/`，不会自动替换控制配置。
+当前开放布局的 2 m/s 左右转向验收在质量/摩擦随机化下五种子均在约 3.7–3.9 秒加速阶段跌倒，尚未进入 5 秒开始的转向阶段，也未施加 8.5 秒的首次冲击，完整验收 **0/5**。结果在 `results/wheelbot_nested_open/acceptance.json`。目前验证范围为名义 1 m/s 直行。键盘/手柄转向入口用于实验；几何改变、直行不跌倒和完整操纵验收必须分开判断。`optimize/optimize_nested.py` 可通过统一的 `sim.py` 回放继续调参，候选先保存在 `results/nested_tuning/`，不会自动替换控制配置。
 
 早期 48 cm 布局留作历史对照：模型、配置和图片分别是 `wheelbot/nested_48cm_model.xml`、`wheelbot/nested_48cm_controller.json`、`wheelbot/nested_48cm_preview.png`；`results/wheelbot_nested/` 与 `results/nested_straight_60_summary.json` 均属于该旧布局，不是当前 24 cm 模型的结果。
 
@@ -98,9 +100,9 @@ $PY sim.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.js
 
 `stage 1` 是 0.6–1.3 m/s 直行；`stage 2` 是 1.3–2.2 m/s，加入质量/摩擦 DR 与定时速度扰动；`stage 3` 扩展到偏航指令 ±0.65 rad/s；`stage 4` 聚焦 1.8–2.15 m/s、±0.4 rad/s，强化偏航奖励并放宽横滚惩罚；`stage 5` 对转向版进一步奖励低侧向速度。后续 stage 7–9 缩短指令切换间隔、延长回合并强化偏航奖励。Wheelbot 第三、四阶段从反作用轮 110 rad/s 的预旋转状态开始，不能据此宣称零速自旋启动。训练结果保存于 `logs/rsl_rl/`，不会覆盖旧 checkpoint；训练奖励不等于独立验收。第五至九阶段抽样 checkpoint 回放尚未达到完整验收。
 
-`optimize_steer.py` 是 CPU 物理轨迹上的差分进化反馈调参；`linearize_steer.py` 在 2 m/s 工作点数值线性化，`optimize_lqr.py` 搜索 LQR 权重。这两种控制器与 PPO 分开验收；不能把它们的性能计入 PPO。`optimize_wheel.py` 的陀螺步态探索目前未达到转向标准。
+`optimize/optimize_steer.py` 是 CPU 物理轨迹上的差分进化反馈调参；`linearize_steer.py` 在 2 m/s 工作点数值线性化，`optimize/optimize_lqr.py` 搜索 LQR 权重。这两种控制器与 PPO 分开验收；不能把它们的性能计入 PPO。`optimize/optimize_wheel.py` 的陀螺步态探索目前未达到转向标准。
 
-额外实验包括 `probe_tilted_flywheel.py`（将飞轮轴倾斜 0.4 rad）与 `optimize_tilted_robust.py`，以及 `optimize_longtrail_sustained.py`、`optimize_lightfork.py`（0.50 m 拖距、5 g 转向头）。这些都是探索性概念变型，不是原发布 Wheelbot 的几何。飞轮轴倾斜反馈在名义转向下接近验收，但多指令和 DR 下仍不可靠；轻量长叉的名义偏航 RMSE 0.164 rad/s 在 DR 下退化至 0.406 rad/s。飞轮变型还运行了第六阶段 PPO，抽样 checkpoint 名义回放并未学出转向；轻量长叉第七阶段 PPO 加快左右指令切换并使用物理一致的质量/惯量和逐环境轮胎摩擦 DR。后者仍须独立验收。
+额外实验包括 `probe_tilted_flywheel.py`（将飞轮轴倾斜 0.4 rad）与 `optimize/optimize_tilted_robust.py`，以及 `optimize/optimize_longtrail_sustained.py`、`optimize/optimize_lightfork.py`（0.50 m 拖距、5 g 转向头）。这些都是探索性概念变型，不是原发布 Wheelbot 的几何。飞轮轴倾斜反馈在名义转向下接近验收，但多指令和 DR 下仍不可靠；轻量长叉的名义偏航 RMSE 0.164 rad/s 在 DR 下退化至 0.406 rad/s。飞轮变型还运行了第六阶段 PPO，抽样 checkpoint 名义回放并未学出转向；轻量长叉第七阶段 PPO 加快左右指令切换并使用物理一致的质量/惯量和逐环境轮胎摩擦 DR。后者仍须独立验收。
 
 第六阶段是独立的 0.5 m 拖距概念变型，以前向、偏航和侧向速度平方误差作为附加代价。运行在 `steerbot_trail050` 实验目录；恢复第三阶段 checkpoint 时，该目录下的 `source_stage3` 是指向原第三阶段运行目录的符号链接。长拖距只有理想刚体关节，未建模实体叉臂质量/柔度，不应视作已定型硬件。
 

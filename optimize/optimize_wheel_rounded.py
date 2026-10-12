@@ -3,6 +3,12 @@
 import argparse
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import mujoco
 import numpy as np
@@ -11,7 +17,6 @@ from scipy.optimize import differential_evolution
 from control import observe
 
 
-ROOT = Path(__file__).resolve().parent
 def model_at(width, cylinder=False, reaction_gear=.48):
     spec = mujoco.MjSpec.from_file(str(ROOT / "wheelbot/model.xml"))
     tire = spec.geom("tire")

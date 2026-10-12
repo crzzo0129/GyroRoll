@@ -2,6 +2,12 @@
 
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import mujoco
 import numpy as np
@@ -10,7 +16,6 @@ from scipy.optimize import differential_evolution
 from control import OptimizedSteerController, observe
 
 
-ROOT = Path(__file__).resolve().parent
 SPEC = mujoco.MjSpec.from_file(str(ROOT / "steerbot/model.xml"))
 SPEC.body("fork").pos[0] = .5
 SPEC.body("drive_wheel").pos[0] = -.5

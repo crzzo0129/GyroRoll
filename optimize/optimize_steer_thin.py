@@ -2,15 +2,20 @@
 
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import mujoco
 import numpy as np
 from scipy.optimize import differential_evolution
 
-import optimize_steer
+from optimize import optimize_steer
 
 
-ROOT = Path(__file__).resolve().parent
 SPEC = mujoco.MjSpec.from_file(str(ROOT / "steerbot/model.xml"))
 SPEC.geom("tire").size[1] = .004
 SPEC.actuator("steer_motor").gear[0] = 2.4

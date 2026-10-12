@@ -2,6 +2,12 @@
 
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import numpy as np
 from scipy.optimize import differential_evolution
@@ -9,7 +15,6 @@ from scipy.optimize import differential_evolution
 from probe_tilted_flywheel import evaluate, model_at
 
 
-ROOT = Path(__file__).resolve().parent
 SOURCE = json.loads((ROOT / "wheelbot/tilted_axis_probe.json").read_text())
 MODEL = model_at(SOURCE["tilt"])
 BOUNDS = [(1., 14.), (.15, 2.5), (-5., 5.), (-7., 7.),

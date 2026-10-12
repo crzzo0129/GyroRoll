@@ -2,16 +2,21 @@
 
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import mujoco
 import numpy as np
 from scipy.optimize import differential_evolution
 
-import optimize_lqr
+from optimize import optimize_lqr
 from linearize_steer import identify
 
 
-ROOT = Path(__file__).resolve().parent
 PATH = ROOT / "steerbot/negative_bidir.json"
 GEOMETRY = json.loads((ROOT / "steerbot/negative_candidate.json").read_text())
 ANCHOR = np.asarray(GEOMETRY["params"])

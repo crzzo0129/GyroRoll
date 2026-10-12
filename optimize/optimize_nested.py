@@ -6,14 +6,17 @@ import io
 import itertools
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import numpy as np
 from scipy.optimize import differential_evolution
 
 from sim import make_parser, run
-
-
-ROOT = Path(__file__).resolve().parent
 
 
 def main():

@@ -2,14 +2,19 @@
 
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import numpy as np
 from scipy.optimize import differential_evolution
 
-from optimize_steer_thin import BOUNDS, INDICES, optimize_steer
+from optimize.optimize_steer_thin import BOUNDS, INDICES, optimize_steer
 
 
-ROOT = Path(__file__).resolve().parent
 ANCHOR = np.array(json.loads((ROOT / "steerbot/thin_tire_004_g24_robust.json").read_text())["params"])
 PATH = ROOT / "steerbot/thin_tire_004_g24_full.json"
 

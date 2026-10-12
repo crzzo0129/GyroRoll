@@ -3,15 +3,20 @@
 import argparse
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import mujoco
 import numpy as np
 from scipy.optimize import differential_evolution
 
-import optimize_steer
+from optimize import optimize_steer
 
 
-ROOT = Path(__file__).resolve().parent
 BASE = np.array(json.loads((ROOT / "steerbot/lightfork.json").read_text())["params"])
 INDICES = [3, 4, 5, 6, 7, 8, 9, 10, 11]
 BOUNDS = [(-3., 3.), (-5., 5.), (-3., 3.), (-25., 15.), (-6., 6.),

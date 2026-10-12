@@ -2,14 +2,19 @@
 
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(ROOT))
 
 import numpy as np
 from scipy.optimize import differential_evolution
 
-from optimize_steer import evaluate
+from optimize.optimize_steer import evaluate
 
 
-ROOT = Path(__file__).resolve().parent
 PATH = ROOT / "steerbot" / "optimized_controller.json"
 original = np.array(json.loads(PATH.read_text())["params"])
 if len(original) == 11:
