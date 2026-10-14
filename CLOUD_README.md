@@ -99,6 +99,23 @@ python -m miniwheelbot_rl evaluate --num-envs 8 --duration 15 --checkpoint logs/
 
 这是名义平地评估，不替代后续质量/电机不确定性、延迟、外力和更长时间转弯的鲁棒性验收。warmup 范围外的指令是泛化检查，需看后续阶段策略表现。训练奖励升高不能单独证明验收通过。
 
+## 6. 目标转速、实际转速和力矩诊断
+
+更新代码后，在训练用 Python 环境运行（将 checkpoint 替换为实际路径）：
+
+```bash
+python -m miniwheelbot_rl diagnose \
+  --checkpoint logs/rsl_rl/nested_velocity_mjlab130/RUN/model_XXX.pt \
+  --duration 20 --speed 1.0 --turn 0 \
+  --diagnostic-dir results/nested_rl/diagnostic_forward
+```
+
+默认单环境，使用策略均值，不添加探索噪声，不修改 checkpoint。保留模型旁边的 `task.json` 和 `geometry.xml`；按模型保存的转速、力矩和几何参数运行。无需额外绘图库、外网或图形窗口。
+
+输出 `report.html`（可下载到电脑离线打开）、`trace.csv`（完整 100 Hz 默认控制频率记录）和 `summary.json`。包含两个轮子的裁剪前策略均值、裁剪后归一化动作、目标/实际转速、力矩，以及机体前进速度和水平航向变化率。统计分别覆盖全程和前三秒之后，包括动作裁剪比例、力矩达到 99% 上限的比例、转速误差等。终止时立即停止，不将自动重置后的状态作为有效数据；力矩为控制周期末采样，不代表周期内峰值或能耗。
+
+建议分别测试直行 `--speed 1 --turn 0`、转弯 `--speed 0.8 --turn 0.35`、倒车转弯 `--speed -0.8 --turn 0.35`，每次指定不同输出目录；换种子可重复初始状态测试。目标频繁跳变且力矩换向，优先检查策略抖动；目标平稳、实际长期追不上且力矩持续同向饱和，再检查动力和负载限制。确定性结果不能代替训练随机采样的诊断，也不能凭单次回放判断所有指令都已通过。
+
 ## 常见处理
 
 - 显存不足：减小 `--num-envs`，如 256 → 128 → 64。

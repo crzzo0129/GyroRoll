@@ -14,9 +14,9 @@ from .settings import Settings, STAGES
 
 def parser():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("mode", choices=("train", "smoke", "play", "evaluate", "video"))
+    p.add_argument("mode", choices=("train", "smoke", "play", "evaluate", "video", "diagnose"))
     p.add_argument("--stage", choices=STAGES, help="default: checkpoint stage, otherwise warmup")
-    p.add_argument("--num-envs", type=int, help="default: train 256, smoke 4, play 1, evaluate 8")
+    p.add_argument("--num-envs", type=int, help="default: train 256, smoke 4, evaluate 8, otherwise 1")
     p.add_argument("--iterations", type=int, default=3000)
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--device", default="cuda:0")
@@ -24,6 +24,7 @@ def parser():
     p.add_argument("--randomize", action="store_true")
     p.add_argument("--duration", type=float, default=15.0)
     p.add_argument("--output", type=Path, default=Path("results/nested_rl/evaluation.json"))
+    p.add_argument("--diagnostic-dir", type=Path, default=Path("results/nested_rl/diagnostic"))
     p.add_argument("--log-root", type=Path, default=Path("logs/rsl_rl/nested_velocity_mjlab130"))
     p.add_argument("--flywheel-limit", type=float, default=250.0, help="signed rad/s")
     p.add_argument("--rolling-limit", type=float, default=35.0, help="signed rad/s")
@@ -31,8 +32,8 @@ def parser():
     p.add_argument("--viewer-host", default="127.0.0.1")
     p.add_argument("--viewer-port", type=int, default=8080)
     p.add_argument("--video", type=Path, default=Path("results/nested_rl/rollout.mp4"))
-    p.add_argument("--speed", type=float, default=0.5, help="video forward command, m/s")
-    p.add_argument("--turn", type=float, default=0.0, help="video heading-rate command, rad/s")
+    p.add_argument("--speed", type=float, default=0.5, help="video/diagnose forward command, m/s")
+    p.add_argument("--turn", type=float, default=0.0, help="video/diagnose heading-rate command, rad/s")
     return p
 
 
@@ -73,11 +74,11 @@ def build(args):
             raise ValueError("Checkpoint geometry snapshot does not match task.json")
     args.stage = args.stage or "warmup"
     env_settings = (replace(settings, episode_seconds=max(settings.episode_seconds, args.duration + 1))
-                    if args.mode in ("evaluate", "video") else settings)
+                    if args.mode in ("evaluate", "video", "diagnose") else settings)
     cfg = make_env_cfg(args.num_envs, args.stage, settings=env_settings,
-                       play=args.mode in ("evaluate", "play", "video"), randomize=args.randomize,
+                       play=args.mode in ("evaluate", "play", "video", "diagnose"), randomize=args.randomize,
                        model_path=model_path)
-    if args.mode in ("evaluate", "video"):
+    if args.mode in ("evaluate", "video", "diagnose"):
         cfg.commands["twist"].resampling_time_range = (1e8, 1e8)
         cfg.commands["twist"].rel_standing_envs = 0.0
     cfg.seed = args.seed
@@ -186,9 +187,12 @@ def evaluate(args, env, wrapped, runner):
 def main():
     args = parser().parse_args()
     if args.num_envs is None:
-        args.num_envs = {"train": 256, "smoke": 4, "play": 1, "evaluate": 8, "video": 1}[args.mode]
-    if args.mode in ("play", "evaluate", "video") and args.checkpoint is None:
-        raise ValueError("play/evaluate/video requires --checkpoint")
+        args.num_envs = {"train": 256, "smoke": 4, "play": 1, "evaluate": 8,
+                         "video": 1, "diagnose": 1}[args.mode]
+    if args.mode in ("play", "evaluate", "video", "diagnose") and args.checkpoint is None:
+        raise ValueError("play/evaluate/video/diagnose requires --checkpoint")
+    if args.mode == "diagnose" and args.num_envs != 1:
+        raise ValueError("diagnose requires --num-envs 1")
     if args.mode == "video":
         if args.num_envs != 1:
             raise ValueError("video requires --num-envs 1")
@@ -209,6 +213,9 @@ def main():
             runner.learn(num_learning_iterations=args.iterations, init_at_random_ep_len=False)
         elif args.mode == "evaluate":
             evaluate(args, env, wrapped, runner)
+        elif args.mode == "diagnose":
+            from .diagnostics import diagnose
+            diagnose(args, env, wrapped, runner)
         elif args.mode == "video":
             from .video import record_video
             record_video(args, env, wrapped, runner)

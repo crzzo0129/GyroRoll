@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="GyroRoll 嵌套正交轮机器人：15 维观测、2 维速度动作、9 项奖励及 PPO 训练配置的源码核对说明。">
+<title>GyroRoll · 强化学习训练说明</title>
+<style>
+:root{--bg:#f5f5f0;--paper:#fff;--ink:#172d32;--muted:#5e7277;--line:#d9e2df;--teal:#087b78;--soft:#eaf5f2;--orange:#a95620;--warm:#fff3e7;--mono:Consolas,"SFMono-Regular",monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:82px}body{margin:0;color:var(--ink);background:var(--bg);font:15px/1.8 system-ui,-apple-system,"Microsoft YaHei",sans-serif}a{color:var(--teal);text-underline-offset:4px}header{position:sticky;top:0;z-index:5;background:#f5f5f0f5;border-bottom:1px solid var(--line)}.bar{max-width:1180px;margin:auto;padding:15px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{font-weight:800;letter-spacing:.04em}.brand span{color:var(--teal)}nav{display:flex;gap:22px;overflow:auto;white-space:nowrap;font-size:13px}nav a{text-decoration:none;color:var(--muted)}main{max-width:1180px;margin:auto;padding:0 28px}section{padding:46px 0;border-top:1px solid var(--line)}.hero{padding:60px 0 38px;border:0}.eyebrow{font:700 11px/1.5 var(--mono);letter-spacing:.16em;color:var(--teal)}h1{font-size:clamp(34px,4.6vw,58px);line-height:1.2;letter-spacing:-.04em;margin:17px 0 22px}h1 span{color:var(--teal)}h2{font-size:29px;line-height:1.4;margin:8px 0 18px;letter-spacing:-.025em}h3{font-size:18px;line-height:1.5;margin:0 0 12px}p{margin:0 0 15px}.lead{font-size:18px;max-width:840px;color:var(--muted)}.meta{font-size:12px;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:30px;border-radius:12px;overflow:hidden}.stat{padding:20px 24px;background:var(--paper)}.stat strong{display:block;font:700 32px/1.3 var(--mono)}.stat span{font-size:12px;color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:25px}.card p:last-child{margin-bottom:0}.note{padding:16px 20px;background:var(--soft);border-left:3px solid var(--teal);margin:20px 0;border-radius:0 8px 8px 0}.note.warm{background:var(--warm);border-color:var(--orange)}.small{font-size:13px;color:var(--muted)}.formula{font:14px/1.9 var(--mono);padding:17px 20px;background:#17363b;color:#ebf6ef;border-radius:8px;margin:17px 0;overflow-x:auto;white-space:normal;overflow-wrap:anywhere}.formula .dim{color:#a9d4cc}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:white;margin:20px 0}table{width:100%;border-collapse:collapse;font-size:14px;min-width:760px}th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#eaf0ed;color:#385c62;font-size:12px;font-weight:700}tr:last-child td{border-bottom:0}tbody tr:nth-child(even){background:#fafbf8}td code{font-size:12px}code{font-family:var(--mono);overflow-wrap:anywhere}.math{font-family:var(--mono);font-size:13px;white-space:nowrap}.tag{display:inline-block;padding:2px 8px;background:var(--soft);border-radius:4px;font:12px/1.7 var(--mono);color:var(--teal)}.weight{font-weight:800;color:var(--teal)}.neg{color:var(--orange)}.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:25px}.flow>div{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:22px 18px}.flow>div:not(:last-child):after{content:"→";position:absolute;right:-14px;top:36px;color:var(--teal);z-index:1}.flow b{display:block;font-size:16px}.flow small{display:block;color:var(--muted);line-height:1.7;margin-top:6px}.step{font:11px var(--mono);color:var(--teal);margin-bottom:12px}.pill{display:inline-block;padding:3px 10px;border:1px solid var(--line);border-radius:20px;margin:0 5px 7px 0;font-size:12px;color:var(--muted)}.sources{padding-left:20px}.sources li{margin:9px 0}footer{max-width:1180px;margin:auto;padding:30px 28px 48px;color:var(--muted);font-size:12px}.calc label{display:block;margin:14px 0 4px;font-size:13px}.calc input{width:100%;accent-color:var(--teal)}.calc output{float:right;font-family:var(--mono);color:var(--teal)}.result{display:flex;gap:20px;flex-wrap:wrap;margin-top:18px}.result>div{flex:1;background:var(--soft);padding:15px;border-radius:8px;min-width:150px}.result strong{display:block;font:700 26px/1.4 var(--mono);color:var(--teal)}.result span{font-size:12px;color:var(--muted)}button{font:inherit;border:1px solid var(--line);background:white;color:var(--ink);padding:7px 13px;border-radius:6px;cursor:pointer}.print{margin-top:17px}ul{padding-left:21px}li{margin:6px 0}sup,sub{font-size:75%}.anchor{font-size:12px;font-weight:400;margin-left:8px;color:var(--muted)}
+@media(max-width:760px){.bar{padding:12px 18px;display:block}.brand{margin-bottom:6px}nav{gap:20px}main{padding:0 18px}.hero{padding-top:36px}.stats{grid-template-columns:repeat(2,1fr)}.grid,.flow{grid-template-columns:1fr}.flow>div:not(:last-child):after{display:none}section{padding:32px 0}.card{padding:20px}h2{font-size:25px}.formula{font-size:12px}.stat{padding:16px}footer{padding:24px 18px}}
+@media print{header,.print,.calc{display:none}body{background:white;font-size:10pt;line-height:1.55}main{max-width:none;padding:0}.hero{padding-top:0}h1{font-size:30pt}h2{font-size:20pt}section{padding:20px 0}.table-wrap{overflow:visible}table{min-width:0;font-size:9pt}th,td{padding:8px}tr,.card,.note,.formula,.flow{break-inside:avoid}.formula{background:#eef4f1;color:#172d32}.formula .dim{color:#476567}.stats{margin-top:16px}a{color:inherit}footer{padding:20px 0}.grid{gap:12px}}
+</style>
+</head>
+<body>
+<header><div class="bar"><div class="brand">GYRO<span>ROLL</span> / TRAINING</div><nav aria-label="页面导航"><a href="#overview">训练闭环</a><a href="#observations">观测</a><a href="#actions">动作</a><a href="#rewards">奖励</a><a href="#episodes">回合与指令</a><a href="#ppo">PPO</a><a href="#sources">源码索引</a></nav></div></header>
+<main>
+<section class="hero">
+<div class="eyebrow">IMPLEMENTATION NOTE · MJLAB 1.3.0</div>
+<h1>让大小轮协同，<br><span>学习平衡与速度跟踪。</span></h1>
+<p class="lead">当前开放轮圈机器人直接强化学习任务说明。按源码梳理策略看见什么、输出什么，以及每一步如何获得奖励。</p>
+<p class="meta">核对日期：2026-10-12 · 代码基线：92f565b · 对象：miniwheelbot_rl/ · 所列数值为当前默认配置</p>
+<div class="stats"><div class="stat"><strong>15</strong><span>Actor / Critic 观测维度</span></div><div class="stat"><strong>2</strong><span>有符号目标轮速动作</span></div><div class="stat"><strong>9</strong><span>环境奖励项</span></div><div class="stat"><strong>100 Hz</strong><span>策略决策频率</span></div></div>
+<div class="note">这是一份<strong>训练定义</strong>，不报告云端模型的训练成绩。已有传统反馈控制器的 1 m/s 演示不等于该 PPO 策略的表现；判断训练效果应使用对应 checkpoint 的独立评估结果。</div>
+<button class="print" type="button" onclick="window.print()">打印 / 保存为 PDF</button>
+</section>
+
+<section id="overview"><div class="eyebrow">01 / CONTROL LOOP</div><h2>任务：同时跟踪前向速度与朝向角速度</h2>
+<div class="grid"><div class="card"><h3>机械对象</h3><p>240 mm 接地大轮绕机身 y 轴旋转，166 mm 小飞轮绕机身 x 轴旋转，两轮正交同中心，机身在上方。两路电机独立作用于各自关节。</p><p class="small">x 为机身前向，y 为左右方向，z 为竖直方向；线速度和角速度观测都表达在机身坐标系。初始根节点高度为 0.370 m。</p></div><div class="card"><h3>学习目标</h3><p>指令为 <code>[v*<sub>x</sub>, ψ̇*]</code>：前进/后退速度与朝向角速度。横向速度目标固定为零。策略需要自己学习俯仰、横滚平衡和转向协调。</p><p class="small">没有传统平衡控制器、MPC 专家或模仿学习输入。指令 ψ̇*=0 表示目标朝向角速度为零，没有指定绝对航向或世界路径。</p></div></div>
+<div class="flow"><div><div class="step">01 · OBSERVE</div><b>15 维状态与指令</b><small>运动、姿态、轮速、指令与上一动作</small></div><div><div class="step">02 · POLICY · 100 Hz</div><b>PPO 输出两个动作</b><small>顺序固定：小飞轮 → 接地大轮</small></div><div><div class="step">03 · SERVO · 500 Hz</div><b>目标轮速转为有限力矩</b><small>速度误差 × k<sub>v</sub>，限幅 ±2.4 N·m</small></div><div><div class="step">04 · FEEDBACK</div><b>物理更新与奖励</b><small>新状态回到观测，奖励用于训练更新</small></div></div>
+</section>
+
+<section id="observations"><div class="eyebrow">02 / OBSERVATIONS</div><h2>观测：15 维，Actor 与 Critic 相同</h2><p>下表是进入网络统计归一化之前的拼接顺序，索引从 0 开始。没有额外的 Critic 特权状态，也没有观测历史堆叠。</p>
+<div class="table-wrap"><table><thead><tr><th>索引 / 维数</th><th>代码项</th><th>实际输入</th><th>含义与处理</th></tr></thead><tbody>
+<tr><td>0–2 / 3</td><td><code>linear_velocity</code></td><td class="math">[v<sub>x</sub>, v<sub>y</sub>, v<sub>z</sub>]</td><td>根节点线速度，机身坐标系，原单位 m/s；未额外缩放。</td></tr>
+<tr><td>3–5 / 3</td><td><code>angular_velocity</code></td><td class="math">0.25 × [ω<sub>x</sub>, ω<sub>y</sub>, ω<sub>z</sub>]</td><td>根节点角速度，机身坐标系；原单位 rad/s，观测乘以 0.25。</td></tr>
+<tr><td>6–8 / 3</td><td><code>gravity</code></td><td class="math">[g<sub>x</sub>, g<sub>y</sub>, g<sub>z</sub>]</td><td>单位重力方向在机身坐标系的投影，无量纲。直立时约为 [0, 0, −1]，用于判断倾斜。</td></tr>
+<tr><td>9–10 / 2</td><td><code>wheel_velocity</code></td><td class="math">[Ω<sub>f</sub>/250, Ω<sub>d</sub>/35]</td><td>实际关节转速，顺序为飞轮、大轮；原单位 rad/s。除以对应速度上限，未裁剪，超速时绝对值可以大于 1。</td></tr>
+<tr><td>11–12 / 2</td><td><code>command</code></td><td class="math">[v*<sub>x</sub>, ψ̇*]</td><td>前向速度指令 m/s、朝向角速度指令 rad/s；不输入恒为零的横向指令。</td></tr>
+<tr><td>13–14 / 2</td><td><code>previous_action</code></td><td class="math">[a<sub>f,t−1</sub>, a<sub>d,t−1</sub>]</td><td>最近执行的归一化动作。在正常 runner / wrapper 路径中已经裁剪到 [−1, 1]，尚未映射为 rad/s。</td></tr>
+</tbody></table></div>
+<div class="grid"><div class="card"><h3>两层处理要区分</h3><p>观测项先执行上述固定缩放，Actor 和 Critic 又各自启用 <code>obs_normalization=True</code> 的统计归一化。表中的 0.25、250、35 不等于网络最终收到的固定数值范围。</p></div><div class="card"><h3>没有输入的量</h3><p>未输入世界位置、绝对航向、累计轮子角位置、显式速度误差或直接的欧拉角。网络通过指令与速度计算跟踪关系，通过重力投影感知倾斜。</p></div></div>
+<p class="small" style="margin-top:16px">Actor / Critic 均设置 enable_corruption=False，当前没有显式观测噪声。机身线速度来自仿真真实状态；部署到实物时仍需要相应的状态估计。</p>
+</section>
+
+<section id="actions"><div class="eyebrow">03 / ACTIONS</div><h2>动作：两个绝对目标轮速</h2><p>策略产生两个连续动作，执行前裁剪到 [−1, 1]。正负号对应各关节轴的旋转方向；零动作意味着目标转速为零，会产生制动力矩。</p>
+<div class="table-wrap"><table><thead><tr><th>顺序 / 动作项</th><th>关节</th><th>目标转速映射</th><th>k<sub>v</sub></th><th>力矩限制</th></tr></thead><tbody>
+<tr><td>0 · <code>flywheel</code></td><td><code>reaction</code> · 小飞轮</td><td>Ω*<sub>f</sub> = 250 × clip(a<sub>f</sub>, −1, 1) rad/s</td><td>0.12 N·m/(rad/s)</td><td>±2.4 N·m</td></tr>
+<tr><td>1 · <code>rolling</code></td><td><code>drive</code> · 接地大轮</td><td>Ω*<sub>d</sub> = 35 × clip(a<sub>d</sub>, −1, 1) rad/s</td><td>0.25 N·m/(rad/s)</td><td>±2.4 N·m</td></tr>
+</tbody></table></div>
+<div class="formula">τ<sub>i</sub> = clip(k<sub>v,i</sub> × (Ω*<sub>i</sub> − Ω<sub>i</sub>), −2.4, 2.4)<br><span class="dim">i ∈ {飞轮 f, 大轮 d} · XML velocity 执行器 · gear = 1 · 每 2 ms 更新</span></div>
+<p>策略每 10 ms 更新一次目标，物理与速度伺服在其间运行 5 步。动作是绝对速度目标，没有固定预旋偏置，也没有显式的动作变化率硬限制；动作平滑由奖励鼓励。</p>
+<div class="note warm"><strong>轮速限制是目标范围，不是实际转速硬锁。</strong>惯性与外界作用可让实际转速短暂超限，奖励中的 overspeed 对此惩罚。电机参数属于仿真配置，尚不是实测硬件规格。</div>
+<p class="small">实现细节：MJLab 1.3.0 的 JointVelocityActionCfg.actuator_names 实际按被驱动关节名匹配，本任务使用 reaction / drive。它们的 XML 执行器名则是 reaction_velocity / drive_velocity。此顺序不同于旧 sim.py 的力矩动作约定，旧策略不可直接混用。</p>
+</section>
+
+<section id="rewards"><div class="eyebrow">04 / REWARDS</div><h2>奖励：跟踪为主，兼顾平衡与执行代价</h2>
+<p>定义直立因子 <span class="math">U = clip(−g<sub>z</sub>, 0, 1)²</span>。直立时 U=1，倾斜时减小。下面的公式给出每项的原始值，再乘权重与控制步长。</p>
+<div class="table-wrap"><table><thead><tr><th>代码项</th><th>原始值</th><th>权重</th><th>作用 / 注意事项</th></tr></thead><tbody>
+<tr><td><code>forward</code></td><td class="math">U exp[−((v<sub>x</sub> − v*<sub>x</sub>)/0.4)²]</td><td class="weight">+4.0</td><td>跟踪前进/后退速度，误差尺度 0.4 m/s。</td></tr>
+<tr><td><code>yaw</code></td><td class="math">U exp[−((ψ̇ − ψ̇*)/0.25)²]</td><td class="weight">+2.0</td><td>跟踪真实朝向角速度，误差尺度 0.25 rad/s。</td></tr>
+<tr><td><code>upright</code></td><td class="math">U</td><td class="weight">+0.5</td><td>鼓励直立；跟踪奖励本身也受 U 调制。</td></tr>
+<tr><td><code>lateral</code></td><td class="math">v<sub>y</sub>²</td><td class="weight neg">−0.5</td><td>抑制机身侧向速度，目标恒为 0。</td></tr>
+<tr><td><code>wobble</code></td><td class="math">ω<sub>x</sub>² + ω<sub>y</sub>²</td><td class="weight neg">−0.01</td><td>抑制横滚与俯仰角速度；这里没有观测中的 0.25 缩放。</td></tr>
+<tr><td><code>action_rate</code></td><td class="math">Σ<sub>i</sub>(clip(a<sub>i,t</sub>) − clip(a<sub>i,t−1</sub>))²</td><td class="weight neg">−0.02</td><td>惩罚相邻动作跳变；clip 范围为 [−1,1]。没有除以 Δt，不是物理角加速度。</td></tr>
+<tr><td><code>torque</code></td><td class="math">τ<sub>f</sub>² + τ<sub>d</sub>²</td><td class="weight neg">−0.005</td><td>使用实际 actuator_force；gear=1 时对应两路电机力矩。不是目标转速的平方。</td></tr>
+<tr><td><code>overspeed</code></td><td class="math">Σ<sub>i</sub> max(|Ω<sub>i</sub>|/Ω<sub>max,i</sub> − 1, 0)²</td><td class="weight neg">−1.0</td><td>只惩罚超过各自上限的实际轮速；上限为 250、35 rad/s。</td></tr>
+<tr><td><code>failure</code></td><td class="math">1<sub>terminated</sub></td><td class="weight neg">−10.0</td><td>跌倒/低高度终止时为 1；正常回合超时不计入此项。</td></tr>
+</tbody></table></div>
+<div class="formula">r<sub>t</sub> = Δt × Σ<sub>j</sub> w<sub>j</sub> f<sub>j</sub>(s<sub>t</sub>, a<sub>t</sub>)<br><span class="dim">Δt = 0.002 × 5 = 0.01 s · MJLab 默认 scale_rewards_by_dt=True</span></div>
+<div class="grid"><div class="card"><h3>每步数值如何解释</h3><p>假设 U=1、两个跟踪误差均为零、所有惩罚项均为零，奖励率为 <strong>6.5</strong>，单步奖励为 <strong>0.065</strong>。这是公式的理论上界，不能据此假定运动时可以零力矩。</p><p>触发 failure 的那个控制步，其单项贡献是 <strong>−10 × 0.01 = −0.1</strong>；提前终止还会损失后续可获得的奖励。</p></div><div class="card"><h3>转向奖励不直接使用 ω<sub>z</sub></h3><p>令 f 为机身前向单位轴在世界坐标系的方向，ḟ=ω<sub>world</sub>×f。代码由其水平投影计算：</p><div class="formula">ψ̇ = (f<sub>x</sub> ḟ<sub>y</sub> − f<sub>y</sub> ḟ<sub>x</sub>) / max(f<sub>x</sub>² + f<sub>y</sub>², 10<sup>−6</sup>)</div><p class="small">机身倾斜时，这与机身 z 轴角速度不同。观测提供角速度与重力，奖励则直接使用该朝向导数。</p></div></div>
+<div class="card calc" style="margin-top:20px"><h3>跟踪奖励小实验</h3><p class="small">仅计算 forward + yaw + upright 三项，不含六项惩罚；是公式演示，不是物理仿真或训练结果。</p><div class="grid"><div>
+<label for="speed-error">前向速度误差 |v<sub>x</sub> − v*<sub>x</sub>| <output id="speed-value">0.00 m/s</output></label><input id="speed-error" type="range" min="0" max="1.2" step="0.01" value="0">
+<label for="yaw-error">朝向角速度误差 |ψ̇ − ψ̇*| <output id="yaw-value">0.00 rad/s</output></label><input id="yaw-error" type="range" min="0" max="0.75" step="0.01" value="0">
+<label for="tilt">总倾角 α <output id="tilt-value">0.00 rad</output></label><input id="tilt" type="range" min="0" max="0.7" step="0.01" value="0">
+</div><div><div class="result" aria-live="polite"><div><strong id="rate">6.5000</strong><span>三项加权奖励率</span></div><div><strong id="per-step">0.06500</strong><span>单控制步贡献 · ×0.01</span></div></div><p id="breakdown" class="small" style="margin-top:14px">forward 4.0000 + yaw 2.0000 + upright 0.5000</p><p class="small">总倾角 α 与直立因子的关系为 U=cos²α（此滑块范围内）。当误差等于对应尺度时，该跟踪项保留零误差值的 e⁻¹≈36.8%。</p></div></div></div>
+<div class="note"><strong>读 TensorBoard：</strong><code>Episode_Reward/项名</code> 是该项的加权、按 Δt 累加后的回合和，在重置环境间取平均，再除以配置的最大回合时长（训练默认为 20 s）。它不是未加权原始项，也不是除以每个失败回合的实际存活时间。PPO 的 entropy_coef=0.01 属于优化目标，不是上述九项环境奖励之一。</div>
+</section>
+
+<section id="episodes"><div class="eyebrow">05 / COMMANDS &amp; EPISODES</div><h2>指令范围、初始状态与终止条件</h2>
+<div class="table-wrap"><table><thead><tr><th>手动阶段</th><th>前向速度指令 m/s</th><th>朝向角速度指令 rad/s</th><th>保持不变的内容</th></tr></thead><tbody><tr><td><code>warmup</code></td><td>[−0.5, +0.5]</td><td>[−0.20, +0.20]</td><td rowspan="3">15 维观测、2 维动作、9 项奖励及其权重。阶段切换扩大指令范围，不自动更换奖励。</td></tr><tr><td><code>tracking</code></td><td>[−1.2, +1.2]</td><td>[−0.40, +0.40]</td></tr><tr><td><code>full</code></td><td>[−2.0, +2.0]</td><td>[−0.60, +0.60]</td></tr></tbody></table></div>
+<p>训练每 3–6 秒重新采样指令，静止指令采样比例为 10%，横向速度指令恒为零。不启用目标航向控制（heading_command=False）；没有显式速度指令斜坡。阶段由启动参数手动选择，不按训练成绩自动晋级。</p>
+<div class="grid"><div class="card"><h3>每回合重置</h3><ul><li>根节点高度 0.370 m；横滚、俯仰各加 ±0.025 rad 扰动。</li><li>初始偏航在约 [−π, π] 采样。</li><li>两关节角度在约 [−π, π] 采样。</li><li>轮速从零附近启动，各加 ±1 rad/s 扰动；没有传统控制器的 20 rad/s 预旋。</li><li>默认根节点初始速度为零，无额外重置速度随机范围。</li></ul></div><div class="card"><h3>何时结束回合</h3><ul><li><strong>姿态失败：</strong>α=acos(−g<sub>z</sub>) &gt; 0.70 rad，约 40.1°。这是总倾角，不是分别检查横滚/俯仰。</li><li><strong>高度失败：</strong>根节点世界高度 &lt; 0.185 m。</li><li><strong>正常超时：</strong>训练回合达到 20 s；不产生 failure 惩罚。</li></ul><p class="small">训练时终止后自动重置。独立评估会保留首次失败记录，不因重置而恢复该样本的通过资格。</p></div></div>
+<div class="note warm"><strong>可选 --randomize：</strong>仅训练模式启用。启动时随机化指定轮胎/轮圈几何的摩擦参数，范围 1.1–1.9（shared_random=True）；每隔 5–8 秒向世界坐标系根节点速度加入扰动，x/y 各 ±0.1 m/s、横滚/俯仰角速度分量各 ±0.15 rad/s。当前未随机化质量、电机参数或执行延迟。play / evaluate / video 使用 play=True，不启用这些训练扰动。</div>
+</section>
+
+<section id="ppo"><div class="eyebrow">06 / PPO &amp; VALIDATION</div><h2>学习器配置与结果判据</h2>
+<div class="grid"><div class="card"><h3>当前显式 PPO 配置</h3><div class="table-wrap"><table style="min-width:0"><tbody><tr><td>Actor / Critic 隐藏层</td><td><code>[128, 128, 128]</code>，各自观测归一化</td></tr><tr><td>动作分布</td><td>Gaussian；初始标准差 0.3；scalar</td></tr><tr><td>学习率</td><td>3 × 10⁻⁴</td></tr><tr><td>每批训练</td><td>4 个 epoch / 4 个 mini-batch</td></tr><tr><td>折扣 / GAE</td><td>γ=0.99 / λ=0.95</td></tr><tr><td>熵系数 / 目标 KL</td><td>0.01 / 0.015</td></tr><tr><td>每环境采样长度</td><td>32 个控制步，0.32 s 仿真时间</td></tr><tr><td>默认并行环境 / 更新次数</td><td>256 / 3000（命令行可改）</td></tr><tr><td>保存间隔</td><td>50 次更新</td></tr></tbody></table></div><p class="small">默认一批采集 256×32=8192 条环境转移。这里只列项目显式设置的超参数，其余继承所固定依赖版本的默认值。</p></div><div class="card"><h3>训练奖励不等于验收通过</h3><p><code>evaluate</code> 对静止、±1 m/s 直行、速度 ±0.8 m/s 搭配转向 ±0.35 rad/s 的四种转弯组合，分别运行多个随机初始状态。</p><p>默认每类 15 s，前 3 s 是启动阶段；之后计算以下误差：</p><ul><li>前向速度 RMSE &lt; 0.35 m/s。</li><li>朝向角速度 RMSE &lt; 0.15 rad/s。</li><li>横向速度 RMSE &lt; 0.35 m/s。</li><li>整个回合存活，且有有效评估样本。</li></ul><p class="small">这组名义评估包含超出 warmup 指令范围的任务；需结合训练阶段解读。它也不同于旧 accept.py 的随机质量与冲击验收。</p><div class="note">复现某个云端 checkpoint 时，应核对其 <code>task.json</code>、<code>geometry.xml</code>、<code>agent.json</code> 以及训练代码版本。本文没有读取用户云端实例，不能判断具体运行是否覆盖了默认参数。</div></div></div>
+</section>
+
+<section id="sources"><div class="eyebrow">07 / SOURCE MAP</div><h2>源码索引</h2><p>下列链接固定到本次整理所依据的代码版本；本文主体和交互计算器无需联网，源码链接需要网络。</p><ul class="sources">
+<li><a href="https://github.com/crzzo0129/GyroRoll/blob/92f565b/miniwheelbot_rl/task.py">task.py</a>：<code>make_env_cfg</code> 定义观测、动作、指令、奖励与终止；<code>tracking</code>、<code>heading_rate</code> 等函数给出计算公式；<code>make_agent_cfg</code> 定义 PPO。</li>
+<li><a href="https://github.com/crzzo0129/GyroRoll/blob/92f565b/miniwheelbot_rl/settings.py">settings.py</a>：轮速/力矩上限、k<sub>v</sub>、频率、回合长度、阶段范围。</li>
+<li><a href="https://github.com/crzzo0129/GyroRoll/blob/92f565b/miniwheelbot_rl/model.py">model.py</a>：<code>velocity_model_xml</code> 将原几何的力矩执行器替换成原生 XML 速度伺服。</li>
+<li><a href="https://github.com/crzzo0129/GyroRoll/blob/92f565b/miniwheelbot_rl/__main__.py">__main__.py</a>：环境构建、动作裁剪 wrapper、checkpoint 配置恢复与独立评估。</li>
+<li><a href="https://github.com/mujocolab/mjlab/blob/v1.3.0/src/mjlab/managers/reward_manager.py">MJLab 1.3.0 · reward_manager.py</a>：奖励乘以 Δt，以及 <code>Episode_Reward/*</code> 的日志归一化口径。</li>
+<li><a href="https://github.com/mujocolab/mjlab/blob/v1.3.0/src/mjlab/envs/mdp/observations.py">MJLab · observations.py</a> / <a href="https://github.com/mujocolab/mjlab/blob/v1.3.0/src/mjlab/envs/mdp/terminations.py">terminations.py</a>：基础观测和总倾角终止条件。</li>
+</ul></section>
+</main>
+<footer>GyroRoll / 嵌套正交轮 · 训练配置说明 · 本地单文件 HTML，可离线阅读及打印。<br>公式使用实际状态量；固定观测缩放、网络归一化、奖励权重与每步时间缩放分别标注。</footer>
+<script>
+(()=>{'use strict';const byId=id=>document.getElementById(id);function update(){const ev=Number(byId('speed-error').value),ew=Number(byId('yaw-error').value),tilt=Number(byId('tilt').value),u=Math.cos(tilt)**2;const f=4*u*Math.exp(-((ev/.4)**2)),y=2*u*Math.exp(-((ew/.25)**2)),upr=.5*u,total=f+y+upr;byId('speed-value').textContent=ev.toFixed(2)+' m/s';byId('yaw-value').textContent=ew.toFixed(2)+' rad/s';byId('tilt-value').textContent=tilt.toFixed(2)+' rad';byId('rate').textContent=total.toFixed(4);byId('per-step').textContent=(total*.01).toFixed(5);byId('breakdown').textContent='forward '+f.toFixed(4)+' + yaw '+y.toFixed(4)+' + upright '+upr.toFixed(4)}['speed-error','yaw-error','tilt'].forEach(id=>byId(id).addEventListener('input',update));update()})();
+</script>
+</body>
+</html>

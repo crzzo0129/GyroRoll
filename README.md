@@ -14,7 +14,7 @@ GyroRoll 是一个使用滚动轮与正交飞轮的两电机独轮机器人仿�
 
 新增 `miniwheelbot_rl/`：PPO 直接输出 `[飞轮目标角速度, 滚轮目标角速度]`，两路都支持正反转，学习前进/后退速度和转向角速度跟踪。轮速经有限力矩的原生速度伺服执行；身体平衡与转向由策略学习。
 
-上传 [云端训练包](dist/miniwheelbot_mjlab130_cloud.zip)，按照 [云端部署与运行说明](CLOUD_README.md) 安装、检查、训练、续训、浏览器回放和评估。动作单位、奖励与物理设置见 [任务说明](discuss/直接强化学习训练.md)。本地未启动 PPO，完整任务仍需在云端验证，不能引用旧反馈控制器的通过率。
+上传 [云端训练包](dist/miniwheelbot_mjlab130_cloud.zip)，按照 [云端部署与运行说明](CLOUD_README.md) 安装、检查、训练、续训、浏览器回放和评估。动作单位、奖励与物理设置见 [任务说明](discuss/直接强化学习训练.md)，观测维度、动作映射、奖励公式与 PPO 参数见 [训练配置 HTML](discuss/rl_training_spec.html)。本地未启动 PPO，完整任务仍需在云端验证，不能引用旧反馈控制器的通过率。
 
 ```bash
 python -m miniwheelbot_rl smoke --num-envs 4

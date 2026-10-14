@@ -16,6 +16,7 @@ FILES = (
     "tests/test_rl_heading_rate.py",
     "tests/test_rl_actions.py",
     "tests/test_rl_video.py",
+    "tests/test_rl_diagnostics.py",
 )
 
 
