@@ -24,6 +24,7 @@ from mjlab.viewer import ViewerConfig
 
 from .model import make_spec, MODEL
 from .settings import Settings, STAGES
+from .policy_config import POLICY_VERSION, distribution_config
 
 
 def command(env):
@@ -177,14 +178,13 @@ def make_env_cfg(num_envs: int = 256, stage: str = "warmup", *,
     )
 
 
-def make_agent_cfg(iterations: int = 3000):
+def make_agent_cfg(iterations: int = 3000, *, policy_version: str = POLICY_VERSION):
     return RslRlOnPolicyRunnerCfg(
         actor=RslRlModelCfg(hidden_dims=(128, 128, 128), obs_normalization=True,
-            distribution_cfg={"class_name": "GaussianDistribution", "init_std": 0.3,
-                              "std_type": "scalar"}),
+            distribution_cfg=distribution_config(policy_version)),
         critic=RslRlModelCfg(hidden_dims=(128, 128, 128), obs_normalization=True),
         algorithm=RslRlPpoAlgorithmCfg(learning_rate=3e-4, num_learning_epochs=4,
-            num_mini_batches=4, entropy_coef=0.01, gamma=0.99, lam=0.95, desired_kl=0.015),
+            num_mini_batches=4, entropy_coef=0.0, gamma=0.99, lam=0.95, desired_kl=0.015),
         num_steps_per_env=32, max_iterations=iterations, clip_actions=1.0,
         experiment_name="nested_velocity_mjlab130", save_interval=50,
         logger="tensorboard", upload_model=False,

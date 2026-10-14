@@ -103,6 +103,7 @@ def write_outputs(directory, rows, report, settings):
                 m = stats[motor]
                 table.append(f'<tr><td>{label}</td><td>{name}</td>'
                              f'<td>{m["clipped_fraction"]:.1%}</td>'
+                             f'<td>{m["action_boundary_fraction"]:.1%}</td>'
                              f'<td>{m["torque_saturation_fraction"]:.1%}</td>'
                              f'<td>{m["speed_rmse_rad_s"]:.3f}</td></tr>')
     page = '''<!doctype html><html lang="zh-CN"><meta charset="utf-8">
@@ -117,7 +118,8 @@ td,th{padding:12px;text-align:left;border-bottom:1px solid #e2e8f0}code{overflow
     page += f'转向指令 {report["command"][1]:g} rad/s。{status}</p>'
     page += '<p>使用策略均值，不加入探索噪声。红色虚线表示限制；先看目标是否跳变，再看实际转速是否跟随、力矩是否持续限幅。'
     page += '统计同时给出含起步和 3 秒后的结果；过早终止时，短时间误差不能代表成功跟踪。</p>'
-    page += '<table><tr><th>时段</th><th>电机</th><th>动作被裁剪比例</th><th>力矩 ≥99% 上限比例</th><th>转速 RMSE / rad/s</th></tr>'
+    page += '<p>均值有界的策略可能无需裁剪却仍长期贴近 ±1，请同时看动作贴边比例和力矩换向情况。</p>'
+    page += '<table><tr><th>时段</th><th>电机</th><th>动作被裁剪比例</th><th>|动作| ≥0.99 比例</th><th>力矩 ≥99% 上限比例</th><th>转速 RMSE / rad/s</th></tr>'
     page += ''.join(table) + '</table><div class="plots">' + ''.join(plots) + '</div>'
     page += '<p>每个控制周期末采样（100 Hz 默认配置）：目标为刚执行的指令，实际转速和力矩为周期末读数。'
     page += '力矩数据不包含周期内部峰值；终止后自动重置的状态不进入曲线。完整数据见 trace.csv，统计见 summary.json。</p></html>'

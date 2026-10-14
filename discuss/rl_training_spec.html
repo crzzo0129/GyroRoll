@@ -19,7 +19,7 @@
 <div class="eyebrow">IMPLEMENTATION NOTE · MJLAB 1.3.0</div>
 <h1>让大小轮协同，<br><span>学习平衡与速度跟踪。</span></h1>
 <p class="lead">当前开放轮圈机器人直接强化学习任务说明。按源码梳理策略看见什么、输出什么，以及每一步如何获得奖励。</p>
-<p class="meta">核对日期：2026-10-12 · 代码基线：92f565b · 对象：miniwheelbot_rl/ · 所列数值为当前默认配置</p>
+<p class="meta">更新日期：2026-10-14 · 策略版本：bounded_mean_gaussian_v1 · 对象：miniwheelbot_rl/ · 所列数值为新训练默认配置</p>
 <div class="stats"><div class="stat"><strong>15</strong><span>Actor / Critic 观测维度</span></div><div class="stat"><strong>2</strong><span>有符号目标轮速动作</span></div><div class="stat"><strong>9</strong><span>环境奖励项</span></div><div class="stat"><strong>100 Hz</strong><span>策略决策频率</span></div></div>
 <div class="note">这是一份<strong>训练定义</strong>，不报告云端模型的训练成绩。已有传统反馈控制器的 1 m/s 演示不等于该 PPO 策略的表现；判断训练效果应使用对应 checkpoint 的独立评估结果。</div>
 <button class="print" type="button" onclick="window.print()">打印 / 保存为 PDF</button>
@@ -43,7 +43,7 @@
 <p class="small" style="margin-top:16px">Actor / Critic 均设置 enable_corruption=False，当前没有显式观测噪声。机身线速度来自仿真真实状态；部署到实物时仍需要相应的状态估计。</p>
 </section>
 
-<section id="actions"><div class="eyebrow">03 / ACTIONS</div><h2>动作：两个绝对目标轮速</h2><p>策略产生两个连续动作，执行前裁剪到 [−1, 1]。正负号对应各关节轴的旋转方向；零动作意味着目标转速为零，会产生制动力矩。</p>
+<section id="actions"><div class="eyebrow">03 / ACTIONS</div><h2>动作：两个绝对目标轮速</h2><p>新策略均值经 tanh 限制在 [−1, 1]，训练加入标准差受限的高斯噪声，执行前再裁剪到 [−1, 1]。旧 checkpoint 回放保留原输出定义。正负号对应各关节轴的旋转方向；零动作意味着目标转速为零，会产生制动力矩。</p>
 <div class="table-wrap"><table><thead><tr><th>顺序 / 动作项</th><th>关节</th><th>目标转速映射</th><th>k<sub>v</sub></th><th>力矩限制</th></tr></thead><tbody>
 <tr><td>0 · <code>flywheel</code></td><td><code>reaction</code> · 小飞轮</td><td>Ω*<sub>f</sub> = 250 × clip(a<sub>f</sub>, −1, 1) rad/s</td><td>0.12 N·m/(rad/s)</td><td>±2.4 N·m</td></tr>
 <tr><td>1 · <code>rolling</code></td><td><code>drive</code> · 接地大轮</td><td>Ω*<sub>d</sub> = 35 × clip(a<sub>d</sub>, −1, 1) rad/s</td><td>0.25 N·m/(rad/s)</td><td>±2.4 N·m</td></tr>
@@ -74,7 +74,7 @@
 <label for="yaw-error">朝向角速度误差 |ψ̇ − ψ̇*| <output id="yaw-value">0.00 rad/s</output></label><input id="yaw-error" type="range" min="0" max="0.75" step="0.01" value="0">
 <label for="tilt">总倾角 α <output id="tilt-value">0.00 rad</output></label><input id="tilt" type="range" min="0" max="0.7" step="0.01" value="0">
 </div><div><div class="result" aria-live="polite"><div><strong id="rate">6.5000</strong><span>三项加权奖励率</span></div><div><strong id="per-step">0.06500</strong><span>单控制步贡献 · ×0.01</span></div></div><p id="breakdown" class="small" style="margin-top:14px">forward 4.0000 + yaw 2.0000 + upright 0.5000</p><p class="small">总倾角 α 与直立因子的关系为 U=cos²α（此滑块范围内）。当误差等于对应尺度时，该跟踪项保留零误差值的 e⁻¹≈36.8%。</p></div></div></div>
-<div class="note"><strong>读 TensorBoard：</strong><code>Episode_Reward/项名</code> 是该项的加权、按 Δt 累加后的回合和，在重置环境间取平均，再除以配置的最大回合时长（训练默认为 20 s）。它不是未加权原始项，也不是除以每个失败回合的实际存活时间。PPO 的 entropy_coef=0.01 属于优化目标，不是上述九项环境奖励之一。</div>
+<div class="note"><strong>读 TensorBoard：</strong><code>Episode_Reward/项名</code> 是该项的加权、按 Δt 累加后的回合和，在重置环境间取平均，再除以配置的最大回合时长（训练默认为 20 s）。它不是未加权原始项，也不是除以每个失败回合的实际存活时间。当前 PPO 的 entropy_coef=0，训练仍保留高斯探索采样；熵项不属于上述九项环境奖励。</div>
 </section>
 
 <section id="episodes"><div class="eyebrow">05 / COMMANDS &amp; EPISODES</div><h2>指令范围、初始状态与终止条件</h2>
@@ -85,10 +85,10 @@
 </section>
 
 <section id="ppo"><div class="eyebrow">06 / PPO &amp; VALIDATION</div><h2>学习器配置与结果判据</h2>
-<div class="grid"><div class="card"><h3>当前显式 PPO 配置</h3><div class="table-wrap"><table style="min-width:0"><tbody><tr><td>Actor / Critic 隐藏层</td><td><code>[128, 128, 128]</code>，各自观测归一化</td></tr><tr><td>动作分布</td><td>Gaussian；初始标准差 0.3；scalar</td></tr><tr><td>学习率</td><td>3 × 10⁻⁴</td></tr><tr><td>每批训练</td><td>4 个 epoch / 4 个 mini-batch</td></tr><tr><td>折扣 / GAE</td><td>γ=0.99 / λ=0.95</td></tr><tr><td>熵系数 / 目标 KL</td><td>0.01 / 0.015</td></tr><tr><td>每环境采样长度</td><td>32 个控制步，0.32 s 仿真时间</td></tr><tr><td>默认并行环境 / 更新次数</td><td>256 / 3000（命令行可改）</td></tr><tr><td>保存间隔</td><td>50 次更新</td></tr></tbody></table></div><p class="small">默认一批采集 256×32=8192 条环境转移。这里只列项目显式设置的超参数，其余继承所固定依赖版本的默认值。</p></div><div class="card"><h3>训练奖励不等于验收通过</h3><p><code>evaluate</code> 对静止、±1 m/s 直行、速度 ±0.8 m/s 搭配转向 ±0.35 rad/s 的四种转弯组合，分别运行多个随机初始状态。</p><p>默认每类 15 s，前 3 s 是启动阶段；之后计算以下误差：</p><ul><li>前向速度 RMSE &lt; 0.35 m/s。</li><li>朝向角速度 RMSE &lt; 0.15 rad/s。</li><li>横向速度 RMSE &lt; 0.35 m/s。</li><li>整个回合存活，且有有效评估样本。</li></ul><p class="small">这组名义评估包含超出 warmup 指令范围的任务；需结合训练阶段解读。它也不同于旧 accept.py 的随机质量与冲击验收。</p><div class="note">复现某个云端 checkpoint 时，应核对其 <code>task.json</code>、<code>geometry.xml</code>、<code>agent.json</code> 以及训练代码版本。本文没有读取用户云端实例，不能判断具体运行是否覆盖了默认参数。</div></div></div>
+<div class="grid"><div class="card"><h3>当前显式 PPO 配置</h3><div class="table-wrap"><table style="min-width:0"><tbody><tr><td>Actor / Critic 隐藏层</td><td><code>[128, 128, 128]</code>，各自观测归一化</td></tr><tr><td>动作分布</td><td>Gaussian；均值 tanh；标准差初始 0.1，sigmoid 限制在 [0.02, 0.2]</td></tr><tr><td>学习率</td><td>3 × 10⁻⁴</td></tr><tr><td>每批训练</td><td>4 个 epoch / 4 个 mini-batch</td></tr><tr><td>折扣 / GAE</td><td>γ=0.99 / λ=0.95</td></tr><tr><td>熵系数 / 目标 KL</td><td>0 / 0.015</td></tr><tr><td>每环境采样长度</td><td>32 个控制步，0.32 s 仿真时间</td></tr><tr><td>默认并行环境 / 更新次数</td><td>256 / 3000（命令行可改）</td></tr><tr><td>保存间隔</td><td>50 次更新</td></tr></tbody></table></div><p class="small">默认一批采集 256×32=8192 条环境转移。这里只列项目显式设置的超参数，其余继承所固定依赖版本的默认值。</p></div><div class="card"><h3>训练奖励不等于验收通过</h3><p><code>evaluate</code> 对静止、±1 m/s 直行、速度 ±0.8 m/s 搭配转向 ±0.35 rad/s 的四种转弯组合，分别运行多个随机初始状态。</p><p>默认每类 15 s，前 3 s 是启动阶段；之后计算以下误差：</p><ul><li>前向速度 RMSE &lt; 0.35 m/s。</li><li>朝向角速度 RMSE &lt; 0.15 rad/s。</li><li>横向速度 RMSE &lt; 0.35 m/s。</li><li>整个回合存活，且有有效评估样本。</li></ul><p class="small">这组名义评估包含超出 warmup 指令范围的任务；需结合训练阶段解读。它也不同于旧 accept.py 的随机质量与冲击验收。</p><div class="note">复现某个云端 checkpoint 时，应核对其 <code>task.json</code>、<code>geometry.xml</code>、<code>agent.json</code> 以及训练代码版本。本文没有读取用户云端实例，不能判断具体运行是否覆盖了默认参数。</div></div></div>
 </section>
 
-<section id="sources"><div class="eyebrow">07 / SOURCE MAP</div><h2>源码索引</h2><p>下列链接固定到本次整理所依据的代码版本；本文主体和交互计算器无需联网，源码链接需要网络。</p><ul class="sources">
+<section id="sources"><div class="eyebrow">07 / SOURCE MAP</div><h2>源码索引</h2><p>下列链接保留原始任务定义的参考版本；当前有界均值和标准差实现见本地 miniwheelbot_rl/distributions.py 与 policy_config.py。本文主体和交互计算器无需联网。</p><ul class="sources">
 <li><a href="https://github.com/crzzo0129/GyroRoll/blob/92f565b/miniwheelbot_rl/task.py">task.py</a>：<code>make_env_cfg</code> 定义观测、动作、指令、奖励与终止；<code>tracking</code>、<code>heading_rate</code> 等函数给出计算公式；<code>make_agent_cfg</code> 定义 PPO。</li>
 <li><a href="https://github.com/crzzo0129/GyroRoll/blob/92f565b/miniwheelbot_rl/settings.py">settings.py</a>：轮速/力矩上限、k<sub>v</sub>、频率、回合长度、阶段范围。</li>
 <li><a href="https://github.com/crzzo0129/GyroRoll/blob/92f565b/miniwheelbot_rl/model.py">model.py</a>：<code>velocity_model_xml</code> 将原几何的力矩执行器替换成原生 XML 速度伺服。</li>

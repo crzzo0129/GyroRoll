@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 
 from .settings import Settings, STAGES
+from .policy_config import POLICY_VERSION, checkpoint_policy_version
 
 
 def parser():
@@ -58,12 +59,14 @@ def build(args):
     settings = Settings(flywheel_speed_limit=args.flywheel_limit,
                         rolling_speed_limit=args.rolling_limit)
     model_path = MODEL
+    policy_version = POLICY_VERSION
     # A checkpoint's physical action mapping must be reproduced in evaluation.
     if args.checkpoint:
         manifest_path = args.checkpoint.parent / "task.json"
         if not manifest_path.exists():
             raise ValueError("Checkpoint needs its sibling task.json; old torque policies are incompatible")
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        policy_version = checkpoint_policy_version(manifest, training=args.mode == "train")
         if manifest["action_order"] != ["reaction", "drive"] or manifest["mjlab"] != "1.3.0":
             raise ValueError("Incompatible action contract or MJLab version")
         settings = Settings(**manifest["settings"])
@@ -88,7 +91,7 @@ def build(args):
     env = ManagerBasedRlEnv(cfg, device=args.device,
                            render_mode="rgb_array" if args.mode == "video" else None)
     wrapped = RslRlVecEnvWrapper(env, clip_actions=1.0)
-    agent = make_agent_cfg(args.iterations)
+    agent = make_agent_cfg(args.iterations, policy_version=policy_version)
     agent.seed = args.seed
     log_dir = None
     if args.mode == "train":
@@ -101,6 +104,7 @@ def build(args):
             "randomize": args.randomize, "seed": args.seed,
             "action_order": ["reaction", "drive"], "action_units": "rad/s",
             "command_order": ["forward_m_s", "heading_rad_s"],
+            "policy_version": policy_version,
             "algorithm": "PPO from scratch, no expert controller",
             "geometry": "wheelbot/nested_model.xml",
             "geometry_sha256": hashlib.sha256(geometry).hexdigest(),
