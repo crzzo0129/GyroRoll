@@ -11,6 +11,7 @@ from pathlib import Path
 
 from .settings import Settings, STAGES
 from .policy_config import POLICY_VERSION, checkpoint_policy_version
+from .curriculum import TASK_VERSION, LESSONS
 
 
 def parser():
@@ -35,6 +36,14 @@ def parser():
     p.add_argument("--video", type=Path, default=Path("results/nested_rl/rollout.mp4"))
     p.add_argument("--speed", type=float, default=0.5, help="video/diagnose forward command, m/s")
     p.add_argument("--turn", type=float, default=0.0, help="video/diagnose heading-rate command, rad/s")
+    p.add_argument("--start-pose", choices=("random", "upright", "tilt_left", "tilt_right",
+                   "left", "right", "front", "back"),
+                   help="recovery stages: train defaults random; replay defaults upright")
+    p.add_argument("--terrain-column", type=int, choices=range(5),
+                   help="replay only: 0 flat, 1/2 half slope +/-; 3/4 full slope +/-")
+    p.add_argument("--heading-deg", type=float, default=0.0, help="fixed replay spawn heading")
+    p.add_argument("--suite", choices=("tracking", "curriculum"),
+                   help="evaluate: default curriculum for recovery stages, otherwise tracking")
     return p
 
 
@@ -66,6 +75,8 @@ def build(args):
         if not manifest_path.exists():
             raise ValueError("Checkpoint needs its sibling task.json; old torque policies are incompatible")
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if manifest.get("task_version", TASK_VERSION) != TASK_VERSION:
+            raise ValueError("Unsupported checkpoint task_version")
         policy_version = checkpoint_policy_version(manifest, training=args.mode == "train")
         if manifest["action_order"] != ["reaction", "drive"] or manifest["mjlab"] != "1.3.0":
             raise ValueError("Incompatible action contract or MJLab version")
@@ -76,20 +87,35 @@ def build(args):
         if hashlib.sha256(model_path.read_bytes()).hexdigest() != manifest["geometry_sha256"]:
             raise ValueError("Checkpoint geometry snapshot does not match task.json")
     args.stage = args.stage or "warmup"
+    if args.mode == "train" and (args.start_pose not in (None, "random") or args.terrain_column is not None):
+        raise ValueError("Training uses the mixed curriculum reset; pose/terrain overrides are replay-only")
+    start_pose = args.start_pose or ("random" if args.mode in ("train", "smoke") else "upright")
+    if args.stage not in LESSONS:
+        start_pose = args.start_pose or "random"
+    if args.suite == "curriculum" and args.stage not in LESSONS:
+        raise ValueError("--suite curriculum requires --stage rise_tilt/rise/recover/slope3/slope6/slope10/mixed")
     env_settings = (replace(settings, episode_seconds=max(settings.episode_seconds, args.duration + 1))
                     if args.mode in ("evaluate", "video", "diagnose") else settings)
     cfg = make_env_cfg(args.num_envs, args.stage, settings=env_settings,
                        play=args.mode in ("evaluate", "play", "video", "diagnose"), randomize=args.randomize,
-                       model_path=model_path)
+                       model_path=model_path, start_pose=start_pose)
     if args.mode in ("evaluate", "video", "diagnose"):
         cfg.commands["twist"].resampling_time_range = (1e8, 1e8)
         cfg.commands["twist"].rel_standing_envs = 0.0
+    if args.mode in ("video", "diagnose"):
+        cfg.auto_reset = False  # Keep the true terminal state for recovery reporting.
     cfg.seed = args.seed
     if args.mode == "video":
         cfg.viewer.width, cfg.viewer.height = 960, 544
         cfg.viewer.azimuth, cfg.viewer.elevation = 135.0, -20.0
     env = ManagerBasedRlEnv(cfg, device=args.device,
                            render_mode="rgb_array" if args.mode == "video" else None)
+    import math
+    if args.terrain_column is not None:
+        if args.stage not in LESSONS or not LESSONS[args.stage].slope_degrees:
+            raise ValueError("--terrain-column requires a slope stage")
+        env._evaluation_column = args.terrain_column
+    env._evaluation_yaw = math.radians(args.heading_deg)
     wrapped = RslRlVecEnvWrapper(env, clip_actions=1.0)
     agent = make_agent_cfg(args.iterations, policy_version=policy_version)
     agent.seed = args.seed
@@ -105,6 +131,9 @@ def build(args):
             "action_order": ["reaction", "drive"], "action_units": "rad/s",
             "command_order": ["forward_m_s", "heading_rad_s"],
             "policy_version": policy_version,
+            "task_version": TASK_VERSION,
+            "lesson": asdict(LESSONS[args.stage]) if args.stage in LESSONS else None,
+            "observation_contract": "physical_state_15_v1",
             "algorithm": "PPO from scratch, no expert controller",
             "geometry": "wheelbot/nested_model.xml",
             "geometry_sha256": hashlib.sha256(geometry).hexdigest(),
@@ -142,6 +171,9 @@ def smoke(env, wrapped):
 
 
 def evaluate(args, env, wrapped, runner):
+    if args.suite == "curriculum" or (args.suite is None and args.stage in LESSONS):
+        from .evaluation import evaluate_curriculum
+        return evaluate_curriculum(args, env, wrapped, runner)
     import torch
     from .task import command, heading_rate
     policy = runner.get_inference_policy(device=env.device)
@@ -164,9 +196,14 @@ def evaluate(args, env, wrapped, runner):
             with torch.inference_mode():
                 actions = policy(obs)
                 robot = env.scene["robot"]
-                errors = torch.stack((robot.data.root_link_lin_vel_b[:, 0] - speed,
+                vx, vy = robot.data.root_link_lin_vel_b[:, 0], robot.data.root_link_lin_vel_b[:, 1]
+                if args.stage in LESSONS:
+                    from .recovery import tangent_velocity, upright_gate
+                    vx, vy = tangent_velocity(env)
+                    alive &= upright_gate(env) > 0.5
+                errors = torch.stack((vx - speed,
                                       heading_rate(env) - yaw,
-                                      robot.data.root_link_lin_vel_b[:, 1]), dim=1)
+                                      vy), dim=1)
                 if step * env.step_dt >= 3.0:
                     error_sums += errors.square() * alive[:, None]
                     counts += alive

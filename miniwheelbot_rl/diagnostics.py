@@ -73,6 +73,8 @@ def write_outputs(directory, rows, report, settings):
     fields = ["time_s", "command_m_s", "command_rad_s", "forward_m_s", "heading_rad_s"]
     fields += [f"{motor}_{suffix}" for motor in ("flywheel", "rolling")
                for suffix in ("raw", "action", "target_rad_s", "actual_rad_s", "torque_Nm")]
+    if rows and "tilt_deg" in rows[0]:
+        fields += ["tilt_deg", "height_m", "recovering", "recoveries"]
     with (directory / "trace.csv").open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
@@ -93,6 +95,10 @@ def write_outputs(directory, rows, report, settings):
                            "归一化动作", (-1, 1)))
     plots.append(chart(rows, "机体前进速度", (("command_m_s", "指令"), ("forward_m_s", "实际")), "m/s"))
     plots.append(chart(rows, "水平航向变化率", (("command_rad_s", "指令"), ("heading_rad_s", "实际")), "rad/s"))
+    if rows and "tilt_deg" in rows[0]:
+        plots.append(chart(rows, "起身：机体倾斜角", (("tilt_deg", "相对竖直方向"),), "deg", (20,)))
+        plots.append(chart(rows, "起身：离地高度", (("height_m", "地面法向高度"),), "m", (0.30,)))
+        plots.append(chart(rows, "恢复状态", (("recovering", "正在恢复"), ("recoveries", "累计成功")), ""))
     status = (f'在 {report["simulated_duration_s"]:.2f} 秒发生回合终止，已停止采样。'
               if report["terminated_early"] else "已完成指定时长。")
     table = []
@@ -119,6 +125,12 @@ td,th{padding:12px;text-align:left;border-bottom:1px solid #e2e8f0}code{overflow
     page += '<p>使用策略均值，不加入探索噪声。红色虚线表示限制；先看目标是否跳变，再看实际转速是否跟随、力矩是否持续限幅。'
     page += '统计同时给出含起步和 3 秒后的结果；过早终止时，短时间误差不能代表成功跟踪。</p>'
     page += '<p>均值有界的策略可能无需裁剪却仍长期贴近 ±1，请同时看动作贴边比例和力矩换向情况。</p>'
+    if "recovery" in report:
+        r = report["recovery"]
+        page += (f'<p>起身次数：{r["successes"]} / {r["attempts"]}；'
+                 f'结束时仍在恢复：{"是" if r["recovering_at_end"] else "否"}。'
+                 '前进速度按地面切向计算；起身过程的全程误差不代表站稳后的跟踪误差，'
+                 '请用 curriculum 评估检查恢复后继续跟踪。</p>')
     page += '<table><tr><th>时段</th><th>电机</th><th>动作被裁剪比例</th><th>|动作| ≥0.99 比例</th><th>力矩 ≥99% 上限比例</th><th>转速 RMSE / rad/s</th></tr>'
     page += ''.join(table) + '</table><div class="plots">' + ''.join(plots) + '</div>'
     page += '<p>每个控制周期末采样（100 Hz 默认配置）：目标为刚执行的指令，实际转速和力矩为周期末读数。'
@@ -159,6 +171,13 @@ def diagnose(args, env, wrapped, runner, *, heading_fn=None):
             row = {"time_s": elapsed, "command_m_s": args.speed, "command_rad_s": args.turn,
                    "forward_m_s": float(robot.data.root_link_lin_vel_b[0, 0]),
                    "heading_rad_s": float(heading_fn(env)[0])}
+            if hasattr(env, "_recovery"):
+                from .recovery import tangent_velocity, ground_height, state
+                row["forward_m_s"] = float(tangent_velocity(env)[0][0])
+                row.update(tilt_deg=math.degrees(math.acos(max(-1, min(1,
+                    float(-robot.data.projected_gravity_b[0, 2]))))),
+                    height_m=float(ground_height(env)[0]),
+                    recovering=float(state(env).active[0]), recoveries=float(state(env).successes[0]))
             for i, motor in enumerate(("flywheel", "rolling")):
                 row.update({f"{motor}_raw": float(raw[0, i]),
                             f"{motor}_action": float(action[0, i]),
@@ -173,6 +192,10 @@ def diagnose(args, env, wrapped, runner, *, heading_fn=None):
               "settings": manifest["settings"], "step_dt_s": env.step_dt,
               "requested_duration_s": args.duration, "simulated_duration_s": elapsed,
               "terminated_early": terminated, "sampling": "control_endpoint; auto-reset states excluded"}
+    if hasattr(env, "_recovery"):
+        from .recovery import snapshot
+        report["recovery"] = snapshot(env)
+        report["stage"] = args.stage
     write_outputs(args.diagnostic_dir, rows, report, settings)
     print(f"Diagnostic report: {(args.diagnostic_dir / 'report.html').resolve()}")
     print(f"Terminated early: {terminated}; recorded {len(rows)} samples")

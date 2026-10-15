@@ -25,6 +25,7 @@ from mjlab.viewer import ViewerConfig
 from .model import make_spec, MODEL
 from .settings import Settings, STAGES
 from .policy_config import POLICY_VERSION, distribution_config
+from .curriculum import LESSONS
 
 
 def command(env):
@@ -56,6 +57,11 @@ def tracking(env, channel: str, sigma: float):
     cmd = command(env)
     actual, target = ((robot.data.root_link_lin_vel_b[:, 0], cmd[:, 0])
                       if channel == "forward" else (heading_rate(env), cmd[:, 1]))
+    if "recovery_timeout" in env.cfg.terminations:
+        from .recovery import upright_gate, tangent_velocity
+        upright = upright_gate(env)
+        if channel == "forward":
+            actual = tangent_velocity(env)[0]
     return upright * torch.exp(-((actual - target) / sigma).square())
 
 
@@ -64,20 +70,30 @@ def upright_reward(env):
 
 
 def lateral_penalty(env):
+    if "recovery_timeout" in env.cfg.terminations:
+        from .recovery import upright_gate, tangent_velocity
+        return upright_gate(env) * tangent_velocity(env)[1].square()
     return env.scene["robot"].data.root_link_lin_vel_b[:, 1].square()
 
 
 def wobble_penalty(env):
-    return env.scene["robot"].data.root_link_ang_vel_b[:, :2].square().sum(dim=1)
+    return recovery_regularization(env) * env.scene["robot"].data.root_link_ang_vel_b[:, :2].square().sum(dim=1)
+
+
+def recovery_regularization(env):
+    if "recovery_timeout" in env.cfg.terminations:
+        from .recovery import upright_gate
+        return 0.2 + 0.8 * upright_gate(env)
+    return 1.0
 
 
 def action_rate_penalty(env):
-    return (env.action_manager.action.clamp(-1, 1)
+    return recovery_regularization(env) * (env.action_manager.action.clamp(-1, 1)
             - env.action_manager.prev_action.clamp(-1, 1)).square().sum(dim=1)
 
 
 def torque_penalty(env):
-    return env.scene["robot"].data.actuator_force.square().sum(dim=1)
+    return recovery_regularization(env) * env.scene["robot"].data.actuator_force.square().sum(dim=1)
 
 
 def overspeed_penalty(env, settings: Settings):
@@ -90,7 +106,8 @@ def failure_penalty(env):
 
 def make_env_cfg(num_envs: int = 256, stage: str = "warmup", *,
                  settings: Settings = Settings(), play: bool = False,
-                 randomize: bool = False, model_path=MODEL) -> ManagerBasedRlEnvCfg:
+                 randomize: bool = False, model_path=MODEL,
+                 start_pose: str = "random") -> ManagerBasedRlEnvCfg:
     max_speed, max_yaw = STAGES[stage]
     robot = EntityCfg(
         spec_fn=partial(make_spec, settings, model_path),
@@ -135,7 +152,7 @@ def make_env_cfg(num_envs: int = 256, stage: str = "warmup", *,
             # although its public name is actuator_names.
             actuator_names=(joint,), scale=limit, offset=0.0,
             use_default_offset=False, clip={".*": (-limit, limit)})
-    return ManagerBasedRlEnvCfg(
+    cfg = ManagerBasedRlEnvCfg(
         scene=SceneCfg(num_envs=num_envs, env_spacing=4.0, entities={"robot": robot},
                        terrain=TerrainEntityCfg(terrain_type="plane")),
         observations={"actor": ObservationGroupCfg(terms=terms, enable_corruption=False),
@@ -176,6 +193,46 @@ def make_env_cfg(num_envs: int = 256, stage: str = "warmup", *,
                                           ls_iterations=10, cone="elliptic")),
         decimation=settings.decimation, episode_length_s=settings.episode_seconds,
     )
+    if stage in LESSONS:
+        from mjlab.managers.metrics_manager import MetricsTermCfg
+        from . import recovery
+        from .terrain import terrain_cfg
+        lesson = LESSONS[stage]
+        cfg.scene.terrain = terrain_cfg(lesson)
+        # This reset owns both root pose and wheel angles so support geometry agrees.
+        cfg.events.pop("reset_wheels")
+        cfg.events["reset_root"] = EventTermCfg(func=recovery.reset_robot, mode="reset",
+            params={"lesson": lesson, "settings": settings, "model_path": model_path,
+                    "start_pose": start_pose})
+        if lesson.push and not play:
+            cfg.events["push"] = EventTermCfg(func=mdp.push_by_setting_velocity, mode="interval",
+                interval_range_s=(7.0, 10.0), params={"asset_cfg": SceneEntityCfg("robot"),
+                    "velocity_range": {"x": (-0.2, 0.2), "y": (-0.2, 0.2),
+                        "roll": (-lesson.push, lesson.push), "pitch": (-lesson.push, lesson.push)}})
+        cfg.terminations = {
+            "recovery_timeout": TerminationTermCfg(func=recovery.recovery_timeout,
+                                                     params={"lesson": lesson}),
+            "invalid_state": TerminationTermCfg(func=recovery.invalid_state),
+            "time_out": TerminationTermCfg(func=mdp.time_out, time_out=True),
+        }
+        if lesson.slope_degrees:
+            cfg.terminations["patch_boundary"] = TerminationTermCfg(func=recovery.out_of_patch)
+        cfg.rewards["upright"] = RewardTermCfg(func=recovery.posture_reward, weight=4.0)
+        cfg.rewards["new_fall"] = RewardTermCfg(func=recovery.fall_cost, weight=-2.0)
+        # No repeatable get-up bonus: stable tracking is the sustained incentive.
+        for name in ("attempts", "successes", "success_fraction", "mean_recovery_seconds",
+                     "resumed_count", "resumed_forward_rmse", "resumed_yaw_rmse"):
+            cfg.metrics[f"recovery/{name}"] = MetricsTermCfg(func=recovery.recovery_metric,
+                params={"name": name}, reduce="last")
+        for name in ("active", "slope_degrees"):
+            cfg.metrics[f"recovery/{name}"] = MetricsTermCfg(func=recovery.recovery_metric,
+                params={"name": name})
+        for channel in ("forward", "yaw"):
+            cfg.metrics[f"tracking/{channel}_mae"] = MetricsTermCfg(func=recovery.tracking_error,
+                params={"channel": channel})
+    elif start_pose != "random":
+        raise ValueError("--start-pose requires a recovery curriculum stage")
+    return cfg
 
 
 def make_agent_cfg(iterations: int = 3000, *, policy_version: str = POLICY_VERSION):

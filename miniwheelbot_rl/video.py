@@ -41,6 +41,11 @@ def record_video(args, env, wrapped, runner):
               "seed": args.seed, "requested_duration_s": args.duration,
               "simulated_duration_s": elapsed, "terminated_early": terminated,
               "fps": fps, "frames": frames, "video": str(args.video)}
+    if hasattr(env, "_recovery"):
+        from .recovery import snapshot
+        report["recovery"] = snapshot(env)
+        report["stage"] = args.stage
+        report["start_pose"] = args.start_pose or "upright"
     args.video.with_suffix(".json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"Video saved: {args.video.resolve()}")
     if terminated:

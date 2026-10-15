@@ -11,6 +11,7 @@ FILES = (
     "requirements-mjlab.txt",
     "package_cloud.py",
     "discuss/直接强化学习训练.md",
+    "discuss/起身恢复与坡地课程.md",
     "wheelbot/nested_model.xml",
     "tests/test_rl_velocity_model.py",
     "tests/test_rl_heading_rate.py",
@@ -18,6 +19,7 @@ FILES = (
     "tests/test_rl_video.py",
     "tests/test_rl_diagnostics.py",
     "tests/test_rl_distribution.py",
+    "tests/test_rl_recovery.py",
 )
 
 
