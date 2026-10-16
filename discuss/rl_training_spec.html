@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="GyroRoll 嵌套正交轮机器人：15 维观测、2 维速度动作、9 项奖励及 PPO 训练配置的源码核对说明。">
+<meta name="description" content="GyroRoll 嵌套正交轮机器人：15 维观测、2 维速度动作、10 项奖励及 PPO 训练配置的源码核对说明。">
 <title>GyroRoll · 强化学习训练说明</title>
 <style>
 :root{--bg:#f5f5f0;--paper:#fff;--ink:#172d32;--muted:#5e7277;--line:#d9e2df;--teal:#087b78;--soft:#eaf5f2;--orange:#a95620;--warm:#fff3e7;--mono:Consolas,"SFMono-Regular",monospace}
@@ -61,7 +61,8 @@
 <tr><td><code>yaw</code></td><td class="math">U exp[−((ψ̇ − ψ̇*)/0.25)²]</td><td class="weight">+2.0</td><td>跟踪真实朝向角速度，误差尺度 0.25 rad/s。</td></tr>
 <tr><td><code>upright</code></td><td class="math">U</td><td class="weight">+0.5</td><td>鼓励直立；跟踪奖励本身也受 U 调制。</td></tr>
 <tr><td><code>lateral</code></td><td class="math">v<sub>y</sub>²</td><td class="weight neg">−0.5</td><td>抑制机身侧向速度，目标恒为 0。</td></tr>
-<tr><td><code>wobble</code></td><td class="math">ω<sub>x</sub>² + ω<sub>y</sub>²</td><td class="weight neg">−0.01</td><td>抑制横滚与俯仰角速度；这里没有观测中的 0.25 缩放。</td></tr>
+<tr><td><code>roll</code></td><td class="math">g · ω<sub>x</sub>²</td><td class="weight neg">−0.05</td><td>独立抑制机身横滚角速度；不使用观测中的 0.25 缩放。普通阶段 g=1，恢复课程 g=0.2+0.8U，U 为直立门控。</td></tr>
+<tr><td><code>pitch</code></td><td class="math">g · ω<sub>y</sub>²</td><td class="weight neg">−0.01</td><td>独立抑制机身俯仰角速度；与 roll 分别设权重、记录曲线。roll 权重已提高为原来的 5 倍，pitch 沿用原权重。</td></tr>
 <tr><td><code>action_rate</code></td><td class="math">Σ<sub>i</sub>(clip(a<sub>i,t</sub>) − clip(a<sub>i,t−1</sub>))²</td><td class="weight neg">−0.02</td><td>惩罚相邻动作跳变；clip 范围为 [−1,1]。没有除以 Δt，不是物理角加速度。</td></tr>
 <tr><td><code>torque</code></td><td class="math">τ<sub>f</sub>² + τ<sub>d</sub>²</td><td class="weight neg">−0.005</td><td>使用实际 actuator_force；gear=1 时对应两路电机力矩。不是目标转速的平方。</td></tr>
 <tr><td><code>overspeed</code></td><td class="math">Σ<sub>i</sub> max(|Ω<sub>i</sub>|/Ω<sub>max,i</sub> − 1, 0)²</td><td class="weight neg">−1.0</td><td>只惩罚超过各自上限的实际轮速；上限为 250、35 rad/s。</td></tr>
@@ -78,7 +79,7 @@
 </section>
 
 <section id="episodes"><div class="eyebrow">05 / COMMANDS &amp; EPISODES</div><h2>指令范围、初始状态与终止条件</h2>
-<div class="table-wrap"><table><thead><tr><th>手动阶段</th><th>前向速度指令 m/s</th><th>朝向角速度指令 rad/s</th><th>保持不变的内容</th></tr></thead><tbody><tr><td><code>warmup</code></td><td>[−0.5, +0.5]</td><td>[−0.20, +0.20]</td><td rowspan="3">15 维观测、2 维动作、9 项奖励及其权重。阶段切换扩大指令范围，不自动更换奖励。</td></tr><tr><td><code>tracking</code></td><td>[−1.2, +1.2]</td><td>[−0.40, +0.40]</td></tr><tr><td><code>full</code></td><td>[−2.0, +2.0]</td><td>[−0.60, +0.60]</td></tr></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>手动阶段</th><th>前向速度指令 m/s</th><th>朝向角速度指令 rad/s</th><th>保持不变的内容</th></tr></thead><tbody><tr><td><code>warmup</code></td><td>[−0.5, +0.5]</td><td>[−0.20, +0.20]</td><td rowspan="3">15 维观测、2 维动作、10 项奖励及其权重。阶段切换扩大指令范围，不自动更换奖励。</td></tr><tr><td><code>tracking</code></td><td>[−1.2, +1.2]</td><td>[−0.40, +0.40]</td></tr><tr><td><code>full</code></td><td>[−2.0, +2.0]</td><td>[−0.60, +0.60]</td></tr></tbody></table></div>
 <p>训练每 3–6 秒重新采样指令，静止指令采样比例为 10%，横向速度指令恒为零。不启用目标航向控制（heading_command=False）；没有显式速度指令斜坡。阶段由启动参数手动选择，不按训练成绩自动晋级。</p>
 <div class="grid"><div class="card"><h3>每回合重置</h3><ul><li>根节点高度 0.370 m；横滚、俯仰各加 ±0.025 rad 扰动。</li><li>初始偏航在约 [−π, π] 采样。</li><li>两关节角度在约 [−π, π] 采样。</li><li>轮速从零附近启动，各加 ±1 rad/s 扰动；没有传统控制器的 20 rad/s 预旋。</li><li>默认根节点初始速度为零，无额外重置速度随机范围。</li></ul></div><div class="card"><h3>何时结束回合</h3><ul><li><strong>姿态失败：</strong>α=acos(−g<sub>z</sub>) &gt; 0.70 rad，约 40.1°。这是总倾角，不是分别检查横滚/俯仰。</li><li><strong>高度失败：</strong>根节点世界高度 &lt; 0.185 m。</li><li><strong>正常超时：</strong>训练回合达到 20 s；不产生 failure 惩罚。</li></ul><p class="small">训练时终止后自动重置。独立评估会保留首次失败记录，不因重置而恢复该样本的通过资格。</p></div></div>
 <div class="note warm"><strong>可选 --randomize：</strong>仅训练模式启用。启动时随机化指定轮胎/轮圈几何的摩擦参数，范围 1.1–1.9（shared_random=True）；每隔 5–8 秒向世界坐标系根节点速度加入扰动，x/y 各 ±0.1 m/s、横滚/俯仰角速度分量各 ±0.15 rad/s。当前未随机化质量、电机参数或执行延迟。play / evaluate / video 使用 play=True，不启用这些训练扰动。</div>

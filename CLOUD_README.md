@@ -1,5 +1,9 @@
 # GyroRoll 云端训练 / MJLab 1.3.0
 
+当前结构为宽体封闭飞轮舱、上方设备舱和顶部载物托盘，整机高度 580 mm，主机身厚 160 mm、宽 220 mm，托盘可用面积 156 × 216 mm。滚轮轴心离地 120 mm、飞轮轴心离地 373 mm，两轮上/下沿净距保持 50 mm。滚轮胎面加宽至 24 mm，轮圈宽 20 mm，双叉间距同步加宽；滚轮沿用 312 g 概念质量预算，惯量按新宽度更新。空载仿真质量预算为 1.465 kg，重心离地约 349.0 mm；质量分布、惯量和碰撞结构已经更新，需要针对新结构训练。当前未添加货物质量，载物能力及载物策略尚未验证。
+
+旧 checkpoint 的续训/回放仍恢复其保存的 `geometry.xml`；训练当前新结构请先不带 `--checkpoint` 运行 `train --stage warmup`。不要覆盖旧 checkpoint 的几何文件或哈希。后续起身课程从新结构的 warmup checkpoint 续训。XML 包含所有外观网格和材质，无需额外图片资源。当前 XML 默认以 Cover Removed 方式显示，隐藏正面盖板和饰面，飞轮正面保留一条白色刻度；隐藏盖板的质量和碰撞仍然生效。旧 checkpoint 的几何快照不会自动采用新外观。
+
 上传 `miniwheelbot_mjlab130_cloud.zip` 到云端并解压。所有命令在解压后的 `miniwheelbot_mjlab130/` 目录执行。包内包含当前 24 cm 开放滚动轮模型、两维轮速动作 PPO 任务、评估与浏览器回放入口，不包含已训练策略。
 
 新增单策略课程：`rise_tilt → rise → recover → slope3 → slope6 → slope10 → mixed`，按“先起身，再坡地”的顺序续训。课程设置、云端训练命令、起身录像和分场景验收见 [起身恢复与坡地课程](discuss/起身恢复与坡地课程.md)。现有有界策略可以直接作为第一阶段的 checkpoint。
@@ -40,12 +44,12 @@ python -m miniwheelbot_rl train --num-envs 4 --iterations 2 --stage warmup --log
 ## 3. 正式训练与续训
 
 ```bash
-python -m miniwheelbot_rl train --stage warmup --num-envs 256 --iterations 3000
+python -m miniwheelbot_rl train --stage warmup --num-envs 256 --iterations 3000 --log-root logs/rsl_rl/cargo_roll005
 ```
 
 策略从随机初始化直接学习，不使用旧控制器、MPC 专家或模仿数据。输出顺序固定为 `[飞轮目标角速度, 滚轮目标角速度]`，两路均支持正反转，目标范围分别为 ±250 rad/s、±35 rad/s；有限力矩的速度伺服执行动作。指令是 `[前进/后退速度, 转向角速度]`。
 
-当前新训练使用 `bounded_mean_gaussian_v1`：策略均值经 tanh 限制在 ±1；两个通道各自的探索标准差初始为 0.1，使用 sigmoid 参数化限制在 0.02～0.2；熵系数为 0。训练仍加入高斯探索噪声，采样后仍可能越界，由执行端裁剪；回放/评估使用同一个 tanh 均值。奖励、转速倍率和电机力矩上限沿用原设置。
+当前新训练使用 `bounded_mean_gaussian_v1`：策略均值经 tanh 限制在 ±1；两个通道各自的探索标准差初始为 0.1，使用 sigmoid 参数化限制在 0.02～0.2；熵系数为 0。训练仍加入高斯探索噪声，采样后仍可能越界，由执行端裁剪；回放/评估使用同一个 tanh 均值。当前横滚角速度惩罚权重已提高到 -0.05；俯仰为 -0.01，转速倍率和电机力矩上限沿用原设置。
 
 第一轮建议先从头训练 500 次更新检查数值和回放，再决定是否继续：
 
@@ -82,6 +86,8 @@ MUJOCO_GL=egl python -m miniwheelbot_rl video --checkpoint logs/rsl_rl/nested_ve
 ```
 
 把 checkpoint 路径换成实际文件，并保留旁边的 `task.json`、`geometry.xml` 和 `agent.json`。默认单环境、960×544、30 fps、跟随相机，不启动网页服务器。`--speed` 单位为 m/s，`--turn` 单位为 rad/s；warmup 建议先看 0.5 m/s 直行，后续可测试 `--speed 0.8 --turn 0.3`。发生跌倒等回合终止时录像提前停止，不把自动重置后的动作拼成连续成功运动；同名 JSON 记录实际时长与终止状态。依赖已安装后，录像本身不需要外网或 TensorBoard。Linux 无窗口渲染需要 NVIDIA EGL 支持。
+
+横滚与俯仰惩罚分别记录为 `Episode_Reward/roll` 和 `Episode_Reward/pitch`，当前 `roll` 权重为 -0.05（原来的 5 倍），`pitch` 权重为 -0.01。恢复课程仍按姿态减弱两项惩罚。更新代码后启动或续训时生效，正在运行的训练需要重启才能采用新代码。
 
 训练曲线在云端启动：
 

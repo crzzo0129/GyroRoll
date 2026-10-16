@@ -76,8 +76,12 @@ def lateral_penalty(env):
     return env.scene["robot"].data.root_link_lin_vel_b[:, 1].square()
 
 
-def wobble_penalty(env):
-    return recovery_regularization(env) * env.scene["robot"].data.root_link_ang_vel_b[:, :2].square().sum(dim=1)
+def roll_penalty(env):
+    return recovery_regularization(env) * env.scene["robot"].data.root_link_ang_vel_b[:, 0].square()
+
+
+def pitch_penalty(env):
+    return recovery_regularization(env) * env.scene["robot"].data.root_link_ang_vel_b[:, 1].square()
 
 
 def recovery_regularization(env):
@@ -172,7 +176,8 @@ def make_env_cfg(num_envs: int = 256, stage: str = "warmup", *,
                                  params={"channel": "yaw", "sigma": 0.25}),
             "upright": RewardTermCfg(func=upright_reward, weight=0.5),
             "lateral": RewardTermCfg(func=lateral_penalty, weight=-0.5),
-            "wobble": RewardTermCfg(func=wobble_penalty, weight=-0.01),
+            "roll": RewardTermCfg(func=roll_penalty, weight=-0.05),
+            "pitch": RewardTermCfg(func=pitch_penalty, weight=-0.01),
             "action_rate": RewardTermCfg(func=action_rate_penalty, weight=-0.02),
             "torque": RewardTermCfg(func=torque_penalty, weight=-0.005),
             "overspeed": RewardTermCfg(func=overspeed_penalty, weight=-1.0,
