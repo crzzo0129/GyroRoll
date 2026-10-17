@@ -1,0 +1,46 @@
+[
+  {
+    "physics_timestep": 0.002,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0,
+    "minimum_tilt_deg": 0.11011025215663986,
+    "recovered_at_s": 4.13,
+    "max_stable_seconds": 11.859999999999792,
+    "stable_at_end": true,
+    "final_tilt_deg": 0.6691991305722608,
+    "wall_seconds": 24.754975599993486
+  },
+  {
+    "physics_timestep": 0.002,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0,
+    "minimum_tilt_deg": 0.06472463750891737,
+    "recovered_at_s": 4.2,
+    "max_stable_seconds": 11.789999999999793,
+    "stable_at_end": true,
+    "final_tilt_deg": 0.883608355106125,
+    "wall_seconds": 23.0217325000267
+  },
+  {
+    "physics_timestep": 0.001,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0,
+    "minimum_tilt_deg": 0.7755583247027564,
+    "recovered_at_s": 4.16,
+    "max_stable_seconds": 11.829999999999792,
+    "stable_at_end": true,
+    "final_tilt_deg": 1.2296358044460736,
+    "wall_seconds": 52.774249400012195
+  },
+  {
+    "physics_timestep": 0.001,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0,
+    "minimum_tilt_deg": 0.28701373757267323,
+    "recovered_at_s": 4.12,
+    "max_stable_seconds": 11.869999999999791,
+    "stable_at_end": true,
+    "final_tilt_deg": 0.5787889941880374,
+    "wall_seconds": 47.03076200000942
+  }
+]

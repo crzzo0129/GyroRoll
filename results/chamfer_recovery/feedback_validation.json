@@ -1,0 +1,1730 @@
+[
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.002,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 2.0000000000000013,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.46000000000000024,
+    "best_capture_cost": 0.05468064547001289,
+    "minimum_tilt_deg": 3.9124105699611698,
+    "final_tilt_deg": 76.5555736357342,
+    "max_wheel_speeds": [
+      248.18946362674316,
+      35.06099352454667
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.009476389891575197,
+    "fell_after_recovery": false,
+    "objective": 6.073899597545568,
+    "initial": {
+      "qpos": [
+        2.6274498212806384e-05,
+        0.024681915553805278,
+        0.0976746850829931,
+        0.7850125213758943,
+        0.6194798912595499,
+        4.5723040263914316e-05,
+        5.930868355065065e-05,
+        -0.0001942890033368243,
+        8.465895832257995e-08
+      ],
+      "qvel": [
+        1.861442205732785e-05,
+        2.8791108571602595e-06,
+        1.0485428395726049e-05,
+        -2.946780472316082e-05,
+        4.554983272508828e-05,
+        -0.00018591052359159205,
+        -5.212254792972945e-06,
+        2.2422043188488975e-05
+      ]
+    },
+    "feedback_scale": 0.25
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.002,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 2.0000000000000013,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.2606001924812695,
+    "minimum_tilt_deg": 6.470215914456107,
+    "final_tilt_deg": 76.55579215666224,
+    "max_wheel_speeds": [
+      247.73022064019432,
+      34.440851452479244
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.00952743886442356,
+    "fell_after_recovery": false,
+    "objective": 6.468904135536782,
+    "initial": {
+      "qpos": [
+        2.6274498212806384e-05,
+        0.024681915553805278,
+        0.0976746850829931,
+        0.7850125213758943,
+        0.6194798912595499,
+        4.5723040263914316e-05,
+        5.930868355065065e-05,
+        -0.0001942890033368243,
+        8.465895832257995e-08
+      ],
+      "qvel": [
+        1.861442205732785e-05,
+        2.8791108571602595e-06,
+        1.0485428395726049e-05,
+        -2.946780472316082e-05,
+        4.554983272508828e-05,
+        -0.00018591052359159205,
+        -5.212254792972945e-06,
+        2.2422043188488975e-05
+      ]
+    },
+    "feedback_scale": 0.5
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.002,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 2.0000000000000013,
+    "recovered_at_s": 4.08,
+    "within_5s": true,
+    "stable_at_end": true,
+    "final_stable_seconds": 6.909999999999897,
+    "max_stable_seconds": 6.909999999999897,
+    "best_capture_cost": 0.0019633971704196254,
+    "minimum_tilt_deg": 0.9649284391705402,
+    "final_tilt_deg": 1.9610380547410775,
+    "max_wheel_speeds": [
+      247.60818919394768,
+      35.10206873110595
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.009473293091579803,
+    "fell_after_recovery": false,
+    "objective": 1.017352151916436,
+    "initial": {
+      "qpos": [
+        2.6274498212806384e-05,
+        0.024681915553805278,
+        0.0976746850829931,
+        0.7850125213758943,
+        0.6194798912595499,
+        4.5723040263914316e-05,
+        5.930868355065065e-05,
+        -0.0001942890033368243,
+        8.465895832257995e-08
+      ],
+      "qvel": [
+        1.861442205732785e-05,
+        2.8791108571602595e-06,
+        1.0485428395726049e-05,
+        -2.946780472316082e-05,
+        4.554983272508828e-05,
+        -0.00018591052359159205,
+        -5.212254792972945e-06,
+        2.2422043188488975e-05
+      ]
+    },
+    "feedback_scale": 1.0
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.002,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 2.0000000000000013,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853236160358044,
+    "minimum_tilt_deg": 74.83148150016608,
+    "final_tilt_deg": 76.55629545154409,
+    "max_wheel_speeds": [
+      247.78698944091084,
+      34.15713415822714
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.004723057329227792,
+    "fell_after_recovery": false,
+    "objective": 6.542317072742478,
+    "initial": {
+      "qpos": [
+        2.6274498212806384e-05,
+        0.024681915553805278,
+        0.0976746850829931,
+        0.7850125213758943,
+        0.6194798912595499,
+        4.5723040263914316e-05,
+        5.930868355065065e-05,
+        -0.0001942890033368243,
+        8.465895832257995e-08
+      ],
+      "qvel": [
+        1.861442205732785e-05,
+        2.8791108571602595e-06,
+        1.0485428395726049e-05,
+        -2.946780472316082e-05,
+        4.554983272508828e-05,
+        -0.00018591052359159205,
+        -5.212254792972945e-06,
+        2.2422043188488975e-05
+      ]
+    },
+    "feedback_scale": 2.0
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.002,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 2.0000000000000013,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853236160358044,
+    "minimum_tilt_deg": 72.46417838378495,
+    "final_tilt_deg": 76.55630510131071,
+    "max_wheel_speeds": [
+      248.60890289259848,
+      34.222043625460586
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.004588567980122468,
+    "fell_after_recovery": false,
+    "objective": 6.54888090140427,
+    "initial": {
+      "qpos": [
+        2.6274498212807797e-05,
+        -0.02468191555380525,
+        0.0976746850829931,
+        0.7850125213758943,
+        -0.6194798912595499,
+        4.5723040263914025e-05,
+        -5.9308683550651495e-05,
+        -0.0001942890033368184,
+        -8.4658958342976e-08
+      ],
+      "qvel": [
+        1.8614422057324252e-05,
+        -2.87911085716983e-06,
+        1.048542839575951e-05,
+        2.9467804723249152e-05,
+        4.5549832725082656e-05,
+        0.00018591052359159636,
+        -5.212254792984149e-06,
+        -2.2422043188568264e-05
+      ]
+    },
+    "feedback_scale": 0.25
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.002,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 2.0000000000000013,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853236160358044,
+    "minimum_tilt_deg": 73.54344202348253,
+    "final_tilt_deg": 76.55541056070032,
+    "max_wheel_speeds": [
+      247.98007926623885,
+      34.82604021953826
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.007577487292055735,
+    "fell_after_recovery": false,
+    "objective": 6.623716598644046,
+    "initial": {
+      "qpos": [
+        2.6274498212807797e-05,
+        -0.02468191555380525,
+        0.0976746850829931,
+        0.7850125213758943,
+        -0.6194798912595499,
+        4.5723040263914025e-05,
+        -5.9308683550651495e-05,
+        -0.0001942890033368184,
+        -8.4658958342976e-08
+      ],
+      "qvel": [
+        1.8614422057324252e-05,
+        -2.87911085716983e-06,
+        1.048542839575951e-05,
+        2.9467804723249152e-05,
+        4.5549832725082656e-05,
+        0.00018591052359159636,
+        -5.212254792984149e-06,
+        -2.2422043188568264e-05
+      ]
+    },
+    "feedback_scale": 0.5
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.002,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 2.0000000000000013,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7714408107981785,
+    "minimum_tilt_deg": 67.68217881500944,
+    "final_tilt_deg": 76.55623562528555,
+    "max_wheel_speeds": [
+      249.5925362850386,
+      37.75702139584258
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.007422089048540409,
+    "fell_after_recovery": false,
+    "objective": 8.807759645926637,
+    "initial": {
+      "qpos": [
+        2.6274498212807797e-05,
+        -0.02468191555380525,
+        0.0976746850829931,
+        0.7850125213758943,
+        -0.6194798912595499,
+        4.5723040263914025e-05,
+        -5.9308683550651495e-05,
+        -0.0001942890033368184,
+        -8.4658958342976e-08
+      ],
+      "qvel": [
+        1.8614422057324252e-05,
+        -2.87911085716983e-06,
+        1.048542839575951e-05,
+        2.9467804723249152e-05,
+        4.5549832725082656e-05,
+        0.00018591052359159636,
+        -5.212254792984149e-06,
+        -2.2422043188568264e-05
+      ]
+    },
+    "feedback_scale": 1.0
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.002,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 2.0000000000000013,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853236160358044,
+    "minimum_tilt_deg": 67.8359523149285,
+    "final_tilt_deg": 76.5554609462596,
+    "max_wheel_speeds": [
+      248.77612996683663,
+      37.9130874860903
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.006003821691930307,
+    "fell_after_recovery": false,
+    "objective": 7.477411208919613,
+    "initial": {
+      "qpos": [
+        2.6274498212807797e-05,
+        -0.02468191555380525,
+        0.0976746850829931,
+        0.7850125213758943,
+        -0.6194798912595499,
+        4.5723040263914025e-05,
+        -5.9308683550651495e-05,
+        -0.0001942890033368184,
+        -8.4658958342976e-08
+      ],
+      "qvel": [
+        1.8614422057324252e-05,
+        -2.87911085716983e-06,
+        1.048542839575951e-05,
+        2.9467804723249152e-05,
+        4.5549832725082656e-05,
+        0.00018591052359159636,
+        -5.212254792984149e-06,
+        -2.2422043188568264e-05
+      ]
+    },
+    "feedback_scale": 2.0
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.001,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998905,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853234421038442,
+    "minimum_tilt_deg": 73.14556894033277,
+    "final_tilt_deg": 76.55596550091423,
+    "max_wheel_speeds": [
+      248.52723068055138,
+      35.00691657817152
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.008640685434991809,
+    "fell_after_recovery": false,
+    "objective": 6.842425333677516,
+    "initial": {
+      "qpos": [
+        -3.69891785742934e-06,
+        0.024697577580127895,
+        0.09767468427819623,
+        0.7850125230360875,
+        0.6194798923797604,
+        2.423432812677885e-05,
+        3.20370841855193e-05,
+        -0.0002513851603087586,
+        -1.1485436263296434e-07
+      ],
+      "qvel": [
+        -4.669733668771496e-06,
+        -5.484290895630641e-07,
+        -2.0389854579247473e-06,
+        5.860485754630502e-06,
+        -8.346624419911296e-06,
+        4.3365585220816755e-05,
+        -8.774246577723322e-06,
+        3.2551907873231993e-06
+      ]
+    },
+    "feedback_scale": 0.25
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.001,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998905,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853234421038442,
+    "minimum_tilt_deg": 67.65939630700095,
+    "final_tilt_deg": 76.55546572360372,
+    "max_wheel_speeds": [
+      248.53112785713003,
+      35.81475073289223
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.00693469293711714,
+    "fell_after_recovery": false,
+    "objective": 7.060117874573856,
+    "initial": {
+      "qpos": [
+        -3.69891785742934e-06,
+        0.024697577580127895,
+        0.09767468427819623,
+        0.7850125230360875,
+        0.6194798923797604,
+        2.423432812677885e-05,
+        3.20370841855193e-05,
+        -0.0002513851603087586,
+        -1.1485436263296434e-07
+      ],
+      "qvel": [
+        -4.669733668771496e-06,
+        -5.484290895630641e-07,
+        -2.0389854579247473e-06,
+        5.860485754630502e-06,
+        -8.346624419911296e-06,
+        4.3365585220816755e-05,
+        -8.774246577723322e-06,
+        3.2551907873231993e-06
+      ]
+    },
+    "feedback_scale": 0.5
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.001,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998905,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853234421038442,
+    "minimum_tilt_deg": 73.26332704644994,
+    "final_tilt_deg": 76.55581186133715,
+    "max_wheel_speeds": [
+      248.0095877733797,
+      34.94824554457725
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.006178246414153995,
+    "fell_after_recovery": false,
+    "objective": 6.665675722968059,
+    "initial": {
+      "qpos": [
+        -3.69891785742934e-06,
+        0.024697577580127895,
+        0.09767468427819623,
+        0.7850125230360875,
+        0.6194798923797604,
+        2.423432812677885e-05,
+        3.20370841855193e-05,
+        -0.0002513851603087586,
+        -1.1485436263296434e-07
+      ],
+      "qvel": [
+        -4.669733668771496e-06,
+        -5.484290895630641e-07,
+        -2.0389854579247473e-06,
+        5.860485754630502e-06,
+        -8.346624419911296e-06,
+        4.3365585220816755e-05,
+        -8.774246577723322e-06,
+        3.2551907873231993e-06
+      ]
+    },
+    "feedback_scale": 1.0
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.001,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998905,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7695330264643336,
+    "minimum_tilt_deg": 74.6277767890852,
+    "final_tilt_deg": 76.55631314612536,
+    "max_wheel_speeds": [
+      247.8502497487719,
+      34.61981234803595
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.0048494547826257225,
+    "fell_after_recovery": false,
+    "objective": 6.306816063604867,
+    "initial": {
+      "qpos": [
+        -3.69891785742934e-06,
+        0.024697577580127895,
+        0.09767468427819623,
+        0.7850125230360875,
+        0.6194798923797604,
+        2.423432812677885e-05,
+        3.20370841855193e-05,
+        -0.0002513851603087586,
+        -1.1485436263296434e-07
+      ],
+      "qvel": [
+        -4.669733668771496e-06,
+        -5.484290895630641e-07,
+        -2.0389854579247473e-06,
+        5.860485754630502e-06,
+        -8.346624419911296e-06,
+        4.3365585220816755e-05,
+        -8.774246577723322e-06,
+        3.2551907873231993e-06
+      ]
+    },
+    "feedback_scale": 2.0
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.001,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998905,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853234421038442,
+    "minimum_tilt_deg": 70.87094143274764,
+    "final_tilt_deg": 76.55552403477984,
+    "max_wheel_speeds": [
+      248.83753565723768,
+      34.968914227133666
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.007151289032044643,
+    "fell_after_recovery": false,
+    "objective": 6.660978087912057,
+    "initial": {
+      "qpos": [
+        -3.6989178574286124e-06,
+        -0.0246975775801279,
+        0.09767468427819623,
+        0.7850125230360875,
+        -0.6194798923797604,
+        2.4234328126781692e-05,
+        -3.203708418551754e-05,
+        -0.0002513851603087568,
+        1.1485436261601397e-07
+      ],
+      "qvel": [
+        -4.669733668805992e-06,
+        5.484290895523087e-07,
+        -2.0389854578852193e-06,
+        -5.8604857545131646e-06,
+        -8.346624420009386e-06,
+        -4.336558522114805e-05,
+        -8.77424657767198e-06,
+        -3.255190787349115e-06
+      ]
+    },
+    "feedback_scale": 0.25
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.001,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998905,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853234421038442,
+    "minimum_tilt_deg": 71.79682147029922,
+    "final_tilt_deg": 76.55589107554283,
+    "max_wheel_speeds": [
+      248.71955406978515,
+      35.09018235311928
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.005929471187730382,
+    "fell_after_recovery": false,
+    "objective": 6.624073560791463,
+    "initial": {
+      "qpos": [
+        -3.6989178574286124e-06,
+        -0.0246975775801279,
+        0.09767468427819623,
+        0.7850125230360875,
+        -0.6194798923797604,
+        2.4234328126781692e-05,
+        -3.203708418551754e-05,
+        -0.0002513851603087568,
+        1.1485436261601397e-07
+      ],
+      "qvel": [
+        -4.669733668805992e-06,
+        5.484290895523087e-07,
+        -2.0389854578852193e-06,
+        -5.8604857545131646e-06,
+        -8.346624420009386e-06,
+        -4.336558522114805e-05,
+        -8.77424657767198e-06,
+        -3.255190787349115e-06
+      ]
+    },
+    "feedback_scale": 0.5
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.001,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998905,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853234421038442,
+    "minimum_tilt_deg": 70.77170065212096,
+    "final_tilt_deg": 76.55576203728553,
+    "max_wheel_speeds": [
+      248.34513686887718,
+      36.13736859440807
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.008105874188916572,
+    "fell_after_recovery": false,
+    "objective": 7.002159802849373,
+    "initial": {
+      "qpos": [
+        -3.6989178574286124e-06,
+        -0.0246975775801279,
+        0.09767468427819623,
+        0.7850125230360875,
+        -0.6194798923797604,
+        2.4234328126781692e-05,
+        -3.203708418551754e-05,
+        -0.0002513851603087568,
+        1.1485436261601397e-07
+      ],
+      "qvel": [
+        -4.669733668805992e-06,
+        5.484290895523087e-07,
+        -2.0389854578852193e-06,
+        -5.8604857545131646e-06,
+        -8.346624420009386e-06,
+        -4.336558522114805e-05,
+        -8.77424657767198e-06,
+        -3.255190787349115e-06
+      ]
+    },
+    "feedback_scale": 1.0
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.001,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998905,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7695330264635472,
+    "minimum_tilt_deg": 74.6277835262609,
+    "final_tilt_deg": 76.55631305994535,
+    "max_wheel_speeds": [
+      247.85024284152323,
+      34.61981234803594
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.004849454782598246,
+    "fell_after_recovery": false,
+    "objective": 6.306816092445368,
+    "initial": {
+      "qpos": [
+        -3.6989178574286124e-06,
+        -0.0246975775801279,
+        0.09767468427819623,
+        0.7850125230360875,
+        -0.6194798923797604,
+        2.4234328126781692e-05,
+        -3.203708418551754e-05,
+        -0.0002513851603087568,
+        1.1485436261601397e-07
+      ],
+      "qvel": [
+        -4.669733668805992e-06,
+        5.484290895523087e-07,
+        -2.0389854578852193e-06,
+        -5.8604857545131646e-06,
+        -8.346624420009386e-06,
+        -4.336558522114805e-05,
+        -8.77424657767198e-06,
+        -3.255190787349115e-06
+      ]
+    },
+    "feedback_scale": 2.0
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.0005,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998352,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853227621347376,
+    "minimum_tilt_deg": 71.35805266677978,
+    "final_tilt_deg": 76.5554671157097,
+    "max_wheel_speeds": [
+      248.65897452004378,
+      35.09801876013726
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.0072067353531948194,
+    "fell_after_recovery": false,
+    "objective": 6.684910474707447,
+    "initial": {
+      "qpos": [
+        2.0870825228750953e-05,
+        0.024716377480717224,
+        0.09767477875843873,
+        0.785012603164098,
+        0.6194797868091115,
+        5.036875493421536e-05,
+        6.380793211367756e-05,
+        -0.0002995973403273147,
+        5.37745021500494e-08
+      ],
+      "qvel": [
+        5.8199415963727916e-06,
+        9.121813979754395e-07,
+        3.3263128318570337e-06,
+        -9.315534279666891e-06,
+        1.4991502851112508e-05,
+        -5.8516974843029976e-05,
+        -4.20752391845639e-06,
+        4.962249239616891e-06
+      ]
+    },
+    "feedback_scale": 0.25
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.0005,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998352,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.6880469661017417,
+    "minimum_tilt_deg": 71.6180088797033,
+    "final_tilt_deg": 76.55546780247168,
+    "max_wheel_speeds": [
+      247.80270688802725,
+      35.505964518749465
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.003230107503750565,
+    "fell_after_recovery": false,
+    "objective": 6.521485394620202,
+    "initial": {
+      "qpos": [
+        2.0870825228750953e-05,
+        0.024716377480717224,
+        0.09767477875843873,
+        0.785012603164098,
+        0.6194797868091115,
+        5.036875493421536e-05,
+        6.380793211367756e-05,
+        -0.0002995973403273147,
+        5.37745021500494e-08
+      ],
+      "qvel": [
+        5.8199415963727916e-06,
+        9.121813979754395e-07,
+        3.3263128318570337e-06,
+        -9.315534279666891e-06,
+        1.4991502851112508e-05,
+        -5.8516974843029976e-05,
+        -4.20752391845639e-06,
+        4.962249239616891e-06
+      ]
+    },
+    "feedback_scale": 0.5
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.0005,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998352,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853227621347376,
+    "minimum_tilt_deg": 71.40777022896944,
+    "final_tilt_deg": 76.55547819464941,
+    "max_wheel_speeds": [
+      248.46243335175126,
+      35.4822536647143
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.0076749089630319695,
+    "fell_after_recovery": false,
+    "objective": 7.062437996969047,
+    "initial": {
+      "qpos": [
+        2.0870825228750953e-05,
+        0.024716377480717224,
+        0.09767477875843873,
+        0.785012603164098,
+        0.6194797868091115,
+        5.036875493421536e-05,
+        6.380793211367756e-05,
+        -0.0002995973403273147,
+        5.37745021500494e-08
+      ],
+      "qvel": [
+        5.8199415963727916e-06,
+        9.121813979754395e-07,
+        3.3263128318570337e-06,
+        -9.315534279666891e-06,
+        1.4991502851112508e-05,
+        -5.8516974843029976e-05,
+        -4.20752391845639e-06,
+        4.962249239616891e-06
+      ]
+    },
+    "feedback_scale": 1.0
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.0005,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998352,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7717403506287948,
+    "minimum_tilt_deg": 73.80136411853204,
+    "final_tilt_deg": 76.55534860475015,
+    "max_wheel_speeds": [
+      248.38190950827538,
+      34.7446867538654
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.00442239372182107,
+    "fell_after_recovery": false,
+    "objective": 6.37958514726428,
+    "initial": {
+      "qpos": [
+        2.0870825228750953e-05,
+        0.024716377480717224,
+        0.09767477875843873,
+        0.785012603164098,
+        0.6194797868091115,
+        5.036875493421536e-05,
+        6.380793211367756e-05,
+        -0.0002995973403273147,
+        5.37745021500494e-08
+      ],
+      "qvel": [
+        5.8199415963727916e-06,
+        9.121813979754395e-07,
+        3.3263128318570337e-06,
+        -9.315534279666891e-06,
+        1.4991502851112508e-05,
+        -5.8516974843029976e-05,
+        -4.20752391845639e-06,
+        4.962249239616891e-06
+      ]
+    },
+    "feedback_scale": 2.0
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.0005,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998352,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853227621347376,
+    "minimum_tilt_deg": 70.89984205883411,
+    "final_tilt_deg": 76.55631687421415,
+    "max_wheel_speeds": [
+      248.35704593804977,
+      35.59390764287159
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.005770017224025911,
+    "fell_after_recovery": false,
+    "objective": 6.7268482157146865,
+    "initial": {
+      "qpos": [
+        2.0870825228750997e-05,
+        -0.024716377480717235,
+        0.09767477875843873,
+        0.785012603164098,
+        -0.6194797868091115,
+        5.036875493421618e-05,
+        -6.380793211367824e-05,
+        -0.00029959734032732516,
+        -5.3774502149993604e-08
+      ],
+      "qvel": [
+        5.819941596374651e-06,
+        -9.121813979721129e-07,
+        3.3263128318527672e-06,
+        9.315534279640323e-06,
+        1.499150285111672e-05,
+        5.851697484305989e-05,
+        -4.20752391845674e-06,
+        -4.962249239555919e-06
+      ]
+    },
+    "feedback_scale": 0.25
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.0005,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998352,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853227621347376,
+    "minimum_tilt_deg": 69.20721480350015,
+    "final_tilt_deg": 76.55544483961485,
+    "max_wheel_speeds": [
+      249.5058837988793,
+      35.49607302679443
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.007706076405837564,
+    "fell_after_recovery": false,
+    "objective": 6.680128565712432,
+    "initial": {
+      "qpos": [
+        2.0870825228750997e-05,
+        -0.024716377480717235,
+        0.09767477875843873,
+        0.785012603164098,
+        -0.6194797868091115,
+        5.036875493421618e-05,
+        -6.380793211367824e-05,
+        -0.00029959734032732516,
+        -5.3774502149993604e-08
+      ],
+      "qvel": [
+        5.819941596374651e-06,
+        -9.121813979721129e-07,
+        3.3263128318527672e-06,
+        9.315534279640323e-06,
+        1.499150285111672e-05,
+        5.851697484305989e-05,
+        -4.20752391845674e-06,
+        -4.962249239555919e-06
+      ]
+    },
+    "feedback_scale": 0.5
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.0005,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998352,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7853227621347376,
+    "minimum_tilt_deg": 71.4381524673114,
+    "final_tilt_deg": 76.55538702020291,
+    "max_wheel_speeds": [
+      248.4535377633486,
+      36.12059008791623
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.006608899276911162,
+    "fell_after_recovery": false,
+    "objective": 8.543976361501901,
+    "initial": {
+      "qpos": [
+        2.0870825228750997e-05,
+        -0.024716377480717235,
+        0.09767477875843873,
+        0.785012603164098,
+        -0.6194797868091115,
+        5.036875493421618e-05,
+        -6.380793211367824e-05,
+        -0.00029959734032732516,
+        -5.3774502149993604e-08
+      ],
+      "qvel": [
+        5.819941596374651e-06,
+        -9.121813979721129e-07,
+        3.3263128318527672e-06,
+        9.315534279640323e-06,
+        1.499150285111672e-05,
+        5.851697484305989e-05,
+        -4.20752391845674e-06,
+        -4.962249239555919e-06
+      ]
+    },
+    "feedback_scale": 1.0
+  },
+  {
+    "params": [
+      13.100194168102558,
+      8.0,
+      0.026162252641425538,
+      12.92032340951243,
+      2.5264494404359383,
+      2.513466701040135
+    ],
+    "precharge_s": 0.0,
+    "physics_timestep": 0.0005,
+    "control_timestep": 0.01,
+    "torque_limit": 2.4,
+    "flywheel_target_limit": 250.0,
+    "schedule": null,
+    "capture_angle": 25.0,
+    "yaw_gain": 0.0,
+    "gyro_gain": 0.7254054235726255,
+    "roll_gyro_gain": 0.8740530944374616,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0.0,
+    "initial_yaw_deg": 0.0,
+    "duration_s": 10,
+    "settle_s": 1.9999999999998352,
+    "recovered_at_s": null,
+    "within_5s": false,
+    "stable_at_end": false,
+    "final_stable_seconds": 0.0,
+    "max_stable_seconds": 0.0,
+    "best_capture_cost": 1.7717403506283806,
+    "minimum_tilt_deg": 73.80135771696666,
+    "final_tilt_deg": 76.55534447979795,
+    "max_wheel_speeds": [
+      248.38182711149062,
+      34.74468675386177
+    ],
+    "max_motor_torques": [
+      2.4,
+      2.4
+    ],
+    "max_target_speeds": [
+      250.0,
+      35.0
+    ],
+    "minimum_contact_distance_m": -0.004422391835918839,
+    "fell_after_recovery": false,
+    "objective": 6.379584908028985,
+    "initial": {
+      "qpos": [
+        2.0870825228750997e-05,
+        -0.024716377480717235,
+        0.09767477875843873,
+        0.785012603164098,
+        -0.6194797868091115,
+        5.036875493421618e-05,
+        -6.380793211367824e-05,
+        -0.00029959734032732516,
+        -5.3774502149993604e-08
+      ],
+      "qvel": [
+        5.819941596374651e-06,
+        -9.121813979721129e-07,
+        3.3263128318527672e-06,
+        9.315534279640323e-06,
+        1.499150285111672e-05,
+        5.851697484305989e-05,
+        -4.20752391845674e-06,
+        -4.962249239555919e-06
+      ]
+    },
+    "feedback_scale": 2.0
+  }
+]

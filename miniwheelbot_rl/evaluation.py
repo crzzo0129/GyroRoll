@@ -7,6 +7,97 @@ from .curriculum import LESSONS, slope_angles
 from .recovery import state, tangent_velocity, upright_gate, ground_height
 
 
+def evaluate_robust_tracking(args, env, wrapped, runner, *, heading_fn=None):
+    """Flat tracking, stop/start transitions and reproducible 1.5 N force pulses."""
+    if args.duration < 15:
+        raise ValueError("Robust tracking evaluation requires --duration >= 15")
+    if args.stage in LESSONS:
+        raise ValueError("Robust tracking evaluates upright tracking stages, not recovery stages")
+    if heading_fn is None:
+        from .task import heading_rate
+        heading_fn = heading_rate
+    policy = runner.get_inference_policy(device=env.device)
+    robot = env.scene["robot"]
+    body_ids, _ = robot.find_bodies(("base",), preserve_order=True)
+    cases = [("stop", 0., (0., 0.)), ("stop_go", 1., (0., 0.)),
+             ("move_push_forward", 1., (1.5, 0.)),
+             ("move_push_backward", 1., (-1.5, 0.)),
+             ("move_push_left", 1., (0., 1.5)),
+             ("move_push_right", 1., (0., -1.5)),
+             ("stop_push_left", 0., (0., 1.5)),
+             ("stop_push_right", 0., (0., -1.5))]
+    report = {"checkpoint": str(args.checkpoint), "stage": args.stage,
+              "suite": "robust", "seed": args.seed, "duration_s": args.duration,
+              "push_window_s": [5., 5.2], "force_frame": "world, at base body CoM",
+              "stop_go_segments": [[0, 1.], [4, 0.], [8, -1.], [12, 0.]],
+              "stop_planar_rmse_limit_m_s": .10, "cases": []}
+    old_auto = env.cfg.auto_reset
+    env.cfg.auto_reset = False
+    zeros = torch.zeros((env.num_envs, 1, 3), device=env.device)
+    try:
+        for name, speed, push in cases:
+            env.reset()
+            alive = torch.ones(env.num_envs, dtype=torch.bool, device=env.device)
+            sums = torch.zeros((env.num_envs, 3), device=env.device)
+            stop_sums = torch.zeros((env.num_envs, 2), device=env.device)
+            counts = torch.zeros(env.num_envs, device=env.device)
+            stop_counts = torch.zeros_like(counts)
+            for step in range(round(args.duration / env.step_dt)):
+                t = step * env.step_dt
+                target = speed
+                if name == "stop_go":
+                    target = 1. if t < 4 else 0. if t < 8 else -1. if t < 12 else 0.
+                env.command_manager.get_command("twist")[:] = torch.tensor(
+                    [target, 0., 0.], device=env.device)
+                forces = zeros.clone()
+                if 5. <= t < 5.2:
+                    forces[alive, 0, :2] = torch.tensor(push, device=env.device)
+                robot.write_external_wrench_to_sim(forces, zeros, body_ids=body_ids)
+                with torch.inference_mode():
+                    actions = policy(wrapped.get_observations())
+                    _, _, done, _ = wrapped.step(actions)
+                alive &= ~done.bool()
+                transition = name == "stop_go" and any(s <= t < s + 1 for s in (4, 8, 12))
+                if t >= 3 and not transition:
+                    vx, vy = robot.data.root_link_lin_vel_b[:, :2].unbind(dim=-1)
+                    yaw = heading_fn(env)
+                    errors = torch.stack((vx - target, yaw, vy), dim=-1)
+                    sums += torch.where(alive[:, None], errors.square(), 0.)
+                    counts += alive
+                    if target == 0:
+                        stop_sums += torch.where(alive[:, None],
+                            torch.stack((vx.square() + vy.square(), yaw.square()), dim=-1), 0.)
+                        stop_counts += alive
+                failed_ids = done.nonzero(as_tuple=False).flatten()
+                if len(failed_ids):
+                    # Continue the batch, but never restore a failed trial's alive flag.
+                    env.reset(env_ids=failed_ids)
+            rmse = (sums / counts.clamp_min(1)[:, None]).sqrt()
+            stop_rmse = (stop_sums / stop_counts.clamp_min(1)[:, None]).sqrt()
+            needs_stop = speed == 0 or name == "stop_go"
+            passed = alive & (counts * env.step_dt >= 1.)
+            passed &= (rmse[:, 0] < .35) & (rmse[:, 1] < .15) & (rmse[:, 2] < .35)
+            if needs_stop:
+                passed &= (stop_counts * env.step_dt >= 1.) & (stop_rmse[:, 0] < .10) & (stop_rmse[:, 1] < .15)
+            report["cases"].append({"name": name, "push_xy_N": list(push),
+                "pass_rate": float(passed.float().mean()),
+                "individual": [{"survived": bool(alive[i]), "passed": bool(passed[i]),
+                    "rmse_forward": float(rmse[i, 0]) if counts[i] else None,
+                    "rmse_heading_rate": float(rmse[i, 1]) if counts[i] else None,
+                    "rmse_lateral": float(rmse[i, 2]) if counts[i] else None,
+                    "stop_planar_rmse": float(stop_rmse[i, 0]) if stop_counts[i] else None,
+                    "stop_heading_rmse": float(stop_rmse[i, 1]) if stop_counts[i] else None,
+                    "stop_samples": int(stop_counts[i])} for i in range(env.num_envs)]})
+            print(f"{name}: pass={float(passed.float().mean()):.2f}")
+    finally:
+        robot.write_external_wrench_to_sim(zeros, zeros, body_ids=body_ids)
+        env.cfg.auto_reset = old_auto
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    print(f"Robust tracking evaluation saved: {args.output}")
+    return report
+
+
 def evaluate_curriculum(args, env, wrapped, runner, *, heading_fn=None):
     if heading_fn is None:
         from .task import heading_rate

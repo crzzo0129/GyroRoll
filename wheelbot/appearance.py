@@ -26,10 +26,10 @@ def chamfered_panel(asset, name, sign):
     # An individual face plate, leaving the rotor bay hollow even visually.
     vertices = []
     for x, cut in ((sign * .072, .006), (sign * .080, .012)):
-        for y, z in ((-.110 + cut, -.100), (.110 - cut, -.100),
-                     (.110, -.100 + cut), (.110, .180 - cut),
+        for y, z in ((-.070, -.100), (.070, -.100),
+                     (.110, .040), (.110, .180 - cut),
                      (.110 - cut, .180), (-.110 + cut, .180),
-                     (-.110, .180 - cut), (-.110, -.100 + cut)):
+                     (-.110, .180 - cut), (-.110, .040)):
             vertices.extend((x, y, z))
     ET.SubElement(asset, "mesh", name=name,
                   vertex=" ".join(f"{v:.8g}" for v in vertices))
@@ -63,8 +63,8 @@ def apply_appearance(root):
                  material="design_light")
         cosmetic(base, f"seam_{sign}", type="box", size=".0003 .096 .00065",
                  pos=f"{face} 0 .104", material="design_graphite")
-        for y in (-.087, .087):
-            for z in (-.077, .080):
+        for z, offset in ((-.077, .057), (.080, .087)):
+            for y in (-offset, offset):
                 cosmetic(base, f"screw_{sign}_{y}_{z}", type="cylinder", size=".0022 .0004",
                          pos=f"{face} {y} {z}", euler="0 1.57079632679 0", material="design_alloy")
         # A small service panel below the equipment seam.
@@ -73,7 +73,7 @@ def apply_appearance(root):
         for i in range(5):
             cosmetic(base, f"vent_{sign}_{i}", type="box", size=".00035 .035 .001",
                      pos=f"{face} 0 {-.053 - i * .005}", material="design_graphite")
-    for name in ("body_left", "body_right", "body_floor", "bay_divider"):
+    for name in ("body_left", "body_right", "lower_left", "lower_right", "body_floor", "bay_divider"):
         base.find(f"geom[@name='{name}']").set("material", "design_ceramic")
     for name in ("spine", "support_0", "support_1", "fork_tip_0", "fork_tip_1", "rotor_bearing"):
         geom = base.find(f"geom[@name='{name}']")

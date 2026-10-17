@@ -1,0 +1,16 @@
+{
+  "cases": 6,
+  "passed": 6,
+  "geometry_sha256": "b1d7b27fbac7a33fa9c8f7570ad043a053fdb668415bf001f2ef1c81d194255e",
+  "max_soft_contact_penetration_mm": 10.843244461059022,
+  "recovery_seconds": [
+    4.13,
+    4.2,
+    4.09,
+    4.16,
+    4.12,
+    4.13
+  ],
+  "tests": "17 unit/regression checks passed",
+  "scope": "Deterministic empty-body, level-ground, zero initial wheel speed, settled side rest. No payload, slope, perturbation or hardware validation."
+}

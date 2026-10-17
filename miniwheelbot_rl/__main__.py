@@ -42,8 +42,8 @@ def parser():
     p.add_argument("--terrain-column", type=int, choices=range(5),
                    help="replay only: 0 flat, 1/2 half slope +/-; 3/4 full slope +/-")
     p.add_argument("--heading-deg", type=float, default=0.0, help="fixed replay spawn heading")
-    p.add_argument("--suite", choices=("tracking", "curriculum"),
-                   help="evaluate: default curriculum for recovery stages, otherwise tracking")
+    p.add_argument("--suite", choices=("tracking", "curriculum", "robust"),
+                   help="evaluate: defaults to the suite for the selected stage")
     return p
 
 
@@ -57,6 +57,7 @@ def build(args):
     from mjlab.utils.torch import configure_torch_backends
     from .task import make_env_cfg, make_agent_cfg
     from .model import MODEL
+    from .robustness import training_manifest
 
     wp.config.kernel_cache_dir = str(Path(__file__).resolve().parents[1] / ".cache" / "warp")
 
@@ -102,6 +103,9 @@ def build(args):
     if args.mode in ("evaluate", "video", "diagnose"):
         cfg.commands["twist"].resampling_time_range = (1e8, 1e8)
         cfg.commands["twist"].rel_standing_envs = 0.0
+    if args.mode == "evaluate" and (args.suite == "robust" or
+            (args.suite is None and args.stage == "full_robust")) and args.stage not in LESSONS:
+        cfg.events["reset_root"].params["pose_range"]["yaw"] = (0.0, 0.0)
     if args.mode in ("video", "diagnose"):
         cfg.auto_reset = False  # Keep the true terminal state for recovery reporting.
     cfg.seed = args.seed
@@ -133,6 +137,7 @@ def build(args):
             "policy_version": policy_version,
             "task_version": TASK_VERSION,
             "lesson": asdict(LESSONS[args.stage]) if args.stage in LESSONS else None,
+            "robust_tracking": training_manifest(args.stage),
             "observation_contract": "physical_state_15_v1",
             "algorithm": "PPO from scratch, no expert controller",
             "geometry": "wheelbot/nested_model.xml",
@@ -171,6 +176,9 @@ def smoke(env, wrapped):
 
 
 def evaluate(args, env, wrapped, runner):
+    if args.suite == "robust" or (args.suite is None and args.stage == "full_robust"):
+        from .evaluation import evaluate_robust_tracking
+        return evaluate_robust_tracking(args, env, wrapped, runner)
     if args.suite == "curriculum" or (args.suite is None and args.stage in LESSONS):
         from .evaluation import evaluate_curriculum
         return evaluate_curriculum(args, env, wrapped, runner)

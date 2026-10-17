@@ -28,6 +28,7 @@ STAGES = {
     "warmup": (0.5, 0.20),
     "tracking": (1.2, 0.40),
     "full": (2.0, 0.60),
+    "full_robust": (2.0, 0.60),
     "rise_tilt": (0.5, 0.20),
     "rise": (0.5, 0.20),
     "recover": (0.5, 0.20),

@@ -198,6 +198,21 @@ def make_env_cfg(num_envs: int = 256, stage: str = "warmup", *,
                                           ls_iterations=10, cone="elliptic")),
         decimation=settings.decimation, episode_length_s=settings.episode_seconds,
     )
+    if stage == "full_robust":
+        from mjlab.managers.metrics_manager import MetricsTermCfg
+        from .robustness import ROBUST_TRACKING, HorizontalPushes, standing_reward, standing_fraction
+        robust = ROBUST_TRACKING
+        cfg.commands["twist"].rel_standing_envs = robust.standing_fraction
+        cfg.rewards["standing"] = RewardTermCfg(func=standing_reward, weight=1.0)
+        cfg.metrics["standing/command_fraction"] = MetricsTermCfg(func=standing_fraction)
+        # Use finite force pulses instead of stacking velocity jumps from --randomize.
+        cfg.events.pop("push", None)
+        if not play:
+            cfg.events["horizontal_push"] = EventTermCfg(func=HorizontalPushes, mode="step",
+                params={"asset_cfg": SceneEntityCfg("robot", body_names=("base",)),
+                        "force_newtons": robust.force_newtons,
+                        "duration_seconds": robust.duration_seconds,
+                        "cooldown_seconds": robust.cooldown_seconds})
     if stage in LESSONS:
         from mjlab.managers.metrics_manager import MetricsTermCfg
         from . import recovery

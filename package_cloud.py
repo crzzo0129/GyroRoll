@@ -20,6 +20,7 @@ FILES = (
     "tests/test_rl_diagnostics.py",
     "tests/test_rl_distribution.py",
     "tests/test_rl_recovery.py",
+    "tests/test_rl_robustness.py",
 )
 
 

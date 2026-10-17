@@ -1,6 +1,6 @@
 {
   "model": "wheelbot/nested_model.xml",
-  "status": "Wide hollow body enclosing flywheel with upper equipment bay and cargo tray; fixed wheel centres, 50 mm edge gap, 580 mm height; empty mass budget only, payload unvalidated",
+  "status": "Wide hollow body enclosing flywheel with upper equipment bay and cargo tray; tapered lower shell for loaded tire contact at side rest; fixed wheel centres, 50 mm edge gap, 580 mm height; empty mass budget only, payload unvalidated",
   "layout": "enclosed_cargo_body",
   "wheel_edge_gap": 0.05,
   "initial_rotor_speed": 20.0,

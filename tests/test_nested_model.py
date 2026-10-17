@@ -121,6 +121,31 @@ class NestedWheelTests(unittest.TestCase):
         self.assertLess(summary["steady_speed_rmse"], .35)
         self.assertLess(summary["turn_yaw_rmse"], .02)
 
+    def test_side_rest_has_loaded_tire_contact_on_both_sides(self):
+        from miniwheelbot_rl.model import velocity_model_xml
+        model = mujoco.MjModel.from_xml_string(velocity_model_xml(ground=True))
+        ground = model.geom("ground").id
+        drive = model.body("drive_wheel").id
+        for sign in (-1, 1):
+            data = mujoco.MjData(model)
+            data.qpos[2] = .16  # Place above the ground, then let gravity settle it.
+            data.qpos[3:7] = [np.sqrt(.5), sign*np.sqrt(.5), 0, 0]
+            for _ in range(1000):
+                mujoco.mj_step(model, data)
+            rotation = data.xmat[model.body("base").id].reshape(3, 3)
+            self.assertGreater(np.degrees(np.arccos(rotation[2, 2])), 70.)
+            self.assertLess(np.degrees(np.arccos(rotation[2, 2])), 82.)
+            wheel_load = 0.
+            for i, contact in enumerate(data.contact):
+                if ground not in contact.geom:
+                    continue
+                other = next(g for g in contact.geom if g != ground)
+                if model.geom_bodyid[other] == drive:
+                    force = np.zeros(6)
+                    mujoco.mj_contactForce(model, data, i, force)
+                    wheel_load += force[0]
+            self.assertGreater(wheel_load, 1., "Tire must carry load, not just visually approach the floor")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,24 @@
+[
+  {
+    "physics_timestep": 0.0005,
+    "initial_roll_deg": 90,
+    "initial_pitch_deg": 0,
+    "minimum_tilt_deg": 0.1281463290011509,
+    "recovered_at_s": 4.09,
+    "max_stable_seconds": 11.89999999999979,
+    "stable_at_end": true,
+    "final_tilt_deg": 1.9767970029134505,
+    "wall_seconds": 89.77154989997507
+  },
+  {
+    "physics_timestep": 0.0005,
+    "initial_roll_deg": -90,
+    "initial_pitch_deg": 0,
+    "minimum_tilt_deg": 0.13033213479440167,
+    "recovered_at_s": 4.13,
+    "max_stable_seconds": 11.859999999999792,
+    "stable_at_end": true,
+    "final_tilt_deg": 3.69279801790927,
+    "wall_seconds": 81.55733890002011
+  }
+]

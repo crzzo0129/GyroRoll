@@ -39,6 +39,12 @@ def sector_vertices(inner, outer, halfwidth):
     return " ".join(f"{v:.12g}" for v in vertices)
 
 
+def extruded_panel(asset, name, profile, xmin, xmax):
+    """Convex wall panel, extruded along x; never fill the rotor cavity."""
+    vertices = [value for x in (xmin, xmax) for y, z in profile for value in (x, y, z)]
+    ET.SubElement(asset, "mesh", name=name, vertex=" ".join(f"{v:.12g}" for v in vertices))
+
+
 def build():
     tree = ET.parse(ROOT / "validated_model.xml")
     root = tree.getroot()
@@ -56,14 +62,19 @@ def build():
     # Hollow 160 x 220 mm enclosure: six separate collision walls, never a
     # solid convex hull around the rotor. Upright bottom/deck heights 270/560 mm.
     # Masses are an empty-body simulation budget, not a fabricated load rating.
-    chassis.set("size", ".004 .110 .140")
-    chassis.set("pos", "-.076 0 .040")
+    # Lower 140 mm tapers from 220 to 140 mm wide. The shoulder and tire
+    # form a side-rest support pair, instead of a long flat chassis side.
+    cover_profile = [(-.070,-.100),(.070,-.100),(.110,.040),(.110,.180),(-.110,.180),(-.110,.040)]
+    extruded_panel(asset, "cover_collision", cover_profile, -.004, .004)
+    chassis.set("type", "mesh")
+    chassis.attrib.pop("size", None)
+    chassis.set("mesh", "cover_collision")
+    chassis.set("pos", "-.076 0 0")
     chassis.set("mass", ".110")
     panels = (
-        ("body_front", ".004 .110 .140", ".076 0 .040", ".110"),
-        ("body_left", ".072 .004 .140", "0 .106 .040", ".065"),
-        ("body_right", ".072 .004 .140", "0 -.106 .040", ".065"),
-        ("body_floor", ".072 .102 .004", "0 0 -.096", ".040"),
+        ("body_left", ".072 .004 .070", "0 .106 .110", ".0325"),
+        ("body_right", ".072 .004 .070", "0 -.106 .110", ".0325"),
+        ("body_floor", ".072 .062 .004", "0 0 -.096", ".040"),
         ("bay_divider", ".072 .102 .004", "0 0 .104", ".045"),
         ("cargo_deck", ".086 .116 .005", "0 0 .185", ".100"),
         ("cargo_rail_front", ".004 .116 .010", ".082 0 .200", ".010"),
@@ -75,6 +86,14 @@ def build():
     for name, size, pos, mass in panels:
         ET.SubElement(base, "geom", name=name, type="box", size=size, pos=pos,
                       mass=mass, rgba=".82 .85 .82 1")
+    ET.SubElement(base, "geom", name="body_front", type="mesh", mesh="cover_collision",
+                  pos=".076 0 0", mass=".110", rgba=".82 .85 .82 1")
+    for sign, side in ((-1, "right"), (1, "left")):
+        profile = [(sign*y,z) for y,z in ((.070,-.100),(.110,.040),(.102,.040),(.062,-.100))]
+        name = f"lower_{side}"
+        extruded_panel(asset, name, profile, -.072, .072)
+        ET.SubElement(base, "geom", name=name, type="mesh", mesh=name, mass=".0325",
+                      rgba=".82 .85 .82 1")
     ET.SubElement(base, "geom", name="spine", type="box",
                   size=".008 .017 .100", pos="-.043 0 .008", mass=".028",
                   rgba=".15 .20 .22 1")
@@ -128,6 +147,7 @@ def build():
         "200 mm, open rim width 20 mm, tire width 24 mm, upper flywheel diameter 166 mm. "
         "Upright edge-to-edge vertical gap 50 mm; flywheel centre height 373 mm. "
         "Hollow enclosed rotor bay, upper equipment bay and cargo tray; height 580 mm. "
+        "Lower shell tapers from 220 to 140 mm over 140 mm height for tire contact at side rest. "
         "Front cover hidden for display only; its mass and collisions remain active. "
         "Empty-body mass budget only; no payload or load rating included. "
         "Ideal chassis-mounted bearings; no detailed motor/shaft packaging."

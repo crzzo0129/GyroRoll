@@ -1,0 +1,152 @@
+[
+  {
+    "layout": "修改前",
+    "physics_timestep": 0.002,
+    "initial_roll_deg": 90.0,
+    "tilt_deg": 88.77269353480087,
+    "tire_bottom_m": 0.09218409772267311,
+    "tire_contact_geoms": [],
+    "tire_normal_force_N": 0.0,
+    "tire_load_fraction": 0.0,
+    "total_ground_normal_force_N": 14.371650000000011
+  },
+  {
+    "layout": "修改前",
+    "physics_timestep": 0.002,
+    "initial_roll_deg": -90.0,
+    "tilt_deg": 88.77269353480087,
+    "tire_bottom_m": 0.09218409772267311,
+    "tire_contact_geoms": [],
+    "tire_normal_force_N": 0.0,
+    "tire_load_fraction": 0.0,
+    "total_ground_normal_force_N": 14.371650000000011
+  },
+  {
+    "layout": "修改前",
+    "physics_timestep": 0.001,
+    "initial_roll_deg": 90.0,
+    "tilt_deg": 88.77269353480092,
+    "tire_bottom_m": 0.09218409772267346,
+    "tire_contact_geoms": [],
+    "tire_normal_force_N": 0.0,
+    "tire_load_fraction": 0.0,
+    "total_ground_normal_force_N": 14.371649999999988
+  },
+  {
+    "layout": "修改前",
+    "physics_timestep": 0.001,
+    "initial_roll_deg": -90.0,
+    "tilt_deg": 88.77269353480092,
+    "tire_bottom_m": 0.09218409772267346,
+    "tire_contact_geoms": [],
+    "tire_normal_force_N": 0.0,
+    "tire_load_fraction": 0.0,
+    "total_ground_normal_force_N": 14.371649999999988
+  },
+  {
+    "layout": "修改前",
+    "physics_timestep": 0.0005,
+    "initial_roll_deg": 90.0,
+    "tilt_deg": 88.772693534801,
+    "tire_bottom_m": 0.09218409772267395,
+    "tire_contact_geoms": [],
+    "tire_normal_force_N": 0.0,
+    "tire_load_fraction": 0.0,
+    "total_ground_normal_force_N": 14.371649999999997
+  },
+  {
+    "layout": "修改前",
+    "physics_timestep": 0.0005,
+    "initial_roll_deg": -90.0,
+    "tilt_deg": 88.772693534801,
+    "tire_bottom_m": 0.09218409772267395,
+    "tire_contact_geoms": [],
+    "tire_normal_force_N": 0.0,
+    "tire_load_fraction": 0.0,
+    "total_ground_normal_force_N": 14.371650000000002
+  },
+  {
+    "layout": "下部斜切后",
+    "physics_timestep": 0.002,
+    "initial_roll_deg": 90.0,
+    "tilt_deg": 76.55633026034903,
+    "tire_bottom_m": -1.75519489314796e-05,
+    "tire_contact_geoms": [
+      "tire",
+      "tire_001"
+    ],
+    "tire_normal_force_N": 2.8494833022329367,
+    "tire_load_fraction": 0.1982810232471704,
+    "total_ground_normal_force_N": 14.370933009967713
+  },
+  {
+    "layout": "下部斜切后",
+    "physics_timestep": 0.002,
+    "initial_roll_deg": -90.0,
+    "tilt_deg": 76.55633026034903,
+    "tire_bottom_m": -1.75519489314796e-05,
+    "tire_contact_geoms": [
+      "tire",
+      "tire_001"
+    ],
+    "tire_normal_force_N": 2.849483302232935,
+    "tire_load_fraction": 0.19828102324717015,
+    "total_ground_normal_force_N": 14.370933009967723
+  },
+  {
+    "layout": "下部斜切后",
+    "physics_timestep": 0.001,
+    "initial_roll_deg": 90.0,
+    "tilt_deg": 76.55632653419903,
+    "tire_bottom_m": -1.7552610767697374e-05,
+    "tire_contact_geoms": [
+      "tire",
+      "tire_001"
+    ],
+    "tire_normal_force_N": 2.8494008093439165,
+    "tire_load_fraction": 0.1981960399635758,
+    "total_ground_normal_force_N": 14.37667881693083
+  },
+  {
+    "layout": "下部斜切后",
+    "physics_timestep": 0.001,
+    "initial_roll_deg": -90.0,
+    "tilt_deg": 76.55632653419903,
+    "tire_bottom_m": -1.7552610767697374e-05,
+    "tire_contact_geoms": [
+      "tire",
+      "tire_001"
+    ],
+    "tire_normal_force_N": 2.8494008093439147,
+    "tire_load_fraction": 0.19819603996357493,
+    "total_ground_normal_force_N": 14.376678816930884
+  },
+  {
+    "layout": "下部斜切后",
+    "physics_timestep": 0.0005,
+    "initial_roll_deg": 90.0,
+    "tilt_deg": 76.55631195597798,
+    "tire_bottom_m": -1.7552362756105208e-05,
+    "tire_contact_geoms": [
+      "tire",
+      "tire_001"
+    ],
+    "tire_normal_force_N": 2.8494825541971083,
+    "tire_load_fraction": 0.19827391671267713,
+    "total_ground_normal_force_N": 14.371444320265045
+  },
+  {
+    "layout": "下部斜切后",
+    "physics_timestep": 0.0005,
+    "initial_roll_deg": -90.0,
+    "tilt_deg": 76.55631195597798,
+    "tire_bottom_m": -1.7552362756105208e-05,
+    "tire_contact_geoms": [
+      "tire",
+      "tire_001"
+    ],
+    "tire_normal_force_N": 2.849482554197108,
+    "tire_load_fraction": 0.19827391671267725,
+    "total_ground_normal_force_N": 14.371444320265034
+  }
+]

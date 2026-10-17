@@ -1,6 +1,6 @@
 # GyroRoll 云端训练 / MJLab 1.3.0
 
-当前结构为宽体封闭飞轮舱、上方设备舱和顶部载物托盘，整机高度 580 mm，主机身厚 160 mm、宽 220 mm，托盘可用面积 156 × 216 mm。滚轮轴心离地 120 mm、飞轮轴心离地 373 mm，两轮上/下沿净距保持 50 mm。滚轮胎面加宽至 24 mm，轮圈宽 20 mm，双叉间距同步加宽；滚轮沿用 312 g 概念质量预算，惯量按新宽度更新。空载仿真质量预算为 1.465 kg，重心离地约 349.0 mm；质量分布、惯量和碰撞结构已经更新，需要针对新结构训练。当前未添加货物质量，载物能力及载物策略尚未验证。
+当前结构为宽体封闭飞轮舱、上方设备舱和顶部载物托盘，整机高度 580 mm，主机身厚 160 mm、宽 220 mm，托盘可用面积 156 × 216 mm。滚轮轴心离地 120 mm、飞轮轴心离地 373 mm，两轮上/下沿净距保持 50 mm。滚轮胎面加宽至 24 mm，轮圈宽 20 mm，双叉间距同步加宽；滚轮沿用 312 g 概念质量预算，惯量按新宽度更新。空载仿真质量预算为 1.465 kg，重心离地约 350.4 mm；质量分布、惯量和碰撞结构已经更新，需要针对新结构训练。机身下部 140 mm 高度已斜切，底端宽 140 mm、上端宽 220 mm；自然侧躺约 76.6° 时滚轮与机身同时接地。左右两侧及三个物理步长均已验证接触，但尚未验证可靠起身。当前未添加货物质量，载物能力及载物策略尚未验证。
 
 旧 checkpoint 的续训/回放仍恢复其保存的 `geometry.xml`；训练当前新结构请先不带 `--checkpoint` 运行 `train --stage warmup`。不要覆盖旧 checkpoint 的几何文件或哈希。后续起身课程从新结构的 warmup checkpoint 续训。XML 包含所有外观网格和材质，无需额外图片资源。当前 XML 默认以 Cover Removed 方式显示，隐藏正面盖板和饰面，飞轮正面保留一条白色刻度；隐藏盖板的质量和碰撞仍然生效。旧 checkpoint 的几何快照不会自动采用新外观。
 
@@ -64,6 +64,7 @@ python -m miniwheelbot_rl train --stage warmup --num-envs 256 --iterations 500
 | warmup | ±0.5 | ±0.20 |
 | tracking | ±1.2 | ±0.40 |
 | full | ±2.0 | ±0.60 |
+| full_robust | ±2.0 | ±0.60 |
 
 也可以用 `--stage full` 从头训练完整范围。分阶段训练时，将下列 `RUN/model_XXX.pt` 替换成实际 checkpoint 路径；文件名以运行目录实际输出为准。`--iterations` 是本次继续训练的更新次数。
 
@@ -72,7 +73,35 @@ python -m miniwheelbot_rl train --stage tracking --num-envs 256 --iterations 300
 python -m miniwheelbot_rl train --stage full --randomize --num-envs 256 --iterations 5000 --checkpoint logs/rsl_rl/nested_velocity_mjlab130/RUN/model_XXX.pt
 ```
 
-随机化当前包括轮胎/轮圈摩擦和间歇速度冲击，不包含质量、电机参数或延迟随机化。所有电机参数是仿真起始值，尚未按实物标定。动作定义、观测、奖励和物理频率详见 [任务说明](discuss/直接强化学习训练.md)。
+普通阶段的 `--randomize` 包括轮胎/轮圈摩擦和间歇速度冲击，不包含质量、电机参数或延迟随机化。`full_robust` 使用下述有限时长外力替代速度冲击，带 `--randomize` 时另加摩擦随机化。所有电机参数是仿真起始值，尚未按实物标定。动作定义、观测、奖励和物理频率详见 [任务说明](discuss/直接强化学习训练.md)。
+
+### full 之后：运动抗推与静止，不训练起身
+
+已有 full 策略可以接着训练 `full_robust`，仍然只有一个 15 维观测、两维轮速动作的 policy。平地直立重置，保留跌倒终止；加载 checkpoint 时继续使用它自己的几何与电机参数。
+
+- 每次重采样有 **25% 概率**选择完整静止指令 `(v, yaw_rate)=(0,0)`；其余命令保持 full 范围。每段持续 3–6 s，机器人会经历行走、停车和再启动。原 full 的静止概率是 10%。
+- 静止额外奖励权重为 1，约束机身水平速度和航向角速度，允许飞轮转动维持平衡。速度尺度为 0.10 m/s，航向角速度尺度为 0.15 rad/s；这不等于锁定世界坐标位置。
+- 每个环境独立等待 **4–8 s**，在机身 base 的质心施加随机水平方向 **0.5–1.5 N** 外力，持续 **0.10–0.25 s** 后清零。首次重置后也先等待；重新开始回合会清除该环境的推力。推力既可出现在运动中，也可出现在静止指令期间。
+- `--randomize` 可额外打开摩擦随机化，不叠加旧的瞬时速度修改。普通 play/video/diagnose 关闭随机推力；抗推效果用下面的专项评估测量。
+
+把 `FULL_RUN/model_XXXX.pt` 替换为已训好的 full checkpoint，旁边保留 `task.json` 和 `geometry.xml`：
+
+```bash
+python -m miniwheelbot_rl smoke --stage full_robust --num-envs 4
+python -m miniwheelbot_rl train --stage full_robust --num-envs 256 --iterations 3000 \
+  --checkpoint FULL_RUN/model_XXXX.pt --log-root logs/rsl_rl/full_robust
+```
+
+3000 是首轮追加更新次数，最终看评估效果。观察 `Episode_Reward/standing`、`Episode_Metrics/standing/command_fraction`、原 forward/yaw 奖励、roll 惩罚和回合长度。25% 是采样概率；提前跌倒或走停难度差异会影响实测回合统计比例。
+
+```bash
+python -m miniwheelbot_rl evaluate --suite robust --num-envs 16 --duration 15 \
+  --checkpoint ROBUST_RUN/model_XXXX.pt --output results/full_robust_evaluation.json
+```
+
+专项评估涵盖静止、走停切换、行进中前后左右推力、静止中左右推力；第 5 s 施加 1.5 N 外力、持续 0.2 s。要求全程不跌倒，静止采样窗口的水平合成速度 RMSE <0.10 m/s、航向角速度 RMSE <0.15 rad/s。走停切换每次留 1 s 过渡，失败后重置的轨迹不会恢复成功资格。`full_robust` checkpoint 默认 evaluate 选择此套件；可另用 `--suite tracking` 复查原速度跟踪。
+
+本地已验证推力定时、单环境重置、力—冲量关系和专项评估统计。完整 MJLab 配置集成、GPU 训练和真实策略抗推效果需要在云端运行上述检查；本地 CPU 测试不代表策略已经学会抗推。
 
 每次运行保存在 `logs/rsl_rl/nested_velocity_mjlab130/日期时间_阶段/`，包含 checkpoint、`task.json`、`agent.json`、`geometry.xml` 和 TensorBoard 曲线。下载或搬迁时保留整个运行目录；续训/评估会恢复保存的几何和电机参数。旧力矩动作策略不能直接续训为本任务。
 
