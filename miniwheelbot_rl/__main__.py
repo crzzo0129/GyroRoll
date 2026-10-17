@@ -138,6 +138,7 @@ def build(args):
             "task_version": TASK_VERSION,
             "lesson": asdict(LESSONS[args.stage]) if args.stage in LESSONS else None,
             "robust_tracking": training_manifest(args.stage),
+            "reward_weights": {name: term.weight for name, term in cfg.rewards.items()},
             "observation_contract": "physical_state_15_v1",
             "algorithm": "PPO from scratch, no expert controller",
             "geometry": "wheelbot/nested_model.xml",

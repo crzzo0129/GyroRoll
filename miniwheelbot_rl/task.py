@@ -80,6 +80,13 @@ def roll_penalty(env):
     return recovery_regularization(env) * env.scene["robot"].data.root_link_ang_vel_b[:, 0].square()
 
 
+def roll_angle_penalty(env):
+    """Squared ZYX roll in radians, independent of pitch for upright poses."""
+    gravity = env.scene["robot"].data.projected_gravity_b
+    roll = torch.atan2(-gravity[:, 1], -gravity[:, 2])
+    return roll.square()
+
+
 def pitch_penalty(env):
     return recovery_regularization(env) * env.scene["robot"].data.root_link_ang_vel_b[:, 1].square()
 
@@ -198,6 +205,9 @@ def make_env_cfg(num_envs: int = 256, stage: str = "warmup", *,
                                           ls_iterations=10, cone="elliptic")),
         decimation=settings.decimation, episode_length_s=settings.episode_seconds,
     )
+    if stage not in LESSONS:
+        # Penalize sustained sideways lean separately from angular motion.
+        cfg.rewards["roll_angle"] = RewardTermCfg(func=roll_angle_penalty, weight=-2.0)
     if stage == "full_robust":
         from mjlab.managers.metrics_manager import MetricsTermCfg
         from .robustness import ROBUST_TRACKING, HorizontalPushes, standing_reward, standing_fraction

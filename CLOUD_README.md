@@ -116,7 +116,9 @@ MUJOCO_GL=egl python -m miniwheelbot_rl video --checkpoint logs/rsl_rl/nested_ve
 
 把 checkpoint 路径换成实际文件，并保留旁边的 `task.json`、`geometry.xml` 和 `agent.json`。默认单环境、960×544、30 fps、跟随相机，不启动网页服务器。`--speed` 单位为 m/s，`--turn` 单位为 rad/s；warmup 建议先看 0.5 m/s 直行，后续可测试 `--speed 0.8 --turn 0.3`。发生跌倒等回合终止时录像提前停止，不把自动重置后的动作拼成连续成功运动；同名 JSON 记录实际时长与终止状态。依赖已安装后，录像本身不需要外网或 TensorBoard。Linux 无窗口渲染需要 NVIDIA EGL 支持。
 
-横滚与俯仰惩罚分别记录为 `Episode_Reward/roll` 和 `Episode_Reward/pitch`，当前 `roll` 权重为 -0.05（原来的 5 倍），`pitch` 权重为 -0.01。恢复课程仍按姿态减弱两项惩罚。更新代码后启动或续训时生效，正在运行的训练需要重启才能采用新代码。
+横滚与俯仰角速度惩罚分别记录为 `Episode_Reward/roll` 和 `Episode_Reward/pitch`，当前 `roll` 权重为 -0.05（原来的 5 倍），`pitch` 权重为 -0.01。恢复课程仍按姿态减弱两项惩罚。更新代码后启动或续训时生效，正在运行的训练需要重启才能采用新代码。
+
+运动阶段（warmup/tracking/full/full_robust）另加 `Episode_Reward/roll_angle`，公式为 `-2.0 × roll²`，roll 单位是弧度，由机体坐标下重力计算 `atan2(-gravity_y, -gravity_z)`。此项约束持续侧倾，独立于原角速度惩罚；起身/坡地课程暂不加入此项。新运行的 `task.json` 保存奖励权重以便核对。续训使用更新后的代码构建奖励，checkpoint 恢复策略及原几何、电机参数，不会覆盖新奖励。建议先追加 1500 次更新，同时检查直行侧倾、转弯跟踪、抗推和静止效果；转弯时可能需要合理侧倾，不以 roll 始终为零作为目标。
 
 训练曲线在云端启动：
 
