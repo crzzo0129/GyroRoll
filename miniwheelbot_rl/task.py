@@ -208,6 +208,8 @@ def make_env_cfg(num_envs: int = 256, stage: str = "warmup", *,
     if stage not in LESSONS:
         # Penalize sustained sideways lean separately from angular motion.
         cfg.rewards["roll_angle"] = RewardTermCfg(func=roll_angle_penalty, weight=-2.0)
+        # Smooth normalized wheel-speed commands while retaining balance corrections.
+        cfg.rewards["action_rate"].weight = -0.10
     if stage == "full_robust":
         from mjlab.managers.metrics_manager import MetricsTermCfg
         from .robustness import ROBUST_TRACKING, HorizontalPushes, standing_reward, standing_fraction

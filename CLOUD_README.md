@@ -120,6 +120,8 @@ MUJOCO_GL=egl python -m miniwheelbot_rl video --checkpoint logs/rsl_rl/nested_ve
 
 运动阶段（warmup/tracking/full/full_robust）另加 `Episode_Reward/roll_angle`，公式为 `-2.0 × roll²`，roll 单位是弧度，由机体坐标下重力计算 `atan2(-gravity_y, -gravity_z)`。此项约束持续侧倾，独立于原角速度惩罚；起身/坡地课程暂不加入此项。新运行的 `task.json` 保存奖励权重以便核对。续训使用更新后的代码构建奖励，checkpoint 恢复策略及原几何、电机参数，不会覆盖新奖励。建议先追加 1500 次更新，同时检查直行侧倾、转弯跟踪、抗推和静止效果；转弯时可能需要合理侧倾，不以 roll 始终为零作为目标。
 
+运动阶段的 `action_rate` 权重进一步从 -0.02 增强到 -0.10，惩罚为 `-0.10 × sum((clip(a_t, -1, 1) - clip(a_previous, -1, 1))²)`，两个动作均为归一化轮速目标。这里是相邻控制步差值，不除以控制周期；默认周期为 0.01 s。恢复课程保持原权重。建议从已训练的 `full_robust_roll` 模型追加 1500 次更新，同时比较相同工况下 `summary.json` 的 `after_3s` 中 `action_delta_rms`、速度跟踪误差及力矩饱和比例，并复查 robust 评估，避免平滑后抗推响应变慢。权重增大后原始 reward 曲线不能直接与旧运行比较。
+
 训练曲线在云端启动：
 
 ```bash
