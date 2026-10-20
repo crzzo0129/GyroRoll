@@ -6,6 +6,36 @@
 
 ## 强化学习速度跟踪
 
+### 当前启动方式：双 H100 直接混合命令
+
+按最新要求取消逐级速度课程，直接从已有平衡 checkpoint 续训 tracking：
+
+- 同一策略、双卡同步 PPO；总计 1024 个环境，每卡 512，两个进程使用不同种子。
+  RSL-RL 同步梯度；只有 rank 0 写配置、日志、checkpoint，结束时核对两卡 actor 参数哈希。
+- 非零前后向速度幅值 0.3–1.0 m/s，转向角速度幅值 0.1–0.3 rad/s。
+  20% 停车，22.5% 前进直行，22.5% 倒车直行，17.5% 左转，17.5% 右转；
+  转弯同时覆盖前进与倒车，命令每 4–8 秒重采样。
+- 没有随机推拉力或瞬时速度冲击事件。初始 Roll/Pitch ±0.1°；
+  50% 静止起步，25% 前进初始速度，25% 倒车初始速度。
+- 最多 10,000 次更新，每 250 次做完整混合命令评估及平衡复查。
+  评估与回退保留，但不再先训练 warmup 或 moving。
+- 直接跟踪评估也使用 ±0.1° 初始倾角，重点验证命令执行；
+  这不代表通过默认 ±1° 的扰动鲁棒性测试，两类结果不可混淆。
+
+在本轮独立云端实验目录中运行：
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 OMP_NUM_THREADS=4 /opt/mjlab-venv/bin/python -u \
+  -m structure_rl.linkage_curriculum --direct-tracking --gpus 2 \
+  --profile linkage_v4 --checkpoint seed/model_28.pt \
+  --output logs/direct_mixed --num-envs 1024 --reset-tilt-deg 0.1 \
+  --learning-rate 1e-6 --block-iterations 250 --max-blocks 40
+```
+
+`linkage_curriculum` 是统一执行入口；`--direct-tracking` 只训练完整 tracking。
+这里 `--num-envs` 表示双卡总数。手工使用 `torch.distributed.run -m structure_rl`
+时，底层 `structure_rl --num-envs` 表示每卡数量，不要把 1024 再重复到每卡。
+
 ### 当前实验：linkage_v4，初始化后继续 PPO
 
 2026-10-20 的迭代发现：纯 PPO 的 V1/V2 都没有学会站立；V3 将局部 LQR

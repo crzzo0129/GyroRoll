@@ -14,6 +14,7 @@ def main():
     p.add_argument('--output',type=Path,required=True)
     p.add_argument('--seed',type=int,default=12345)
     p.add_argument('--motion-fraction',type=float,default=1.)
+    p.add_argument('--tilt-deg',type=float,help='Explicit initial tilt for command tracking checks')
     p.add_argument('--airborne-reset',action='store_true',help='Also test release from 1 mm above nominal ground contact')
     p.add_argument('--affine-reference',action='store_true',help='Diagnostic reference only; never eligible for curriculum promotion')
     a=p.parse_args()
@@ -21,6 +22,8 @@ def main():
         raise ValueError('motion-fraction must be in (0,1]')
     if a.phase!='moving' and a.motion_fraction!=1:
         raise ValueError('Partial lessons apply only to moving')
+    if a.tilt_deg is not None and (not math.isfinite(a.tilt_deg) or not 0<=a.tilt_deg<=10):
+        raise ValueError('tilt-deg must be finite and in [0,10]')
     import torch
     from .__main__ import parser,build
     from .task import metric
@@ -44,6 +47,8 @@ def main():
         tilt=math.radians(.1 if a.phase=='warmup' else (.3 if a.phase=='moving' else 1.))
         if a.phase=='moving':
             tilt*=1/3+2/3*a.motion_fraction
+        if a.tilt_deg is not None:
+            tilt=math.radians(a.tilt_deg)
         env._evaluation_roll=torch.linspace(-tilt,tilt,trials,device=device).repeat(len(cases))
         env._evaluation_pitch=torch.tensor([-tilt,tilt],device=device).repeat(count//2)
         env._initial_speed=0.

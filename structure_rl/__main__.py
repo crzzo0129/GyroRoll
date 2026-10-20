@@ -27,6 +27,7 @@ def parser():
     p.add_argument('--iterations', type=int, default=3000)
     p.add_argument('--learning-rate',type=float,help='Explicit PPO learning rate, including after optimizer resume')
     p.add_argument('--motion-fraction',type=float,help='Linkage moving lesson fraction (0,1]; final tests use 1')
+    p.add_argument('--reset-tilt-deg',type=float,help='Explicit linkage initial Roll/Pitch bound; no external pushes')
     p.add_argument('--seed', type=int, default=42)
     p.add_argument('--device', default='cuda:0')
     p.add_argument('--run-dir', type=Path, help='New directory for this training run')
@@ -65,6 +66,8 @@ def build(args):
             raise ValueError('ReLU linkage_v4 checkpoints cannot be loaded with an ELU profile')
         if args.motion_fraction is None:
             args.motion_fraction=manifest.get('motion_fraction',1.)
+        if args.reset_tilt_deg is None:
+            args.reset_tilt_deg=manifest.get('reset_tilt_override_deg')
         if args.mirror_coeff is None:
             args.mirror_coeff = manifest.get('mirror_loss_coefficient')
         settings = MotorSettings(**manifest['motors'])
@@ -100,6 +103,10 @@ def build(args):
     replay = args.mode in ('evaluate', 'video')
     cfg = configuration(args.morphology, args.phase, args.num_envs, settings, model_path, replay, args.profile,
                         motion_fraction=args.motion_fraction)
+    if args.reset_tilt_deg is not None:
+        if args.morphology!='roll_linkage' or not math.isfinite(args.reset_tilt_deg) or not 0<=args.reset_tilt_deg<=10:
+            raise ValueError('reset-tilt-deg requires roll_linkage and a finite bound in [0,10]')
+        cfg.events['reset_robot'].params['reset_tilt_deg']=args.reset_tilt_deg
     cfg.seed = args.seed
     if replay:
         cfg.auto_reset = False
@@ -150,6 +157,7 @@ def build(args):
         if args.mode == 'train':
             log_dir = args.run_dir or Path('logs/structure_rl') / args.morphology / (
                 datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '_' + args.phase)
+        if args.mode == 'train' and int(os.environ.get('RANK','0'))==0:
             log_dir.mkdir(parents=True, exist_ok=False)
             geometry = (model_path or source_model(args.morphology)).read_bytes()
             (log_dir / 'geometry.xml').write_bytes(geometry)
@@ -162,6 +170,10 @@ def build(args):
                 'seed': args.seed, 'num_envs': args.num_envs, 'iterations_requested': args.iterations,
                 'learning_rate':agent.algorithm.learning_rate,
                 'motion_fraction':args.motion_fraction,
+                'reset_tilt_override_deg':args.reset_tilt_deg,
+                'external_pushes':False,
+                'world_size':int(os.environ.get('WORLD_SIZE','1')),
+                'total_num_envs':args.num_envs*int(os.environ.get('WORLD_SIZE','1')),
                 'source_checkpoint': str(args.checkpoint) if args.checkpoint else None,
                 'observation_dimension': observation_dimension(args.morphology), 'action_dimension': 2,
                 'action_order': ['drive_rad_s', {'twin_sync':'shared_rotor_rad_s',
@@ -206,6 +218,8 @@ def build(args):
                     entropy_coefficient=.001,discount_factor=.995,gae_lambda=.99)
             if args.profile in ('linkage_v2','linkage_v3','linkage_v4') and args.phase=='moving':
                 manifest['reset_tilt_rad']*=1/3+2/3*args.motion_fraction
+            if args.reset_tilt_deg is not None:
+                manifest['reset_tilt_rad']=math.radians(args.reset_tilt_deg)
             (log_dir / 'task.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
             (log_dir / 'agent.json').write_text(json.dumps(agent_config, indent=2), encoding='utf-8')
         runner = None
@@ -222,7 +236,7 @@ def build(args):
                 initialize_actor(runner.alg.actor, activation='relu' if args.profile=='linkage_v4' else 'elu')
             if args.checkpoint:
                 load_cfg={'actor':True,'critic':True,'optimizer':False,'iteration':False} if args.warm_start else None
-                runner.load(str(args.checkpoint),load_cfg=load_cfg)
+                runner.load(str(args.checkpoint),load_cfg=load_cfg,map_location=args.device)
                 if args.learning_rate is not None:
                     runner.alg.learning_rate=args.learning_rate
                     for group in runner.alg.optimizer.param_groups:
@@ -272,6 +286,17 @@ def smoke(args, env, wrapped):
 
 def main():
     args = parser().parse_args()
+    rank=int(os.environ.get('RANK','0'))
+    world_size=int(os.environ.get('WORLD_SIZE','1'))
+    if world_size>1:
+        if args.mode!='train' or args.run_dir is None or args.seed_only:
+            raise ValueError('Distributed launch requires train --run-dir (not --seed-only)')
+        local_rank=int(os.environ['LOCAL_RANK'])
+        args.device=f'cuda:{local_rank}'
+        args.seed+=rank
+        os.environ['MUJOCO_EGL_DEVICE_ID']=str(local_rank)
+        import torch
+        torch.cuda.set_device(local_rank)
     args.num_envs = args.num_envs if args.num_envs is not None else {'train': 256, 'smoke': 4, 'evaluate': 8, 'video': 1}[args.mode]
     if args.num_envs < 1 or args.iterations < 1 or not math.isfinite(args.duration) or args.duration <= 3:
         raise ValueError('Positive num-envs/iterations and finite duration > 3 s are required')
@@ -300,7 +325,22 @@ def main():
                 print('INITIALIZED_NEURAL_POLICY_SAVED (zero PPO updates)',flush=True)
                 return
             runner.learn(num_learning_iterations=args.iterations, init_at_random_ep_len=False)
-            (log_dir / 'complete.json').write_text(json.dumps({'completed': True, 'iterations_requested': args.iterations}), encoding='utf-8')
+            if world_size>1:
+                import torch.distributed as dist
+                digest=hashlib.sha256()
+                for name,parameter in runner.alg.actor.named_parameters():
+                    digest.update(name.encode())
+                    digest.update(parameter.detach().cpu().contiguous().numpy().tobytes())
+                hashes=[None]*world_size
+                dist.all_gather_object(hashes,digest.hexdigest())
+                if len(set(hashes))!=1:
+                    raise RuntimeError(f'Distributed actor parameters diverged: {hashes}')
+                if rank==0:
+                    (log_dir/'rank_sync.json').write_text(json.dumps({
+                        'world_size':world_size,'total_num_envs':args.num_envs*world_size,
+                        'actor_parameter_hashes':hashes,'synchronized':True},indent=2))
+            if rank==0:
+                (log_dir / 'complete.json').write_text(json.dumps({'completed': True, 'iterations_requested': args.iterations}), encoding='utf-8')
         elif args.mode == 'evaluate':
             from .evaluation import evaluate
             evaluate(args, env, wrapped, runner)
@@ -312,6 +352,10 @@ def main():
             args.video.with_suffix('.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
     finally:
         env.close()
+        if world_size>1:
+            import torch.distributed as dist
+            if dist.is_initialized():
+                dist.destroy_process_group()
 
 
 if __name__ == '__main__':

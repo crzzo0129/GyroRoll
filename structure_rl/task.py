@@ -63,7 +63,7 @@ def metric(env,name,morphology):
     raise ValueError(name)
 
 
-def reset_robot(env,env_ids,morphology,phase,profile='baseline',motion_fraction=1.):
+def reset_robot(env,env_ids,morphology,phase,profile='baseline',motion_fraction=1.,reset_tilt_deg=None):
     if env_ids is None:env_ids=torch.arange(env.num_envs,device=env.device)
     n=len(env_ids);r=env.scene['robot']
     state=r.data.default_root_state[env_ids].clone()
@@ -75,6 +75,8 @@ def reset_robot(env,env_ids,morphology,phase,profile='baseline',motion_fraction=
         angles[:,:2]*=RESET_TILT[phase]/.015
         if phase=='moving':
             angles[:,:2]*=(1/3+2/3*motion_fraction)
+    if reset_tilt_deg is not None:
+        angles[:,:2]=(torch.rand((n,2),device=env.device)*2-1)*(reset_tilt_deg*torch.pi/180)
     if getattr(env,'_fixed_reset',False):angles[:]=0
     if hasattr(env,'_evaluation_roll'):angles[:,0]=env._evaluation_roll[env_ids]
     if hasattr(env,'_evaluation_pitch'):angles[:,1]=env._evaluation_pitch[env_ids]

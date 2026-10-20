@@ -21,9 +21,16 @@ def main():
     p.add_argument('--checkpoint',type=Path)
     p.add_argument('--learning-rate',type=float,default=1e-6)
     p.add_argument('--graded-moving',action='store_true',help='Evaluate 10%, 25%, 50%, then full moving lessons')
+    p.add_argument('--direct-tracking',action='store_true',help='Train full mixed commands immediately; no warmup/moving lessons')
+    p.add_argument('--gpus',type=int,default=1,help='Synchronized workers; num-envs is the total across GPUs')
+    p.add_argument('--reset-tilt-deg',type=float,help='Initial pose perturbation; also used for direct tracking evaluation')
     p.add_argument('--min-learning-rate',type=float,default=1e-9)
     a=p.parse_args()
     if min(a.block_iterations,a.max_blocks,a.num_envs)<1:raise ValueError('Counts must be positive')
+    if a.gpus<1 or a.num_envs%a.gpus:
+        raise ValueError('num-envs must be divisible by gpus')
+    if a.direct_tracking and (a.graded_moving or not a.checkpoint):
+        raise ValueError('Direct tracking requires a checkpoint and cannot combine with graded-moving')
     if not all(math.isfinite(v) and v>0 for v in (a.learning_rate,a.min_learning_rate)):
         raise ValueError('Learning rates must be finite and positive')
     if a.checkpoint:
@@ -41,14 +48,23 @@ def main():
     completed_phases=[]
     def evaluate(checkpoint,phase,path,fraction=1.):
         path.parent.mkdir(parents=True,exist_ok=True)
-        subprocess.run([sys.executable,'-u','-m','structure_rl.linkage_gate',
-            '--checkpoint',str(checkpoint),'--phase',phase,'--motion-fraction',str(fraction),'--output',str(path)],check=True)
+        command=[sys.executable,'-u','-m','structure_rl.linkage_gate',
+            '--checkpoint',str(checkpoint),'--phase',phase,'--motion-fraction',str(fraction),'--output',str(path)]
+        if a.direct_tracking and phase=='tracking' and a.reset_tilt_deg is not None:
+            command+=['--tilt-deg',str(a.reset_tilt_deg)]
+        subprocess.run(command,check=True)
         return json.loads(path.read_text())
     try:
         lessons=[('warmup',1.),*[( 'moving',f) for f in ((.1,.25,.5,1.) if a.graded_moving else (1.,))],('tracking',1.)]
+        if a.direct_tracking:
+            lessons=[('tracking',1.)]
+            guard=evaluate(checkpoint,'warmup',a.output/'balance_baseline.json')
+            if promotion_passed(guard):
+                completed_phases.append(('warmup',1.))
         for phase,fraction in lessons:
             lesson=phase if fraction==1 else f'{phase}_{fraction:g}'
-            status.update(phase=phase,motion_fraction=fraction)
+            status.update(status='evaluating_baseline',phase=phase,motion_fraction=fraction,
+                          direct_tracking=a.direct_tracking,total_num_envs=a.num_envs,world_size=a.gpus);save()
             baseline=evaluate(checkpoint,phase,a.output/lesson/'baseline.json',fraction) if checkpoint else None
             if baseline and promotion_passed(baseline,motion_fraction=fraction):
                 status['history'].append({'phase':phase,'motion_fraction':fraction,'baseline_passed':True,'checkpoint':str(checkpoint)})
@@ -58,9 +74,14 @@ def main():
             for block in range(a.max_blocks):
                 directory=a.output/lesson/f'block_{block:02d}'
                 status.update(status='training',phase=phase,block=block);save()
-                command=[sys.executable,'-u','-m','structure_rl','train','--morphology','roll_linkage',
+                launcher=([sys.executable,'-u','-m','torch.distributed.run','--standalone',
+                           f'--nproc_per_node={a.gpus}','-m','structure_rl'] if a.gpus>1
+                          else [sys.executable,'-u','-m','structure_rl'])
+                command=[*launcher,'train','--morphology','roll_linkage',
                     '--profile',a.profile,'--phase',phase,'--motion-fraction',str(fraction),'--iterations',str(a.block_iterations),
-                    '--learning-rate',str(learning_rate),'--num-envs',str(a.num_envs),'--seed',str(a.seed),'--run-dir',str(directory)]
+                    '--learning-rate',str(learning_rate),'--num-envs',str(a.num_envs//a.gpus),'--seed',str(a.seed),'--run-dir',str(directory)]
+                if a.reset_tilt_deg is not None:
+                    command+=['--reset-tilt-deg',str(a.reset_tilt_deg)]
                 if checkpoint:command+=['--checkpoint',str(checkpoint)]
                 with (a.output/'commands.jsonl').open('a') as file:file.write(json.dumps(command)+'\n')
                 subprocess.run(command,check=True)

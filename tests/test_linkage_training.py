@@ -12,6 +12,42 @@ from structure_rl.linkage_seed import affine_seed,initialize_actor,grounded_heig
 
 
 class LinkageTrainingTests(unittest.TestCase):
+    def test_direct_tracking_launches_one_shared_policy_on_two_workers(self):
+        from structure_rl.linkage_curriculum import main
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);seed=root/'model_0.pt';seed.touch()
+            seed.with_name('task.json').write_text(json.dumps({'training_profile':'linkage_v4'}))
+            commands=[]
+            def run(command,check):
+                commands.append(command)
+                if 'train' in command:
+                    directory=Path(command[command.index('--run-dir')+1])
+                    directory.mkdir(parents=True);(directory/'model_1.pt').touch()
+                    return
+                phase=command[command.index('--phase')+1]
+                output=Path(command[command.index('--output')+1])
+                output.parent.mkdir(parents=True,exist_ok=True)
+                output.write_text(json.dumps({'phase':phase,'duration_s':15.,'trials_per_case':16,
+                    'cases':[{'name':name,'survival_rate':1.,'pass_rate':1. if phase=='warmup' else .5,
+                              'mean_survival_s':15.,'max_closure_error_m':.0001}
+                             for name,_,_ in gate_cases(phase)]}))
+            with patch('sys.argv',['curriculum','--output',str(root/'run'),'--profile','linkage_v4',
+                    '--checkpoint',str(seed),'--max-blocks','1','--direct-tracking',
+                    '--gpus','2','--num-envs','1024','--reset-tilt-deg','.1']), \
+                    patch('structure_rl.linkage_curriculum.subprocess.run',side_effect=run):
+                main()
+            training=[c for c in commands if 'train' in c]
+            self.assertEqual(len(training),1)
+            command=training[0]
+            self.assertIn('torch.distributed.run',command)
+            self.assertIn('--nproc_per_node=2',command)
+            self.assertEqual(command[command.index('--num-envs')+1],'512')
+            self.assertEqual(command[command.index('--phase')+1],'tracking')
+            self.assertEqual(command[command.index('--reset-tilt-deg')+1],'0.1')
+            self.assertFalse(any('moving' in c for c in commands))
+            tracking_checks=[c for c in commands if 'structure_rl.linkage_gate' in c and 'tracking' in c]
+            self.assertTrue(all('--tilt-deg' in c for c in tracking_checks))
+
     def test_curriculum_resumes_preserved_checkpoint_after_regression(self):
         from structure_rl.linkage_curriculum import main
         with tempfile.TemporaryDirectory() as temporary:
