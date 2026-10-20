@@ -24,7 +24,7 @@ def main():
     parser.add_argument("--iterations", type=int, default=12)
     parser.add_argument("--drive-only", action="store_true")
     args = parser.parse_args()
-    output = ROOT / "results/nested_tuning"
+    output = ROOT / "results/wheelbot_cargo/nested_tuning"
     output.mkdir(exist_ok=True, parents=True)
     config = json.loads((ROOT / "wheelbot/nested_controller.json").read_text())
     trial_path = output / "trial_controller.json"

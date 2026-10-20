@@ -153,6 +153,8 @@ def diagnose(args, env, wrapped, runner, *, heading_fn=None):
     scales = torch.tensor([settings.flywheel_speed_limit, settings.rolling_speed_limit], device=env.device)
     policy = runner.get_inference_policy(device=env.device)
     env.reset()
+    action_smoothing = args.action_smoothing
+    previous_action = None
     command = torch.tensor([args.speed, 0.0, args.turn], device=env.device)
     rows, terminated, elapsed = [], False, 0.0
     for step in range(math.ceil(args.duration / env.step_dt)):
@@ -162,8 +164,11 @@ def diagnose(args, env, wrapped, runner, *, heading_fn=None):
             if not torch.isfinite(raw).all():
                 raise RuntimeError("Policy produced a non-finite action")
             action = raw.clamp(-1, 1)
+            if previous_action is not None:
+                action = action_smoothing * action + (1 - action_smoothing) * previous_action
+            previous_action = action
             target = action * scales
-            _, _, done, _ = wrapped.step(raw)
+            _, _, done, _ = wrapped.step(action)
             elapsed = (step + 1) * env.step_dt
             if bool(done.any()):
                 terminated = True
@@ -189,6 +194,7 @@ def diagnose(args, env, wrapped, runner, *, heading_fn=None):
             rows.append(row)
     report = {"checkpoint": str(args.checkpoint), "policy": "deterministic_mean",
               "command": [args.speed, args.turn], "seed": args.seed,
+              "action_smoothing": action_smoothing,
               "settings": manifest["settings"], "step_dt_s": env.step_dt,
               "requested_duration_s": args.duration, "simulated_duration_s": elapsed,
               "terminated_early": terminated, "sampling": "control_endpoint; auto-reset states excluded"}

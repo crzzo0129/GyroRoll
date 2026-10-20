@@ -54,7 +54,8 @@ def main():
         print(f"{checkpoint.name}: {score:.3f} (speed {speed:.3f}, yaw {yaw:.3f}, "
               f"lateral {lateral:.3f}, {result['duration']:.1f}s)", flush=True)
     ranked.sort(key=lambda r: r["score"])
-    destination = args.output or ROOT / "results" / args.kind / "checkpoint_ranking.json"
+    from result_paths import legacy_result_dir
+    destination = args.output or legacy_result_dir(args.kind) / "checkpoint_ranking.json"
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(ranked, indent=2))
     print(f"Best: {ranked[0]['checkpoint']} score={ranked[0]['score']:.3f}")

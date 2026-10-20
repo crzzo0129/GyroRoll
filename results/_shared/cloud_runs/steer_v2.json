@@ -1,0 +1,125 @@
+{
+  "date": "2026-10-19",
+  "notebook_name": "micro-duck",
+  "notebook_id": "f04eb0bd-e440-4ee7-97c0-1e1ee444dbb7",
+  "qz_job_id": "qzcli_structure_20261019_1792421979_4c30baa7",
+  "remote_root": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_steer_v2_20261019",
+  "source_checkpoint": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_20261019_v1/logs/structure_rl/raked_steer/2026-10-19_compare01/tracking/model_7498.pt",
+  "status_at_last_check": "complete_reports_and_videos_downloaded_verified",
+  "training_profile": "steer_v2",
+  "num_envs_each": 256,
+  "seed": 42,
+  "iterations_per_stage": 2000,
+  "stages": 2,
+  "learning_rate": 0.0001,
+  "learning_rate_schedule": "fixed",
+  "warm_start_std": 0.08,
+  "preflight": {
+    "local_tests_passed": 18,
+    "cloud_tests_passed": 5,
+    "gpu_smoke": "passed",
+    "ppo_updates": 5,
+    "checkpoint_reload_and_evaluation": "passed",
+    "job_id": "qzcli_structure_20261019_1792421766_5af00549"
+  },
+  "pipelines": {
+    "balanced": {
+      "physical_gpu": 0,
+      "mirror_loss_coefficient": 0,
+      "status_file": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_steer_v2_20261019/logs/steer_v2/balanced/status.json",
+      "pid": 1162701,
+      "last_observed_iteration": 3998,
+      "checkpoints_written": 1,
+      "status": "complete",
+      "new_iterations_completed": 4000,
+      "final_checkpoint": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_steer_v2_20261019/logs/steer_v2/balanced/stage2/model_3998.pt",
+      "exit_code": 0
+    },
+    "balanced_mirror": {
+      "physical_gpu": 1,
+      "mirror_loss_coefficient": 1,
+      "status_file": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_steer_v2_20261019/logs/steer_v2/balanced_mirror/status.json",
+      "pid": 1162702,
+      "last_observed_iteration": 3998,
+      "checkpoints_written": 1,
+      "status": "complete",
+      "new_iterations_completed": 4000,
+      "exit_code": 0,
+      "final_checkpoint": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_steer_v2_20261019/logs/steer_v2/balanced_mirror/stage2/model_3998.pt"
+    }
+  },
+  "remote_jobs": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_steer_v2_20261019/logs/steer_v2/launch/jobs.json",
+  "bundle_sha256": "d5c92b23d4e608656d70be87b05e9752b8fcf0cd1c3cccb303810fc507586f34",
+  "baseline_reports_local": "results/structure_rl/downloads/2026-10-19_compare01",
+  "reports_zip_sha256": "42efff40777f9c2a178371e9d2684a0e37543c566325412d9098bfe638d84508",
+  "evaluation": "15 s; original 96 trials plus 48 negative-initial-speed trials; same original pass criteria, heading drift also reported",
+  "checked_at": "2026-10-20T00:17:22.688034+08:00",
+  "stage1_evaluation": {
+    "balanced": {
+      "matched_96": {
+        "survived": 96,
+        "passed": 50
+      },
+      "negative_initial_48": {
+        "survived": 40,
+        "passed": 20
+      }
+    },
+    "balanced_mirror": {
+      "matched_96": {
+        "survived": 96,
+        "passed": 54
+      },
+      "negative_initial_48": {
+        "survived": 40,
+        "passed": 5
+      }
+    },
+    "note": "After first 2000 new iterations. Final 4000-iteration evaluations pending. Baseline matched96: survived88 passed37. Heading drift and negative-start weaknesses persist."
+  },
+  "final_evaluation": {
+    "balanced": {
+      "matched_96": {
+        "trials": 96,
+        "survived": 96,
+        "passed": 54
+      },
+      "negative_initial_48": {
+        "trials": 48,
+        "survived": 28,
+        "passed": 9
+      }
+    },
+    "balanced_mirror": {
+      "matched_96": {
+        "trials": 96,
+        "survived": 95,
+        "passed": 40
+      },
+      "negative_initial_48": {
+        "trials": 48,
+        "survived": 40,
+        "passed": 12
+      }
+    }
+  },
+  "recommended_checkpoint": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_steer_v2_20261019/logs/steer_v2/balanced/stage1/model_1999.pt",
+  "selection_reason": "Best observed combined 144-trial pass count (70) and original reverse-case pass count (15/16); heading control remains inadequate.",
+  "local_final_report": "results/structure_rl/downloads/steer_v2_final/summary.html",
+  "rendering": {
+    "job_id": "qzcli_structure_20261019_1792425863_4ef0ce98",
+    "physical_egl_gpu": 1,
+    "method": "GPU policy trajectories recorded first, then separate MuJoCo pose replay for rendering",
+    "video_duration_seconds": 45,
+    "video_frames_each": 1080,
+    "download_sha256_verified": true,
+    "preview_checked": [
+      "reverse",
+      "forward_to_reverse"
+    ]
+  },
+  "local_videos": [
+    "results/structure_rl/downloads/steer_v2_final/videos/final_comparison.mp4",
+    "results/structure_rl/downloads/steer_v2_final/videos/balanced_stage1.mp4"
+  ]
+}

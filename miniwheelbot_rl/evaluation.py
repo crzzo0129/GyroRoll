@@ -28,6 +28,7 @@ def evaluate_robust_tracking(args, env, wrapped, runner, *, heading_fn=None):
              ("stop_push_right", 0., (0., -1.5))]
     report = {"checkpoint": str(args.checkpoint), "stage": args.stage,
               "suite": "robust", "seed": args.seed, "duration_s": args.duration,
+              "action_smoothing": args.action_smoothing,
               "push_window_s": [5., 5.2], "force_frame": "world, at base body CoM",
               "stop_go_segments": [[0, 1.], [4, 0.], [8, -1.], [12, 0.]],
               "stop_planar_rmse_limit_m_s": .10, "cases": []}
@@ -37,6 +38,7 @@ def evaluate_robust_tracking(args, env, wrapped, runner, *, heading_fn=None):
     try:
         for name, speed, push in cases:
             env.reset()
+            previous_action = None
             alive = torch.ones(env.num_envs, dtype=torch.bool, device=env.device)
             sums = torch.zeros((env.num_envs, 3), device=env.device)
             stop_sums = torch.zeros((env.num_envs, 2), device=env.device)
@@ -55,6 +57,10 @@ def evaluate_robust_tracking(args, env, wrapped, runner, *, heading_fn=None):
                 robot.write_external_wrench_to_sim(forces, zeros, body_ids=body_ids)
                 with torch.inference_mode():
                     actions = policy(wrapped.get_observations())
+                    if previous_action is not None:
+                        actions = (args.action_smoothing * actions +
+                                   (1 - args.action_smoothing) * previous_action)
+                    previous_action = actions
                     _, _, done, _ = wrapped.step(actions)
                 alive &= ~done.bool()
                 transition = name == "stop_go" and any(s <= t < s + 1 for s in (4, 8, 12))
@@ -137,6 +143,7 @@ def evaluate_curriculum(args, env, wrapped, runner, *, heading_fn=None):
                   ("slope_rise_right", "right", 3, 0, 0.3, 0, 0)]
     report = {"checkpoint": str(args.checkpoint), "stage": args.stage,
               "seed": args.seed, "duration_s": args.duration, "suite": "curriculum",
+              "action_smoothing": args.action_smoothing,
               "speed_definition": "surface-tangent forward; yaw = horizontal heading rate",
               "recovery_deadline_s": lesson.recovery_seconds,
               "stable_duration_s": lesson.stable_seconds,
@@ -148,6 +155,7 @@ def evaluate_curriculum(args, env, wrapped, runner, *, heading_fn=None):
         for name, pose, column, yaw, speed, turn, push in cases:
             env._evaluation_pose, env._evaluation_column, env._evaluation_yaw = pose, column, yaw
             env.reset()
+            previous_action = None
             alive = torch.ones(env.num_envs, dtype=torch.bool, device=env.device)
             ever_fell = torch.zeros_like(alive)
             recovered = torch.zeros_like(alive)
@@ -168,6 +176,10 @@ def evaluate_curriculum(args, env, wrapped, runner, *, heading_fn=None):
                     env.sim.forward()
                 with torch.inference_mode():
                     actions = policy(wrapped.get_observations())
+                    if previous_action is not None:
+                        actions = (args.action_smoothing * actions +
+                                   (1 - args.action_smoothing) * previous_action)
+                    previous_action = actions
                     _, _, done, _ = wrapped.step(actions)
                     monitor = state(env)
                     ever_fell |= (monitor.attempts > 0) & alive

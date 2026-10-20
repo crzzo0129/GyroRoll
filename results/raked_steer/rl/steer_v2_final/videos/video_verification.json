@@ -1,0 +1,20 @@
+{
+  "balanced_stage1": {
+    "frames": 1080,
+    "reverse_last6s_mean_actual_m_s": -1.002,
+    "after_reversal_last5s_mean_actual_m_s": -1.0706,
+    "any_terminated": false
+  },
+  "balanced_stage2": {
+    "frames": 1080,
+    "reverse_last6s_mean_actual_m_s": -1.0821,
+    "after_reversal_last5s_mean_actual_m_s": -1.1251,
+    "any_terminated": false
+  },
+  "balanced_mirror_stage2": {
+    "frames": 1080,
+    "reverse_last6s_mean_actual_m_s": -1.026,
+    "after_reversal_last5s_mean_actual_m_s": -1.0649,
+    "any_terminated": false
+  }
+}

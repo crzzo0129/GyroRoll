@@ -10,8 +10,8 @@ from PIL import Image,ImageDraw,ImageFont
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--name',required=True);p.add_argument('--stage',type=int,required=True)
-    p.add_argument('--input',type=Path,default=Path('results/steer_v2_trajectories'))
-    p.add_argument('--output',type=Path,default=Path('results/steer_v2_final'));a=p.parse_args()
+    p.add_argument('--input',type=Path,default=Path('results/raked_steer/trajectories'))
+    p.add_argument('--output',type=Path,default=Path('results/raked_steer/rl/steer_v2_final'));a=p.parse_args()
     stem=f'{a.name}_stage{a.stage}';trajectory=np.load(a.input/(stem+'.npz'))
     report=json.loads((a.input/(stem+'.json')).read_text())
     model=mujoco.MjModel.from_xml_path(str(a.input/'scene/scene.xml'))

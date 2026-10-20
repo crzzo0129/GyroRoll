@@ -1,0 +1,70 @@
+{
+  "task_version": "structure_velocity_v1",
+  "mjlab": "1.3.0",
+  "policy_version": "bounded_mean_gaussian_v1",
+  "runtime_versions": {
+    "mjlab": "1.3.0",
+    "torch": "2.9.1",
+    "mujoco": "3.10.0",
+    "mujoco-warp": "3.8.1",
+    "warp-lang": "1.12.0"
+  },
+  "morphology": "raked_steer",
+  "phase": "tracking",
+  "motors": {
+    "drive_limit": 35.0,
+    "drive_kv": 0.25,
+    "drive_torque": 2.4,
+    "rotor_limit": 250.0,
+    "rotor_kv_each": 0.06,
+    "rotor_torque_each": 1.2,
+    "steer_limit": 0.7,
+    "steer_kp": 8.0,
+    "steer_kd": 0.25,
+    "steer_torque": 2.4
+  },
+  "seed": 42,
+  "num_envs": 256,
+  "iterations_requested": 5000,
+  "source_checkpoint": "logs/structure_rl/raked_steer/2026-10-19_compare01/moving/model_2499.pt",
+  "observation_dimension": 16,
+  "action_dimension": 2,
+  "action_order": [
+    "drive_rad_s",
+    "steer_rad"
+  ],
+  "command_order": [
+    "forward_m_s",
+    "heading_rate_rad_s"
+  ],
+  "geometry_sha256": "e5112cd6d5c6a4ef5a27966b7d1d6764b2c4c406f7cde91f7aa14fffa6cfa908",
+  "reward_weights": {
+    "forward": 4.0,
+    "yaw": 2.0,
+    "upright": 1.0,
+    "lateral": -0.5,
+    "roll": -0.05,
+    "pitch": -0.01,
+    "action_rate": -0.1,
+    "torque": -0.005,
+    "overspeed": -1.0,
+    "failure": -10.0,
+    "roll_angle": -2.0
+  },
+  "commands": {
+    "forward": [
+      -1.0,
+      1.0
+    ],
+    "yaw_rate": [
+      -0.3,
+      0.3
+    ],
+    "standing_fraction": 0.25
+  },
+  "physics_dt": 0.002,
+  "policy_dt": 0.01,
+  "rotor_sync_validation_tolerance_rad_s": 0.01,
+  "algorithm": "PPO; native finite-torque motor servos; no expert balance controller",
+  "initialization": "moving: 0.5 to 1 m/s; tracking: half zero, half 0.8 m/s; warmup: zero"
+}

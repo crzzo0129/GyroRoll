@@ -13,13 +13,13 @@ from wheelbot.recovery_control import PredictiveRecovery
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--controller',type=Path,default=Path('results/chamfer_recovery/tuned.json'))
-    p.add_argument('--reference',type=Path,default=Path('results/chamfer_recovery/reference.npz'))
+    p.add_argument('--controller',type=Path,default=Path('results/wheelbot_cargo/chamfer_recovery/tuned.json'))
+    p.add_argument('--reference',type=Path,default=Path('results/wheelbot_cargo/chamfer_recovery/reference.npz'))
     p.add_argument('--timesteps',type=float,nargs='+',default=[.002,.001,.0005])
     p.add_argument('--rolls',type=float,nargs='+',default=[90,-90])
     p.add_argument('--pitch',type=float,default=0)
     p.add_argument('--duration',type=float,default=15)
-    p.add_argument('--output-dir',type=Path,default=Path('results/chamfer_recovery/validation'))
+    p.add_argument('--output-dir',type=Path,default=Path('results/wheelbot_cargo/chamfer_recovery/validation'))
     args=p.parse_args()
     config=json.loads(args.controller.read_text())
     args.output_dir.mkdir(parents=True,exist_ok=True)

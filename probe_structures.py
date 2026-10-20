@@ -36,8 +36,13 @@ except ImportError:
         raise ValueError('Riccati iteration did not converge')
 
 ROOT = Path(__file__).resolve().parent
-OUT = ROOT / "results/structure_comparison"
+OUT = ROOT / "results/comparisons/structure_concepts"
 DT = .01
+
+
+def model_output(kind):
+    family = {'twin': 'twin_flywheel', 'steer': 'raked_steer'}[kind]
+    return ROOT / 'results' / family / 'local_lqr'
 
 
 def xml(kind, rake=30., trail=.03, coupling=None):
@@ -327,7 +332,7 @@ def validate():
               'initial_flywheel_speed':0.,'payload':None,'fixed_chassis_geometry':True},'models':{},'cases':[]}
     for kind in ('twin','steer'):
         plant=Plant(kind,15.,-.16)
-        folder=OUT/kind;folder.mkdir(exist_ok=True)
+        folder=model_output(kind);folder.mkdir(parents=True,exist_ok=True)
         (folder/'model.xml').write_text(plant.xml,encoding='utf-8')
         schedule=ScheduledFeedback(plant)
         moving= schedule if kind=='twin' else Feedback(plant,1.,integral_q=10.)
@@ -364,7 +369,7 @@ def render():
     from PIL import Image,ImageDraw
     previews=[]
     for kind in ('twin','steer'):
-        folder=OUT/kind
+        folder=model_output(kind)
         model=mujoco.MjModel.from_xml_path(str(folder/'model.xml'))
         data=mujoco.MjData(model)
         camera=mujoco.MjvCamera();mujoco.mjv_defaultFreeCamera(model,camera)
@@ -416,7 +421,7 @@ def write_report():
     plots=[]
     for kind,label in [('twin','双飞轮'),('steer','斜轴转向')]:
         for name in ('straight','moving_straight','moving_left','moving_push'):
-            z=np.genfromtxt(OUT/kind/(name+'.csv'),delimiter=',',skip_header=1)
+            z=np.genfromtxt(model_output(kind)/(name+'.csv'),delimiter=',',skip_header=1)
             plots.append(chart(label+' · '+LABELS[name],z,[('横滚角',1),('航向角',8)],'rad'))
     html='''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
     <title>两种结构重新验证</title><style>body{max-width:1250px;margin:35px auto;padding:0 22px;font-family:system-ui,sans-serif;color:#17283c;background:#f5f7fa;line-height:1.7}h1{font-size:30px}section,.card{background:white;padding:18px;border-radius:10px;margin:16px 0}table{border-collapse:collapse;width:100%;background:white;font-size:14px}td,th{padding:9px;border-bottom:1px solid #ddd;text-align:left}img,video{max-width:100%}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}svg{width:100%;font-size:12px}.notice{border-left:5px solid #cb6f16;padding:14px;background:#fff4e5}@media(max-width:800px){.grid{grid-template-columns:1fr}table{font-size:12px}}</style>
@@ -433,10 +438,10 @@ def write_report():
     <h2>结果</h2><p>不倒与跟踪分别计数。跟踪通过要求完整存活，3 s 后速度 RMSE &lt;0.15 m/s、5 s 后航向角速度 RMSE &lt;0.10 rad/s。这个判据只约束速度和角速度，不保证累计航向正确，必须同时看末端航向误差。起停工况只统计存活，不纳入这个固定命令跟踪判据。表中误差为 +1° 初始 roll、2 ms 步长的代表回放；完整 84 条结果在 summary.json。失败回放的短期误差不能当作通过。</p>
     <table><tr><th>结构</th><th>工况</th><th>存活</th><th>跟踪通过</th><th>速度 RMSE m/s</th><th>航向角速度 RMSE rad/s</th><th>末端航向误差 °</th></tr>'''+''.join(rows)+'''</table>
     <section><h2>观看代表回放</h2><p>失败视频在失败点停止，不拼接重置后的画面。</p><div class="grid">
-    <div><h3>双飞轮：从零起步</h3><video controls src="twin/straight.mp4"></video></div>
-    <div><h3>斜轴转向：已有初速下左转</h3><video controls src="steer/moving_left.mp4"></video></div>
-    <div><h3>双飞轮：行进侧推</h3><video controls src="twin/moving_push.mp4"></video></div>
-    <div><h3>斜轴转向：行进侧推</h3><video controls src="steer/moving_push.mp4"></video></div></div></section>
+    <div><h3>双飞轮：从零起步</h3><video controls src="../../twin_flywheel/local_lqr/straight.mp4"></video></div>
+    <div><h3>斜轴转向：已有初速下左转</h3><video controls src="../../raked_steer/local_lqr/moving_left.mp4"></video></div>
+    <div><h3>双飞轮：行进侧推</h3><video controls src="../../twin_flywheel/local_lqr/moving_push.mp4"></video></div>
+    <div><h3>斜轴转向：行进侧推</h3><video controls src="../../raked_steer/local_lqr/moving_push.mp4"></video></div></div></section>
     <h2>姿态与航向</h2><div class="grid">'''+''.join(plots)+'''</div>
     <section><h2>限制与下一步</h2><p>这是两个新概念模型的局部可行性测试，未训练新 PPO、未复用旧结构策略。当前结果尚不足以决定最终硬件：双飞轮未表现出独立航向控制优势；斜轴方案需要解决低速起停，并缩短负拖距或优化机身/轴线后重新验证。抗推“未倒”不等于恢复原路径，尤其不能作为运输光滑货物已通过的证据。</p><p>本报告没有实测电机转矩—转速曲线、延迟、传感噪声、货物滑动或地面随机化。轮胎为 128 段胶囊构成的圆截面近似；细步长一致性不等于接触模型或硬件真实性已验证。</p><p>复现：在项目根目录运行 <code>.venv-mjlab/Scripts/python.exe probe_structures.py --validate --render</code>。目录保留两个 model.xml、controller.json、CSV、逐帧 qpos、MP4 和总表。</p></section></html>'''
     (OUT/'report.html').write_text(html,encoding='utf-8')

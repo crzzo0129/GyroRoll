@@ -76,12 +76,14 @@ CUDA_VISIBLE_DEVICES=1 /opt/mjlab-venv/bin/python -u -m structure_rl.pipeline --
 将下面的 `CHECKPOINT` 替换为某个新训练目录里的 `model_*.pt`。必须同时保留其 `task.json` 和 `geometry.xml`。
 
 ```bash
-python -m structure_rl evaluate --checkpoint CHECKPOINT --duration 15 --output results/comparison/evaluation.json
+python -m structure_rl evaluate --checkpoint CHECKPOINT --duration 15
 CUDA_VISIBLE_DEVICES=1 MUJOCO_EGL_DEVICE_ID=0 MUJOCO_GL=egl PYOPENGL_PLATFORM=egl \
 python -m structure_rl video --checkpoint CHECKPOINT --duration 15 --speed 1 --turn 0 \
-  --initial-speed 0 --video results/comparison/forward.mp4
+  --initial-speed 0
 ```
 
+评估默认按 checkpoint 模型写入 `results/twin_flywheel/rl/` 或
+`results/raked_steer/rl/`，视频同样按模型归类；可以用 `--output` / `--video` 指定新实验路径。
 评估自动生成 JSON 和同名 HTML，覆盖静止、正向、反向、左右转、停—走—停；
 分别使用 0 与 0.8 m/s 初始化，并在 8 个环境中覆盖 ±1° 的初始 roll。
 报告存活率、跟踪通过率、速度误差、累计航向误差、最大倾角、动作变化与饱和率。
@@ -176,4 +178,4 @@ CUDA_VISIBLE_DEVICES=1 MUJOCO_GL=egl PYOPENGL_PLATFORM=egl MUJOCO_EGL_DEVICE_ID=
 Use `--stage 2` for the final model, or `--name balanced_mirror --stage 2`
 for the final symmetry model. Run from the isolated `structure_rl_steer_v2_20261019`
 experiment directory containing `logs/steer_v2`. Outputs go to
-`results/steer_v2_trajectories` and `results/steer_v2_final`.
+`results/raked_steer/trajectories` and `results/raked_steer/rl/steer_v2_final`.

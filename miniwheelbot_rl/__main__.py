@@ -25,17 +25,19 @@ def parser():
     p.add_argument("--checkpoint", type=Path)
     p.add_argument("--randomize", action="store_true")
     p.add_argument("--duration", type=float, default=15.0)
-    p.add_argument("--output", type=Path, default=Path("results/nested_rl/evaluation.json"))
-    p.add_argument("--diagnostic-dir", type=Path, default=Path("results/nested_rl/diagnostic"))
+    p.add_argument("--output", type=Path, default=Path("results/wheelbot_cargo/rl/evaluation.json"))
+    p.add_argument("--diagnostic-dir", type=Path, default=Path("results/wheelbot_cargo/rl/diagnostic"))
     p.add_argument("--log-root", type=Path, default=Path("logs/rsl_rl/nested_velocity_mjlab130"))
     p.add_argument("--flywheel-limit", type=float, default=250.0, help="signed rad/s")
     p.add_argument("--rolling-limit", type=float, default=35.0, help="signed rad/s")
     p.add_argument("--viewer", choices=("viser", "native"), default="viser")
     p.add_argument("--viewer-host", default="127.0.0.1")
     p.add_argument("--viewer-port", type=int, default=8080)
-    p.add_argument("--video", type=Path, default=Path("results/nested_rl/rollout.mp4"))
+    p.add_argument("--video", type=Path, default=Path("results/wheelbot_cargo/rl/rollout.mp4"))
     p.add_argument("--speed", type=float, default=0.5, help="video/diagnose forward command, m/s")
     p.add_argument("--turn", type=float, default=0.0, help="video/diagnose heading-rate command, rad/s")
+    p.add_argument("--action-smoothing", type=float, default=1.0,
+                   help="EMA action weight: 1 disables smoothing, smaller values smooth more")
     p.add_argument("--start-pose", choices=("random", "upright", "tilt_left", "tilt_right",
                    "left", "right", "front", "back"),
                    help="recovery stages: train defaults random; replay defaults upright")
@@ -63,6 +65,8 @@ def build(args):
 
     if args.num_envs < 1 or args.iterations < 1 or args.duration <= 3:
         raise ValueError("num-envs/iterations must be positive and duration must exceed 3 s")
+    if not 0.0 < args.action_smoothing <= 1.0:
+        raise ValueError("action-smoothing must be in (0, 1]")
     if args.device.startswith("cuda") and not torch.cuda.is_available():
         raise RuntimeError("CUDA is unavailable. Install CUDA-enabled PyTorch and check NVIDIA driver.")
     configure_torch_backends()
@@ -191,9 +195,11 @@ def evaluate(args, env, wrapped, runner):
              ("left", 0.8, 0.35), ("right", 0.8, -0.35),
              ("reverse_left", -0.8, 0.35), ("reverse_right", -0.8, -0.35))
     report = {"mjlab": "1.3.0", "checkpoint": str(args.checkpoint),
-              "duration_s": args.duration, "seed": args.seed, "cases": []}
+              "duration_s": args.duration, "seed": args.seed,
+              "action_smoothing": args.action_smoothing, "cases": []}
     for name, speed, yaw in cases:
         env.reset()
+        previous_action = None
         alive = torch.ones(env.num_envs, dtype=torch.bool, device=env.device)
         error_sums = torch.zeros((env.num_envs, 3), device=env.device)
         counts = torch.zeros(env.num_envs, device=env.device)
@@ -204,6 +210,10 @@ def evaluate(args, env, wrapped, runner):
             obs = wrapped.get_observations()
             with torch.inference_mode():
                 actions = policy(obs)
+                if previous_action is not None:
+                    actions = (args.action_smoothing * actions +
+                               (1 - args.action_smoothing) * previous_action)
+                previous_action = actions
                 robot = env.scene["robot"]
                 vx, vy = robot.data.root_link_lin_vel_b[:, 0], robot.data.root_link_lin_vel_b[:, 1]
                 if args.stage in LESSONS:

@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 
 
+from result_paths import legacy_result_dir
+
 ROOT = Path(__file__).resolve().parent
 INFO = {
     "wheelbot": {
@@ -29,7 +31,8 @@ def value(x, units=""):
 def render(kind):
     info = INFO[kind]
     results_name = "steerbot_moderate" if kind == "steerbot" else kind
-    results = ROOT / "results" / results_name
+    results = legacy_result_dir(results_name)
+    results_relative = results.relative_to(ROOT).as_posix()
     acceptance = json.loads((results / "acceptance.json").read_text())
     trajectory = json.loads((results / "seed_0.json").read_text())["trajectory"]
     measured = acceptance["individual"]
@@ -86,12 +89,12 @@ def render(kind):
     controller_artifact = (f" 参数文件 <code>{html.escape(controller_file)}</code>。"
                            if controller_file else "")
     alternate = ""
-    alternate_path = ROOT / "results" / "steerbot_trail050" / "acceptance.json"
+    alternate_path = ROOT / 'results/steerbot_legacy/steerbot_trail050' / "acceptance.json"
     if kind == "steerbot" and alternate_path.exists():
         alt = json.loads(alternate_path.read_text())
         alternate = (f'<h2>长拖距对照</h2><div class="lead"><div>'
                      f'<video controls muted playsinline preload="metadata" '
-                     f'src="../results/steerbot_trail050/rollout.mp4"></video>'
+                     f'src="../results/steerbot_legacy/steerbot_trail050/rollout.mp4"></video>'
                      f'</div><div><p>转向轴机械拖距扩至 0.50 m，采用单独训练的 PPO 策略。'
                      f'五种子扰动/DR 验收：完整通过 {alt["pass_rate"]:.0%}，'
                      f'速度 RMSE {value(alt["mean_steady_speed_rmse"], " m/s")}，'
@@ -99,12 +102,12 @@ def render(kind):
                      f'侧向速度 RMSE {value(alt["mean_turn_lateral_rmse"], " m/s")}。'
                      f'该长叉臂目前为理想刚体运动学，没有建模实体叉臂的额外质量和柔度；'
                      f'仍未通过偏航验收。</p></div></div>')
-    lightfork_path = ROOT / "results" / "steerbot_lightfork" / "acceptance.json"
+    lightfork_path = ROOT / 'results/steerbot_legacy/steerbot_lightfork' / "acceptance.json"
     if kind == "steerbot" and lightfork_path.exists():
         alt = json.loads(lightfork_path.read_text())
         alternate += (f'<h2>轻量长叉对照</h2><div class="lead"><div>'
                       f'<video controls muted playsinline preload="metadata" '
-                      f'src="../results/steerbot_lightfork/rollout.mp4"></video>'
+                      f'src="../results/steerbot_legacy/steerbot_lightfork/rollout.mp4"></video>'
                       f'</div><div><p>0.50 m 拖距、转向头质量减至 0.005 kg，'
                       f'以完整左右转 15 s 名义轨迹差分进化调参。名义偏航 RMSE 曾达到 '
                       f'0.164 rad/s，但五种子扰动/DR 验收完整通过 {alt["pass_rate"]:.0%}，'
@@ -113,12 +116,12 @@ def render(kind):
                       f'侧向速度 RMSE {value(alt["mean_turn_lateral_rmse"], " m/s")}。'
                       f'轻量化提高名义灵敏度，但目前控制器对质量/摩擦变化敏感；'
                       f'长叉臂本身的质量与柔度也尚未建模。</p></div></div>')
-    negative_path = ROOT / "results/steerbot_negative015/acceptance.json"
+    negative_path = ROOT / "results/steerbot_legacy/steerbot_negative015/acceptance.json"
     if kind == "steerbot" and negative_path.exists():
         alt = json.loads(negative_path.read_text())
         alternate += (f'<h2>负拖距转向候选</h2><div class="lead"><div>'
                       f'<video controls muted playsinline preload="metadata" '
-                      f'src="../results/steerbot_negative015/rollout.mp4"></video>'
+                      f'src="../results/steerbot_legacy/steerbot_negative015/rollout.mp4"></video>'
                       f'</div><div><p>转向轴在轮轴后 0.15 m（负拖距），窄圆柱轮胎半宽 '
                       f'0.004 m，转向电机 2.4 N·m，车身主质量 0.645 kg、下移 0.062 m。'
                       f'对称直行工作点线性化后用 LQR 和积分偏航控制；无扰动名义回放'
@@ -129,14 +132,14 @@ def render(kind):
                       f'侧向速度 RMSE {value(alt["mean_turn_lateral_rmse"], " m/s")}。'
                       f'负拖距并非被动稳定；当前控制器不能充分抑制扰动后的偏航振荡。'
                       f'</p></div></div>')
-    candidate_path = ROOT / "results/steerbot_negative_candidate/acceptance.json"
+    candidate_path = ROOT / "results/steerbot_legacy/steerbot_negative_candidate/acceptance.json"
     if kind == "steerbot" and candidate_path.exists():
         alt = json.loads(candidate_path.read_text())
-        mirrored = json.loads((ROOT / "results/steerbot_negative_mirror/acceptance.json").read_text())
-        holdout = json.loads((ROOT / "results/steerbot_negative_holdout/acceptance.json").read_text())
+        mirrored = json.loads((ROOT / "results/steerbot_legacy/steerbot_negative_mirror/acceptance.json").read_text())
+        holdout = json.loads((ROOT / "results/steerbot_legacy/steerbot_negative_holdout/acceptance.json").read_text())
         alternate = (f'<h2>强冲击压力测试</h2><div class="lead"><div>'
                      f'<video controls muted playsinline preload="metadata" '
-                     f'src="../results/steerbot_negative_candidate/rollout.mp4"></video>'
+                     f'src="../results/steerbot_legacy/steerbot_negative_candidate/rollout.mp4"></video>'
                      f'</div><div><p>转向轴在轮轴后约 0.145 m，主轮半宽 4 mm，'
                      f'车身主质量 0.737 kg；对称直行工作点 LQR，单个转向电机。'
                      f'同一负拖距候选，冲击升至 0.25 m/s 与 0.25 rad/s。'
@@ -151,24 +154,24 @@ def render(kind):
                      f'偏航 RMSE {value(mirrored["mean_turn_yaw_rmse"], " rad/s")}。'
                      f'强冲击下未达到双向操纵验收。'
                      f'</p></div></div>' + alternate)
-    original_steer_path = ROOT / "results/steerbot/acceptance.json"
+    original_steer_path = ROOT / "results/steerbot_legacy/steerbot/acceptance.json"
     if kind == "steerbot" and original_steer_path.exists():
         original = json.loads(original_steer_path.read_text())
         alternate += (f'<h2>原正拖距模型</h2><div class="lead"><div>'
                       f'<video controls muted playsinline preload="metadata" '
-                      f'src="../results/steerbot/rollout.mp4"></video>'
+                      f'src="../results/steerbot_legacy/steerbot/rollout.mp4"></video>'
                       f'</div><div><p>原始转向轴在轮轴前 0.12 m，转向电机 0.6 N·m、'
                       f'轮胎半宽 0.016 m。五种子强冲击/DR 通过 '
                       f'{original["pass_rate"]:.0%}，偏航 RMSE '
                       f'{value(original["mean_turn_yaw_rmse"], " rad/s")}，'
                       f'侧向速度 RMSE {value(original["mean_turn_lateral_rmse"], " m/s")}。'
                       f'该结果不能代表上方负拖距构型。</p></div></div>')
-    tilted_path = ROOT / "results" / "wheelbot_tilt040" / "acceptance.json"
+    tilted_path = ROOT / 'results/wheelbot_legacy/wheelbot_tilt040' / "acceptance.json"
     if kind == "wheelbot" and tilted_path.exists():
         alt = json.loads(tilted_path.read_text())
         alternate = (f'<h2>倾斜飞轮轴对照</h2><div class="lead"><div>'
                      f'<video controls muted playsinline preload="metadata" '
-                     f'src="../results/wheelbot_tilt040/rollout.mp4"></video>'
+                     f'src="../results/wheelbot_legacy/wheelbot_tilt040/rollout.mp4"></video>'
                      f'</div><div><p>将原水平飞轮轴倾斜 {value(alt["tilt"], " rad")}，'
                      f'保留两电机和单轮接触；起始飞轮预旋转 110 rad/s。'
                      f'这是探索性变型，不是已发表 Wheelbot 原构型。'
@@ -179,12 +182,12 @@ def render(kind):
                      f'单独的 GPU PPO 阶段 6 在抽样 checkpoint 的名义回放中最佳偏航 RMSE '
                      f'约 0.423 rad/s，没有计入上述反馈验收；不同指令幅值和镜像顺序也未达到泛化要求。'
                      f'</p></div></div>')
-    original_path = ROOT / "results" / "wheelbot_original" / "acceptance.json"
+    original_path = ROOT / 'results/wheelbot_legacy/wheelbot_original' / "acceptance.json"
     if kind == "wheelbot" and original_path.exists():
         alt = json.loads(original_path.read_text())
         alternate += (f'<h2>原始宽胎/低力矩对照</h2><div class="lead"><div>'
                       f'<video controls muted playsinline preload="metadata" '
-                      f'src="../results/wheelbot_original/rollout.mp4"></video>'
+                      f'src="../results/wheelbot_legacy/wheelbot_original/rollout.mp4"></video>'
                       f'</div><div><p>原模型轮胎半宽 0.016 m、飞轮电机 0.48 N·m。'
                       f'直行基线在五种子扰动/DR 的整段转向验收中通过 {alt["pass_rate"]:.0%}，'
                       f'速度 RMSE {value(alt["mean_steady_speed_rmse"], " m/s")}，'
@@ -192,12 +195,12 @@ def render(kind):
                       f'该基线未闭环跟踪偏航指令，不能把窄胎候选的通过结果'
                       f'归于原宽胎几何。</p></div></div>')
     if kind == "wheelbot":
-        mirror_path = ROOT / "results/wheelbot_thin_mirror/acceptance.json"
-        holdout_path = ROOT / "results/wheelbot_holdout/acceptance.json"
-        strong_mirror_ext_path = ROOT / "results/wheelbot_mirror_holdout/acceptance.json"
-        fresh_paths = [ROOT / f"results/{name}/acceptance.json" for name in
+        mirror_path = ROOT / "results/wheelbot_legacy/wheelbot_thin_mirror/acceptance.json"
+        holdout_path = ROOT / "results/wheelbot_legacy/wheelbot_holdout/acceptance.json"
+        strong_mirror_ext_path = ROOT / "results/wheelbot_legacy/wheelbot_mirror_holdout/acceptance.json"
+        fresh_paths = [legacy_result_dir(name) / "acceptance.json" for name in
                        ("wheelbot_fresh_holdout", "wheelbot_fresh_mirror_holdout")]
-        moderate_paths = [ROOT / f"results/{name}/acceptance.json" for name in
+        moderate_paths = [legacy_result_dir(name) / "acceptance.json" for name in
                           ("wheelbot_moderate_mirror", "wheelbot_moderate_holdout",
                            "wheelbot_moderate_mirror_holdout")]
         if mirror_path.exists() and holdout_path.exists():
@@ -262,19 +265,19 @@ def render(kind):
                      "首页验收、机身 +y 外力和缓丘视频均运行 <code>--controller lqr</code>。"
                      "下方历史对照视频的控制器各不相同：长拖距对照使用 PPO checkpoint，"
                      "其余注明优化反馈的对照不是 PPO。训练过 PPO 不等于该策略已通过本构型验收。</p>")
-        force_result = json.loads((ROOT / "results/steerbot_side_force/acceptance.json").read_text())
-        force_trace = json.loads((ROOT / "results/steerbot_side_force/seed_0.json").read_text())["trajectory"]
-        hill_result = json.loads((ROOT / "results/steerbot_hill_accept/acceptance.json").read_text())
-        hill_trace = json.loads((ROOT / "results/steerbot_hill.json").read_text())["trajectory"]
-        hill_turns = [json.loads((ROOT / f"results/steerbot_hill_{side}.json").read_text())["summary"]
+        force_result = json.loads((ROOT / "results/steerbot_legacy/steerbot_side_force/acceptance.json").read_text())
+        force_trace = json.loads((ROOT / "results/steerbot_legacy/steerbot_side_force/seed_0.json").read_text())["trajectory"]
+        hill_result = json.loads((ROOT / "results/steerbot_legacy/steerbot_hill_accept/acceptance.json").read_text())
+        hill_trace = json.loads((ROOT / "results/steerbot_legacy/steerbot_hill.json").read_text())["trajectory"]
+        hill_turns = [json.loads((ROOT / f"results/steerbot_legacy/steerbot_hill_{side}.json").read_text())["summary"]
                       for side in ("left", "right")]
-        mirrored = json.loads((ROOT / "results/steerbot_moderate_mirror/acceptance.json").read_text())
-        held = json.loads((ROOT / "results/steerbot_moderate_holdout/acceptance.json").read_text())
-        held_mirror = json.loads((ROOT / "results/steerbot_moderate_mirror_holdout/acceptance.json").read_text())
+        mirrored = json.loads((ROOT / "results/steerbot_legacy/steerbot_moderate_mirror/acceptance.json").read_text())
+        held = json.loads((ROOT / "results/steerbot_legacy/steerbot_moderate_holdout/acceptance.json").read_text())
+        held_mirror = json.loads((ROOT / "results/steerbot_legacy/steerbot_moderate_mirror_holdout/acceptance.json").read_text())
         strong = json.loads(candidate_path.read_text())
-        strong_mirror = json.loads((ROOT / "results/steerbot_negative_mirror/acceptance.json").read_text())
+        strong_mirror = json.loads((ROOT / "results/steerbot_legacy/steerbot_negative_mirror/acceptance.json").read_text())
         fresh = ""
-        fresh_paths = [ROOT / f"results/{name}/acceptance.json" for name in
+        fresh_paths = [legacy_result_dir(name) / "acceptance.json" for name in
                        ("steerbot_fresh_holdout", "steerbot_fresh_mirror_holdout")]
         if all(path.exists() for path in fresh_paths):
             f, fm = [json.loads(path.read_text()) for path in fresh_paths]
@@ -322,9 +325,9 @@ def render(kind):
 <li>对手柄转弯目标先低通。通过模型求稳态转向输入及对应的横滚/侧向/转向角状态作为参考值。电机输出可读成：<code>稳态转弯前馈 − 状态偏差反馈 − 偏航误差积分</code>，最终限幅到 ±1；转向关节的实际最大力矩为 2.4 N·m。每 2 ms 用新观测执行一次。</li></ol>
 <p>这是一套 2 m/s 附近的局部反馈，不是全速域的非线性稳定性证明。偏航角速度归零只表示不再转动；受到横向力后航向角可能已经改变，若想回到世界坐标的原路线还需外层航向/路径闭环。仿真使用无噪声的理想状态，未验证硬件传感和延迟。</p>
 <h2>机身 +y 外力实验</h2>
-<div class="media-pair"><video controls muted playsinline preload="metadata" src="../results/steerbot_side_force/rollout.mp4"></video><div><p>在<strong>世界坐标 +y</strong> 方向，将 {force_result['side_push_force']:.1f} N 直接施加到机身 <code>base</code> 质心附近，8.5–8.7 s 持续 0.2 s，冲量约 0.2 N·s。视频左上角只在施力帧显示标记；此实验<strong>关闭</strong>了原有的侧向速度/横滚角速度瞬时冲击。直行序列 0–2 s 为 1 m/s、2–11 s 为 2 m/s、11–15 s 为 1.5 m/s。</p><p>质量 ±15%、轮胎摩擦 1.1–1.9 的五个种子均行驶满 15 s，无跌倒；峰值横滚 {max(r['max_abs_roll'] for r in force_result['individual']):.3f} rad。包含受力瞬态的严格速度/偏航/侧滑综合阈值通过 {sum(r['pass_2m_turn'] for r in force_result['individual'])}/5，主要超标是瞬时偏航：转弯评价窗口（实际为直行）平均偏航 RMSE {force_result['mean_turn_yaw_rmse']:.3f} rad/s。种子 0 在 10–11 s 横滚与偏航角速度绝对值分别不超过 {max(abs(s['roll']) for s in force_trace if 10<s['t']<11):.3f} rad、{max(abs(s['yaw_rate']) for s in force_trace if 10<s['t']<11):.3f} rad/s。横滚恢复并不意味着原有横向位置恢复。</p></div></div>
+<div class="media-pair"><video controls muted playsinline preload="metadata" src="../results/steerbot_legacy/steerbot_side_force/rollout.mp4"></video><div><p>在<strong>世界坐标 +y</strong> 方向，将 {force_result['side_push_force']:.1f} N 直接施加到机身 <code>base</code> 质心附近，8.5–8.7 s 持续 0.2 s，冲量约 0.2 N·s。视频左上角只在施力帧显示标记；此实验<strong>关闭</strong>了原有的侧向速度/横滚角速度瞬时冲击。直行序列 0–2 s 为 1 m/s、2–11 s 为 2 m/s、11–15 s 为 1.5 m/s。</p><p>质量 ±15%、轮胎摩擦 1.1–1.9 的五个种子均行驶满 15 s，无跌倒；峰值横滚 {max(r['max_abs_roll'] for r in force_result['individual']):.3f} rad。包含受力瞬态的严格速度/偏航/侧滑综合阈值通过 {sum(r['pass_2m_turn'] for r in force_result['individual'])}/5，主要超标是瞬时偏航：转弯评价窗口（实际为直行）平均偏航 RMSE {force_result['mean_turn_yaw_rmse']:.3f} rad/s。种子 0 在 10–11 s 横滚与偏航角速度绝对值分别不超过 {max(abs(s['roll']) for s in force_trace if 10<s['t']<11):.3f} rad、{max(abs(s['yaw_rate']) for s in force_trace if 10<s['t']<11):.3f} rad/s。横滚恢复并不意味着原有横向位置恢复。</p></div></div>
 <h2>手柄越过缓丘</h2>
-<div class="media-pair"><video controls muted playsinline preload="metadata" src="../results/steerbot_hill.mp4"></video><div><p>独立 <a href="hill_model.xml">缓丘 MJCF</a> 使用同一负拖距机器人的关节、质量和控制器，仅将平地换成高度场；起点平地，沿世界 x=2–6 m 为 <code>sin²</code> 连续凸坡，峰高 0.06 m（最大坡度约 2.7°），x=4 m 达峰。两侧不碰撞的小球标出坡起、坡顶和坡尾；地形横向范围 ±100 m。</p><p>无外力、直行指令的五个 DR 种子均通过 15 s 越丘测试，速度稳态 RMSE 均值 {hill_result['mean_steady_speed_rmse']:.3f} m/s，横滚峰值 {max(r['max_abs_roll'] for r in hill_result['individual']):.3f} rad；视频为名义 2 m/s 指令、{hill_trace[-1]['t']:.0f} s 回放。额外的种子 0、2 m/s 持续左/右各 0.1 rad/s 转向 15 s 回放均未跌倒，偏航跟踪 RMSE 分别为 {hill_turns[0]['turn_yaw_rmse']:.3f} / {hill_turns[1]['turn_yaw_rmse']:.3f} rad/s。结果<strong>未</strong>覆盖坡上急转、任意手柄动作或加外力的组合。</p></div></div>
+<div class="media-pair"><video controls muted playsinline preload="metadata" src="../results/steerbot_legacy/steerbot_hill.mp4"></video><div><p>独立 <a href="hill_model.xml">缓丘 MJCF</a> 使用同一负拖距机器人的关节、质量和控制器，仅将平地换成高度场；起点平地，沿世界 x=2–6 m 为 <code>sin²</code> 连续凸坡，峰高 0.06 m（最大坡度约 2.7°），x=4 m 达峰。两侧不碰撞的小球标出坡起、坡顶和坡尾；地形横向范围 ±100 m。</p><p>无外力、直行指令的五个 DR 种子均通过 15 s 越丘测试，速度稳态 RMSE 均值 {hill_result['mean_steady_speed_rmse']:.3f} m/s，横滚峰值 {max(r['max_abs_roll'] for r in hill_result['individual']):.3f} rad；视频为名义 2 m/s 指令、{hill_trace[-1]['t']:.0f} s 回放。额外的种子 0、2 m/s 持续左/右各 0.1 rad/s 转向 15 s 回放均未跌倒，偏航跟踪 RMSE 分别为 {hill_turns[0]['turn_yaw_rmse']:.3f} / {hill_turns[1]['turn_yaw_rmse']:.3f} rad/s。结果<strong>未</strong>覆盖坡上急转、任意手柄动作或加外力的组合。</p></div></div>
 <p><strong>手柄操纵缓丘</strong>：在项目根目录、有桌面图形环境的终端运行以下命令（视频本身是固定指令回放，不是交互界面）。</p>
 <pre><code>PY=/home/legged-ma/miniforge3/envs/zhu_mjlab/bin/python
 $PY sim.py steerbot --model steerbot/hill_model.xml --controller lqr --lqr-tuning steerbot/negative_candidate.json --speed 2 --turn 0 --duration 60</code></pre>
@@ -346,8 +349,8 @@ $PY sim.py steerbot --model steerbot/hill_model.xml --controller lqr --lqr-tunin
 <tr><td>空格 / R</td><td>空格把转向指令归零；R 重置机器人位置、速度和控制器内部状态，但保留当前手动指令。</td></tr>
 </tbody></table></div>
 <p>手柄一旦连接，其左摇杆每个物理步覆盖键盘设定的速度/转向；拔掉手柄可单独使用键盘。启动时模型给予 0.8 m/s 前进初速度和匹配的轮速，不是零速站立控制。<code>--test</code> 模式使用固定验收序列，会忽略手动速度与转向输入。</p>
-<p>复现实测中等冲击的五种子回放：<code>$PY accept.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.json --kick-scale .6 --seeds 5 --video --output-dir results/steerbot_moderate</code>。该命令在无桌面时使用 EGL 录制视频，不能用作实时手柄模式。</p>
-<p>复现外力和坡道：<code>$PY accept.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.json --no-disturbance --test-turn-amplitude 0 --side-push-force 1 --side-push-duration .2 --seeds 5 --video --output-dir results/steerbot_side_force</code>；<code>$PY accept.py steerbot --model steerbot/hill_model.xml --controller lqr --lqr-tuning steerbot/negative_candidate.json --no-disturbance --test-turn-amplitude 0 --seeds 5 --output-dir results/steerbot_hill_accept</code>。手动场景若也要施力，可在第四条命令加 <code>--side-push-force 1 --side-push-start 8.5 --side-push-duration .2</code>。</p>
+<p>复现实测中等冲击的五种子回放：<code>$PY accept.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.json --kick-scale .6 --seeds 5 --video --output-dir results/steerbot_legacy/steerbot_moderate</code>。该命令在无桌面时使用 EGL 录制视频，不能用作实时手柄模式。</p>
+<p>复现外力和坡道：<code>$PY accept.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.json --no-disturbance --test-turn-amplitude 0 --side-push-force 1 --side-push-duration .2 --seeds 5 --video --output-dir results/steerbot_legacy/steerbot_side_force</code>；<code>$PY accept.py steerbot --model steerbot/hill_model.xml --controller lqr --lqr-tuning steerbot/negative_candidate.json --no-disturbance --test-turn-amplitude 0 --seeds 5 --output-dir results/steerbot_legacy/steerbot_hill_accept</code>。手动场景若也要施力，可在第四条命令加 <code>--side-push-force 1 --side-push-start 8.5 --side-push-duration .2</code>。</p>
 '''
     training_heading = ("历史强化学习尝试（非本页主演示）"
                         if kind == "steerbot" else "训练设置")
@@ -383,7 +386,7 @@ pre {{ max-width:100%; overflow-x:auto; padding:16px; background:#e5ecee; border
 </style></head><body>
 <header><strong>独轮车 · MuJoCo 实验记录</strong><nav><a href="../wheelbot/report.html">飞轮构型</a><a href="../steerbot/report.html">转向构型</a></nav></header>
 <main><div class="eyebrow">{kind.upper()} / 两执行器 / 单轮接触</div><h1>{info['title']}</h1><p>{info['subtitle']}</p>
-<section class="lead"><div><video controls muted playsinline preload="metadata" src="../results/{results_name}/rollout.mp4"></video><p class="eyebrow">种子 0：{recording_label}；2 m/s 阶跃、左右转与扰动按实际持续时间执行</p></div>
+<section class="lead"><div><video controls muted playsinline preload="metadata" src="../{results_relative}/rollout.mp4"></video><p class="eyebrow">种子 0：{recording_label}；2 m/s 阶跃、左右转与扰动按实际持续时间执行</p></div>
 <div class="overview {status}"><div class="eyebrow">验收结论 · 冲击 {kick_magnitude:.2f} m/s + {kick_magnitude:.2f} rad/s</div><div class="verdict">{verdict}</div><p>通过 {sum(r['pass_2m_turn'] for r in measured)} / {len(measured)} 个随机种子。目标是完整 15 秒不跌倒、稳态速度 RMSE &lt; 0.35 m/s、直行/转弯/回正偏航 RMSE 各 &lt; 0.15 rad/s、机身侧向速度 RMSE &lt; 0.35 m/s。</p>
 <div class="metrics"><div class="metric"><span>稳态速度 RMSE · 平均</span><b>{value(acceptance['mean_steady_speed_rmse'], ' m/s')}</b></div><div class="metric"><span>直行偏航 RMSE · 平均</span><b>{value(acceptance.get('mean_straight_yaw_rmse'), ' rad/s')}</b></div><div class="metric"><span>转向偏航 RMSE · 平均</span><b>{value(acceptance['mean_turn_yaw_rmse'], ' rad/s')}</b></div><div class="metric"><span>回正偏航 RMSE · 平均</span><b>{value(acceptance.get('mean_recovery_yaw_rmse'), ' rad/s')}</b></div><div class="metric"><span>转向侧滑 RMSE · 平均</span><b>{value(acceptance.get('mean_turn_lateral_rmse'), ' m/s')}</b></div></div></div></section>
 {demo_note}

@@ -13,6 +13,8 @@ def record_video(args, env, wrapped, runner):
     fps = 30
     policy = runner.get_inference_policy(device=env.device)
     env.reset()
+    action_smoothing = getattr(args, "action_smoothing", 1.0)
+    previous_action = None
     target = torch.tensor([args.speed, 0.0, args.turn], device=env.device)
     args.video.parent.mkdir(parents=True, exist_ok=True)
     frames = 0
@@ -30,7 +32,11 @@ def record_video(args, env, wrapped, runner):
                         raise RuntimeError("Video requires rgb_array rendering")
                     writer.append_data(frame)
                     frames += 1
-                _, _, done, _ = wrapped.step(policy(obs))
+                action = policy(obs).clamp(-1, 1)
+                if previous_action is not None:
+                    action = action_smoothing * action + (1 - action_smoothing) * previous_action
+                previous_action = action
+                _, _, done, _ = wrapped.step(action)
             elapsed = (step + 1) * env.step_dt
             if bool(done.any()):
                 # MJLab automatically resets on failure. Never show that reset as
@@ -40,7 +46,8 @@ def record_video(args, env, wrapped, runner):
     report = {"checkpoint": str(args.checkpoint), "command": [args.speed, args.turn],
               "seed": args.seed, "requested_duration_s": args.duration,
               "simulated_duration_s": elapsed, "terminated_early": terminated,
-              "fps": fps, "frames": frames, "video": str(args.video)}
+              "fps": fps, "frames": frames, "video": str(args.video),
+              "action_smoothing": action_smoothing}
     if hasattr(env, "_recovery"):
         from .recovery import snapshot
         report["recovery"] = snapshot(env)

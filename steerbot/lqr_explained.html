@@ -105,7 +105,7 @@
     <nav class="toc" aria-label="推导目录"><a href="#mechanics">① 横滚动力学</a><a href="#loops">② 速度/俯仰环</a><a href="#identify">③ 线性化 A、B</a><a href="#lqr">④ 积分增广与 Riccati</a><a href="#result">⑤ 结果与边界</a></nav>
 
     <section aria-labelledby="watch"><h2 id="watch">先看一次真实受力</h2>
-      <div class="split"><figure><video controls muted playsinline preload="metadata" src="../results/steerbot_side_force/rollout.mp4"></video><figcaption>8.5–8.7 秒，对机身施加世界 +y 方向 1 N 外力；左上角只在受力时显示标记。视频使用 LQR，不是 PPO。</figcaption></figure>
+      <div class="split"><figure><video controls muted playsinline preload="metadata" src="../results/steerbot_legacy/steerbot_side_force/rollout.mp4"></video><figcaption>8.5–8.7 秒，对机身施加世界 +y 方向 1 N 外力；左上角只在受力时显示标记。视频使用 LQR，不是 PPO。</figcaption></figure>
       <div><p>如果你推它一下，车身先倾、运动方向也会偏。控制器每隔 2 毫秒观察一次姿态和运动，再改变转向电机的力矩，让行进中的轮地反力参与扶正。</p><p>五个质量/摩擦随机种子均未跌倒；但把受力瞬间的偏航误差也严格考核时，只有 <strong>3/5</strong> 通过。它能恢复横滚，不等于能自动回到原来的路线。</p></div></div>
       <div class="facts"><div><b>1 个接地轮</b><span>轮子转动负责向前跑；只有轮胎与地面接触。</span></div><div><b>1 个转向电机</b><span>同时影响左右倾斜和朝向；没有额外的横滚电机。</span></div><div><b>必须运动</b><span>这套控制器从 0.8 m/s 初速起步，不是零速站立方案。</span></div></div>
     </section>
@@ -189,7 +189,7 @@ B ≈ [-0.06373, -6.07400, -0.36059, -7.17258, 0.19301, 17.18231]ᵀ</pre><p>数
     </section>
 
     <section aria-labelledby="result"><h2 id="result">第五步：它确实做到什么，还没做到什么？</h2>
-      <div class="split"><figure><video controls muted playsinline preload="metadata" src="../results/steerbot_hill.mp4"></video><figcaption>6 cm 连续缓丘的 2 m/s 名义回放，仍是同一个 LQR 控制器。</figcaption></figure><div><p>缓丘直行测试在五个质量/摩擦随机种子中 <strong>5/5</strong> 通过；1 N、0.2 s 机身侧向力实验五个种子均未跌倒，但严格偏航综合阈值为 <strong>3/5</strong>。这些数字证明的是指定仿真条件，不是任意地形与冲击。</p><p>更重要的是：它的状态里没有世界坐标 y 位置，也没有绝对航向角目标。外力之后横滚和偏航<strong>速度</strong>恢复，并不自动驶回原路线。</p></div></div>
+      <div class="split"><figure><video controls muted playsinline preload="metadata" src="../results/steerbot_legacy/steerbot_hill.mp4"></video><figcaption>6 cm 连续缓丘的 2 m/s 名义回放，仍是同一个 LQR 控制器。</figcaption></figure><div><p>缓丘直行测试在五个质量/摩擦随机种子中 <strong>5/5</strong> 通过；1 N、0.2 s 机身侧向力实验五个种子均未跌倒，但严格偏航综合阈值为 <strong>3/5</strong>。这些数字证明的是指定仿真条件，不是任意地形与冲击。</p><p>更重要的是：它的状态里没有世界坐标 y 位置，也没有绝对航向角目标。外力之后横滚和偏航<strong>速度</strong>恢复，并不自动驶回原路线。</p></div></div>
       <div class="limits"><div><strong>零速不保证平衡</strong><p>控制器依赖行进中的转向—轮地接触耦合；测试从非零前进速度起步。</p></div><div><strong>只在局部设计</strong><p>增益来自约 2 m/s 的理想状态模型；高速猛打方向、坡上强外力组合未通过普适验收。</p></div><div><strong>不是强化学习成果</strong><p>这三段主演示加载的是 LQR。项目确实训练过 PPO，但该策略没有取得这里的主验收结果。</p></div><div><strong>还不是实物证明</strong><p>没有传感噪声、转向机构柔度、轮胎形变、执行器延迟和温升模型。</p></div></div>
     </section>
 

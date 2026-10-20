@@ -1,0 +1,272 @@
+{
+  "axes": "Both axes use chassis +x; speeds are joint speeds relative to the chassis.",
+  "constraint": "q_left = sign*q_right; zero initial joint angles; fixed mode per rollout",
+  "limitation": "MuJoCo joint equalities are compliant numerical constraints, not bit-exact velocity identities.",
+  "control": "Two independent generalized commands: drive and coupled rotor; motor torque split [tau/2, sign*tau/2]. Opposite mode cancels direct roll authority; no claim of an optimized opposite-mode controller.",
+  "cases": [
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.002,
+      "initial_roll_deg": -1.0,
+      "command_speed": 0.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 2.454925152051146e-12,
+      "peak_flywheel_speed_rad_s": 23.29998573641295
+    },
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.002,
+      "initial_roll_deg": -1.0,
+      "command_speed": 1.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 3.682387728076719e-12,
+      "peak_flywheel_speed_rad_s": 23.30366230005462
+    },
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.002,
+      "initial_roll_deg": 1.0,
+      "command_speed": 0.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 2.851052727237402e-12,
+      "peak_flywheel_speed_rad_s": 23.299985736412925
+    },
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.002,
+      "initial_roll_deg": 1.0,
+      "command_speed": 1.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 1.616484723854228e-12,
+      "peak_flywheel_speed_rad_s": 23.303662300055397
+    },
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.001,
+      "initial_roll_deg": -1.0,
+      "command_speed": 0.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 3.0375701953744283e-13,
+      "peak_flywheel_speed_rad_s": 23.529415975600106
+    },
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.001,
+      "initial_roll_deg": -1.0,
+      "command_speed": 1.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 1.1226575225009583e-12,
+      "peak_flywheel_speed_rad_s": 23.533154954509975
+    },
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.001,
+      "initial_roll_deg": 1.0,
+      "command_speed": 0.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 1.1226575225009583e-12,
+      "peak_flywheel_speed_rad_s": 23.529415975600106
+    },
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.001,
+      "initial_roll_deg": 1.0,
+      "command_speed": 1.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 1.1226575225009583e-12,
+      "peak_flywheel_speed_rad_s": 23.533154954510806
+    },
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.0005,
+      "initial_roll_deg": -1.0,
+      "command_speed": 0.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 5.613287612504791e-13,
+      "peak_flywheel_speed_rad_s": 23.64424255003213
+    },
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.0005,
+      "initial_roll_deg": -1.0,
+      "command_speed": 1.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 3.885711197249009e-13,
+      "peak_flywheel_speed_rad_s": 23.64801284562931
+    },
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.0005,
+      "initial_roll_deg": 1.0,
+      "command_speed": 0.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 5.613287612504791e-13,
+      "peak_flywheel_speed_rad_s": 23.644242550032136
+    },
+    {
+      "mode": "equal",
+      "relation": "omega_left = 1 * omega_right",
+      "dt": 0.0005,
+      "initial_roll_deg": 1.0,
+      "command_speed": 1.0,
+      "survived": true,
+      "duration_s": 15.0,
+      "max_constraint_speed_error_rad_s": 5.595524044110789e-13,
+      "peak_flywheel_speed_rad_s": 23.648012845630106
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.002,
+      "initial_roll_deg": -1.0,
+      "command_speed": 0.0,
+      "survived": false,
+      "duration_s": 1.1300000000000001,
+      "max_constraint_speed_error_rad_s": 0.02446923042339222,
+      "peak_flywheel_speed_rad_s": 279.3530024204328
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.002,
+      "initial_roll_deg": -1.0,
+      "command_speed": 1.0,
+      "survived": false,
+      "duration_s": 0.8300000000000001,
+      "max_constraint_speed_error_rad_s": 0.02203820781039667,
+      "peak_flywheel_speed_rad_s": 274.9517828650743
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.002,
+      "initial_roll_deg": 1.0,
+      "command_speed": 0.0,
+      "survived": false,
+      "duration_s": 0.78,
+      "max_constraint_speed_error_rad_s": 0.016500530300902483,
+      "peak_flywheel_speed_rad_s": 264.1651708879388
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.002,
+      "initial_roll_deg": 1.0,
+      "command_speed": 1.0,
+      "survived": false,
+      "duration_s": 0.78,
+      "max_constraint_speed_error_rad_s": 0.019990973425535685,
+      "peak_flywheel_speed_rad_s": 264.16831055137965
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.001,
+      "initial_roll_deg": -1.0,
+      "command_speed": 0.0,
+      "survived": false,
+      "duration_s": 1.67,
+      "max_constraint_speed_error_rad_s": 0.011097048678976762,
+      "peak_flywheel_speed_rad_s": 282.2826126797921
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.001,
+      "initial_roll_deg": -1.0,
+      "command_speed": 1.0,
+      "survived": false,
+      "duration_s": 1.03,
+      "max_constraint_speed_error_rad_s": 0.011507296763994646,
+      "peak_flywheel_speed_rad_s": 282.5130943445751
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.001,
+      "initial_roll_deg": 1.0,
+      "command_speed": 0.0,
+      "survived": false,
+      "duration_s": 0.78,
+      "max_constraint_speed_error_rad_s": 0.0100722901421193,
+      "peak_flywheel_speed_rad_s": 264.16900751266326
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.001,
+      "initial_roll_deg": 1.0,
+      "command_speed": 1.0,
+      "survived": false,
+      "duration_s": 0.79,
+      "max_constraint_speed_error_rad_s": 0.009857854186691384,
+      "peak_flywheel_speed_rad_s": 264.17214799308204
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.0005,
+      "initial_roll_deg": -1.0,
+      "command_speed": 0.0,
+      "survived": false,
+      "duration_s": 2.18,
+      "max_constraint_speed_error_rad_s": 0.007637259747724556,
+      "peak_flywheel_speed_rad_s": 281.63738370878673
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.0005,
+      "initial_roll_deg": -1.0,
+      "command_speed": 1.0,
+      "survived": false,
+      "duration_s": 1.33,
+      "max_constraint_speed_error_rad_s": 0.007290122644775465,
+      "peak_flywheel_speed_rad_s": 281.20183040247
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.0005,
+      "initial_roll_deg": 1.0,
+      "command_speed": 0.0,
+      "survived": false,
+      "duration_s": 0.78,
+      "max_constraint_speed_error_rad_s": 0.005794896491750023,
+      "peak_flywheel_speed_rad_s": 264.1708572494717
+    },
+    {
+      "mode": "opposite",
+      "relation": "omega_left = -1 * omega_right",
+      "dt": 0.0005,
+      "initial_roll_deg": 1.0,
+      "command_speed": 1.0,
+      "survived": false,
+      "duration_s": 0.78,
+      "max_constraint_speed_error_rad_s": 0.005702396401773058,
+      "peak_flywheel_speed_rad_s": 264.1739977749111
+    }
+  ]
+}

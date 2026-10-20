@@ -38,7 +38,7 @@ def measurements(experiment, data):
 
 
 def main():
-    output = Path('results/chamfer_rise')
+    output = Path('results/wheelbot_cargo/chamfer_rise')
     output.mkdir(parents=True,exist_ok=True)
     results=[]
     canvas=Image.new('RGB',(1800,650),'#edf1f2')
@@ -46,7 +46,7 @@ def main():
     font=ImageFont.truetype('C:/Windows/Fonts/msyh.ttc',26)
     small=ImageFont.truetype('C:/Windows/Fonts/msyh.ttc',21)
     draw.text((36,20),'侧放接地对比 / 从 90° 放下，自然静置 2 秒',font=font,fill='#183740')
-    for index,(name,path) in enumerate((('修改前','results/local_rise/geometry.xml'),('下部斜切后','wheelbot/nested_model.xml'))):
+    for index,(name,path) in enumerate((('修改前','results/wheelbot_cargo/local_rise/geometry.xml'),('下部斜切后','wheelbot/nested_model.xml'))):
         for timestep in (.002,.001,.0005):
             ex=Experiment(timestep=timestep,model_path=path)
             for roll in (90.,-90.):

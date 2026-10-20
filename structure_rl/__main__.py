@@ -29,8 +29,8 @@ def parser():
     p.add_argument('--run-dir', type=Path, help='New directory for this training run')
     p.add_argument('--duration', type=float, default=15.)
     p.add_argument('--extended-evaluation', action='store_true', help='Also evaluate resets at -0.8 m/s')
-    p.add_argument('--output', type=Path, default=Path('results/structure_rl/evaluation.json'))
-    p.add_argument('--video', type=Path, default=Path('results/structure_rl/video.mp4'))
+    p.add_argument('--output', type=Path, help='Default: results/<model>/rl/evaluation.json')
+    p.add_argument('--video', type=Path, help='Default: results/<model>/rl/video.mp4')
     p.add_argument('--speed', type=float, default=1.)
     p.add_argument('--turn', type=float, default=0.)
     p.add_argument('--initial-speed', type=float, default=0., help='Video reset speed; 0 tests autonomous start')
@@ -64,6 +64,10 @@ def build(args):
         model_path = args.checkpoint.parent / 'geometry.xml'
     if args.morphology is None:
         raise ValueError('--morphology is required when starting from scratch')
+    family = 'twin_flywheel' if args.morphology == 'twin_sync' else 'raked_steer'
+    result_dir = Path('results') / family / 'rl'
+    args.output = args.output or result_dir / 'evaluation.json'
+    args.video = args.video or result_dir / 'video.mp4'
     args.phase = args.phase or ('warmup' if args.morphology == 'twin_sync' else 'moving')
     args.profile = args.profile or 'baseline'
     args.mirror_coeff = args.mirror_coeff if args.mirror_coeff is not None else (1. if args.profile=='steer_v2' else 0.)
@@ -194,7 +198,7 @@ def main():
         raise ValueError('Commands and initial speed must be finite')
     if args.mode in ('evaluate', 'video') and args.checkpoint is None:
         raise ValueError('Replay requires --checkpoint from structure_rl')
-    if args.mode == 'video' and (args.num_envs != 1 or args.video.suffix.lower() != '.mp4'):
+    if args.mode == 'video' and (args.num_envs != 1 or (args.video is not None and args.video.suffix.lower() != '.mp4')):
         raise ValueError('Video requires --num-envs 1 and an .mp4 path')
     if os.name == 'nt':
         os.environ['MUJOCO_GL'] = 'glfw'

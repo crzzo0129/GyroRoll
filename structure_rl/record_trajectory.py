@@ -17,7 +17,7 @@ def main():
     checkpoint=root/('model_1999.pt' if a.stage==1 else 'model_3998.pt')
     args=parser().parse_args(['evaluate','--checkpoint',str(checkpoint),'--duration','16','--num-envs','1'])
     env,wrapped,runner,_=build(args)
-    out=Path('results/steer_v2_trajectories');out.mkdir(parents=True,exist_ok=True)
+    out=Path('results/raked_steer/trajectories');out.mkdir(parents=True,exist_ok=True)
     policy=runner.get_inference_policy(device=env.device)
     fps=24;states=[];metrics=[];report={'name':a.name,'stage':a.stage,'checkpoint':str(checkpoint),
         'fps':fps,'initial_speed_m_s':0.,'initial_roll_deg':0.,'seed':42,'action_smoothing':1.,

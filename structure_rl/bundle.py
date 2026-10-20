@@ -8,7 +8,7 @@ import zipfile
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--output', type=Path, default=Path('results/structure_rl/deploy/structure_training.zip'))
+    p.add_argument('--output', type=Path, default=Path('results/_shared/deploy/structure_training.zip'))
     args = p.parse_args()
     root = Path(__file__).resolve().parents[1]
     files = list((root / 'structure_rl').glob('*.py'))

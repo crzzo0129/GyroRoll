@@ -15,7 +15,7 @@ def main():
     p.add_argument("--start", type=Path)
     p.add_argument("--torque-limit", type=float, default=2.4)
     p.add_argument("--flywheel-limit", type=float, default=250.)
-    p.add_argument("--output", type=Path, default=Path("results/local_rise/search.json"))
+    p.add_argument("--output", type=Path, default=Path("results/wheelbot_cargo/local_rise/search.json"))
     args = p.parse_args()
     ex = Experiment(args.torque_limit, args.flywheel_limit)
     rng = np.random.default_rng(args.seed)

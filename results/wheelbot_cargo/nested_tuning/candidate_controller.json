@@ -1,0 +1,25 @@
+{
+  "model": "wheelbot/nested_model.xml",
+  "status": "tuned on nominal replay; independent validation required",
+  "initial_rotor_speed": 100.0,
+  "reaction_gear": 2.4,
+  "outer_radius": 0.24,
+  "inner_radius": 0.205,
+  "rim_halfwidth": 0.095,
+  "recovery_yaw_gain": -0.3,
+  "recovery_yaw_integral_gain": 0.02,
+  "speed_slew": 1.0,
+  "turn_min_speed": 1.1,
+  "turn_full_speed": 1.8,
+  "startup_seconds": 2.0,
+  "startup_speed_limit": 0.6,
+  "params": [
+    0.1,
+    6.0,
+    0.2,
+    3.63,
+    1.15,
+    -0.2,
+    0.012
+  ]
+}

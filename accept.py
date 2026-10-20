@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from result_paths import legacy_result_dir
 
 
 ROOT = Path(__file__).resolve().parent
@@ -54,7 +55,7 @@ def main():
     parser.add_argument("--side-push-duration", type=float, default=.3)
     parser.add_argument("--rotor-speed", type=float, default=0.)
     args = parser.parse_args()
-    output = args.output_dir or ROOT / "results" / ("wheelbot_nested_open" if args.controller == "nested" else args.kind)
+    output = args.output_dir or legacy_result_dir("wheelbot_nested_open" if args.controller == "nested" else args.kind)
     output.mkdir(parents=True, exist_ok=True)
     results = []
     for seed in range(args.seed_start, args.seed_start + args.seeds):

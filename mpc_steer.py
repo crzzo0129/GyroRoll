@@ -139,7 +139,7 @@ def run(args):
                    speed_rmse=float(np.sqrt(np.mean(errors[0]))) if errors[0] else None,
                    yaw_rmse=float(np.sqrt(np.mean(errors[1]))) if errors[1] else None,
                    lateral_rmse=float(np.sqrt(np.mean(errors[2]))) if errors[2] else None)
-    output = ROOT / "results" / "steerbot_mpc_probe.json"
+    output = ROOT / 'results/steerbot_legacy/steerbot_mpc_probe.json'
     output.write_text(json.dumps(dict(summary=summary, trajectory=trajectory), indent=2))
     print(json.dumps(summary, indent=2))
 

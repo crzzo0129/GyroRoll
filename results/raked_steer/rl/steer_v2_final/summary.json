@@ -1,0 +1,47 @@
+[
+  {
+    "label": "原斜轴策略",
+    "matched_survived": 88,
+    "matched_passed": 37,
+    "extra_passed": null,
+    "all_passed": null,
+    "reverse_matched_passed": 0,
+    "source_checkpoint": "logs/structure_rl/raked_steer/2026-10-19_compare01/tracking/model_7498.pt"
+  },
+  {
+    "label": "普通优化 · 2000 次",
+    "matched_survived": 96,
+    "matched_passed": 50,
+    "extra_passed": 20,
+    "all_passed": 70,
+    "reverse_matched_passed": 15,
+    "source_checkpoint": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_steer_v2_20261019/logs/steer_v2/balanced/stage1/model_1999.pt"
+  },
+  {
+    "label": "普通优化 · 4000 次",
+    "matched_survived": 96,
+    "matched_passed": 54,
+    "extra_passed": 9,
+    "all_passed": 63,
+    "reverse_matched_passed": 2,
+    "source_checkpoint": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_steer_v2_20261019/logs/steer_v2/balanced/stage2/model_3998.pt"
+  },
+  {
+    "label": "对称约束 · 2000 次",
+    "matched_survived": 96,
+    "matched_passed": 54,
+    "extra_passed": 5,
+    "all_passed": 59,
+    "reverse_matched_passed": 1,
+    "source_checkpoint": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_steer_v2_20261019/logs/steer_v2/balanced_mirror/stage1/model_1999.pt"
+  },
+  {
+    "label": "对称约束 · 4000 次",
+    "matched_survived": 95,
+    "matched_passed": 40,
+    "extra_passed": 12,
+    "all_passed": 52,
+    "reverse_matched_passed": 0,
+    "source_checkpoint": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_steer_v2_20261019/logs/steer_v2/balanced_mirror/stage2/model_3998.pt"
+  }
+]

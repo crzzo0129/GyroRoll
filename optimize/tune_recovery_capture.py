@@ -12,7 +12,7 @@ from probe_rise import Experiment
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--controller',type=Path,required=True)
-    p.add_argument('--output',type=Path,default=Path('results/chamfer_recovery/tuned.json'))
+    p.add_argument('--output',type=Path,default=Path('results/wheelbot_cargo/chamfer_recovery/tuned.json'))
     p.add_argument('--trials',type=int,default=320)
     p.add_argument('--seed',type=int,default=93)
     args=p.parse_args()

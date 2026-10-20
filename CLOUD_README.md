@@ -111,7 +111,7 @@ python -m miniwheelbot_rl evaluate --suite robust --num-envs 16 --duration 15 \
 
 ```bash
 python -m pip install imageio==2.37.0 imageio-ffmpeg==0.6.0
-MUJOCO_GL=egl python -m miniwheelbot_rl video --checkpoint logs/rsl_rl/nested_velocity_mjlab130/RUN/model_XXX.pt --duration 15 --speed 0.5 --turn 0 --video results/nested_rl/forward.mp4
+MUJOCO_GL=egl python -m miniwheelbot_rl video --checkpoint logs/rsl_rl/nested_velocity_mjlab130/RUN/model_XXX.pt --duration 15 --speed 0.5 --turn 0 --video results/wheelbot_cargo/rl/forward.mp4
 ```
 
 把 checkpoint 路径换成实际文件，并保留旁边的 `task.json`、`geometry.xml` 和 `agent.json`。默认单环境、960×544、30 fps、跟随相机，不启动网页服务器。`--speed` 单位为 m/s，`--turn` 单位为 rad/s；warmup 建议先看 0.5 m/s 直行，后续可测试 `--speed 0.8 --turn 0.3`。发生跌倒等回合终止时录像提前停止，不把自动重置后的动作拼成连续成功运动；同名 JSON 记录实际时长与终止状态。依赖已安装后，录像本身不需要外网或 TensorBoard。Linux 无窗口渲染需要 NVIDIA EGL 支持。
@@ -145,7 +145,7 @@ ssh -p 22 -L 8080:127.0.0.1:8080 -L 6006:127.0.0.1:6006 用户名@云端地址
 ## 5. 独立评估
 
 ```bash
-python -m miniwheelbot_rl evaluate --num-envs 8 --duration 15 --checkpoint logs/rsl_rl/nested_velocity_mjlab130/RUN/model_XXX.pt --output results/nested_rl/evaluation.json
+python -m miniwheelbot_rl evaluate --num-envs 8 --duration 15 --checkpoint logs/rsl_rl/nested_velocity_mjlab130/RUN/model_XXX.pt --output results/wheelbot_cargo/rl/evaluation.json
 ```
 
 评估覆盖静止、1 m/s 前进、−1 m/s 后退，以及速度 ±0.8 m/s、转向角速度 ±0.35 rad/s 的四种转弯组合。每个初始状态必须全程不倒；去除前三秒启动阶段后，前进速度 RMSE <0.35 m/s、转向角速度 RMSE <0.15 rad/s、横向速度 RMSE <0.35 m/s 才计通过。报告分别给出每类存活率、通过率和各初始状态误差，跌倒后重置不会清除失败记录。可增加环境数、改变种子重复评估；建议每类通过率至少 95% 再认为该范围跟踪基本达标。
@@ -160,7 +160,7 @@ python -m miniwheelbot_rl evaluate --num-envs 8 --duration 15 --checkpoint logs/
 python -m miniwheelbot_rl diagnose \
   --checkpoint logs/rsl_rl/nested_velocity_mjlab130/RUN/model_XXX.pt \
   --duration 20 --speed 1.0 --turn 0 \
-  --diagnostic-dir results/nested_rl/diagnostic_forward
+  --diagnostic-dir results/wheelbot_cargo/rl/diagnostic_forward
 ```
 
 默认单环境，使用策略均值，不添加探索噪声，不修改 checkpoint。保留模型旁边的 `task.json` 和 `geometry.xml`；按模型保存的转速、力矩和几何参数运行。无需额外绘图库、外网或图形窗口。

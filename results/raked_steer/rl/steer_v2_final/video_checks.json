@@ -1,0 +1,22 @@
+{
+  "final_comparison.mp4": {
+    "sha256": "25b94f3061c4bb7047e03e97c44639cfa50d438326d30d6ab66d4312b4516f60",
+    "bytes": 2647211,
+    "frames": 1080,
+    "duration_s": 45.0,
+    "size": [
+      1280,
+      448
+    ]
+  },
+  "balanced_stage1.mp4": {
+    "sha256": "8915bb54037d496e5a24a8e617d3220e829a7a6fb4e942c1d29adb1b80405521",
+    "bytes": 1467436,
+    "frames": 1080,
+    "duration_s": 45.0,
+    "size": [
+      640,
+      448
+    ]
+  }
+}

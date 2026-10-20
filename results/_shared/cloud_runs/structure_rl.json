@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-19",
+  "notebook_name": "micro-duck",
+  "notebook_id": "f04eb0bd-e440-4ee7-97c0-1e1ee444dbb7",
+  "qz_job_id": "qzcli_structure_20261019_1792412146_d1b7032f",
+  "remote_root": "/inspire/qb-ilm2/project/leverage-robot/ky26210/GyroRoll/experiments/structure_rl_20261019_v1",
+  "run_name": "2026-10-19_compare01",
+  "status_at_last_check": "both_pipelines_complete_with_evaluations",
+  "checked_at": "2026-10-19T21:23:22+08:00",
+  "checkpoint_roundtrip": "Both model_100.pt checkpoints loaded and produced finite actions, observations and rewards on GPU",
+  "progress_at_last_check": {"twin_sync": 7498, "raked_steer": 7498},
+  "iterations_completed_per_policy": 7500,
+  "final_evaluation": {
+    "duration_s": 15,
+    "trials_each": 96,
+    "twin_sync": {"survived": 96, "passed": 96, "forward_from_rest_speed_rmse_m_s": 0.03339677723124623, "forward_from_rest_mean_final_heading_error_deg": 4.056717127561569},
+    "raked_steer": {"survived": 88, "passed": 37, "forward_from_rest_speed_rmse_m_s": 0.020647834055125713, "forward_from_rest_mean_final_heading_error_deg": 14.906063556671143},
+    "scope": "Flat ground; initial roll from -1 to +1 degree; initial speeds 0 and 0.8 m/s. Pass criteria use survival and forward/yaw-rate/lateral RMSE, not accumulated heading error. Fixed-case RMSE excludes first 3 seconds."
+  },
+  "training_metrics_at_last_check": {
+    "twin_sync": {"forward_mae_m_s": 0.0930, "yaw_rate_mae_rad_s": 0.3684, "mean_episode_steps": 1902.59},
+    "raked_steer": {"forward_mae_m_s": 0.0301, "yaw_rate_mae_rad_s": 0.1655, "mean_episode_steps": 1899.65}
+  },
+  "latest_checkpoints_at_last_check": {
+    "twin_sync": "logs/structure_rl/twin_sync/2026-10-19_compare01/tracking/model_7498.pt",
+    "raked_steer": "logs/structure_rl/raked_steer/2026-10-19_compare01/tracking/model_7498.pt"
+  },
+  "gpu_smoke": {
+    "twin_sync": "passed",
+    "raked_steer": "passed",
+    "max_twin_sync_error_rad_s": 0.00499725341796875
+  },
+  "pipelines": {
+    "twin_sync": {"physical_gpu": 0, "phases": ["warmup", "tracking"]},
+    "raked_steer": {"physical_gpu": 1, "phases": ["moving", "tracking"]}
+  },
+  "iterations": [2500, 5000],
+  "num_envs_each": 256,
+  "bundle_sha256": "8f864ee47d7e056c0cfa5d9f16f773f1e6188ba20c4c13f6bd30a6b7152bd616",
+  "runtime_versions": {"mjlab": "1.3.0", "torch": "2.9.1", "mujoco": "3.10.0", "mujoco-warp": "3.8.1"},
+  "notes": "Both policies completed 2500 + 5000 PPO iterations and automatic evaluation. Both final checkpoints are model_7498.pt. JSON and HTML reports are in each run directory as tracking_evaluation.*. Twin policy passes this limited velocity-tracking suite, but accumulated heading drift remains. Raked policy fails several tasks. No push, slope or payload validation yet."
+}

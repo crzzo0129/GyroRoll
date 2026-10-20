@@ -45,7 +45,7 @@ def main():
     p.add_argument('--yaw-weight', type=float, default=.01)
     p.add_argument('--flywheel-only', action='store_true')
     p.add_argument('--start', type=Path)
-    p.add_argument('--output', type=Path, default=Path('results/chamfer_recovery/plan.json'))
+    p.add_argument('--output', type=Path, default=Path('results/wheelbot_cargo/chamfer_recovery/plan.json'))
     args = p.parse_args()
     ex = Experiment(timestep=args.timestep)
     m = ex.model

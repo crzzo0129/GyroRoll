@@ -1,0 +1,48 @@
+{
+  "name": "balanced_mirror",
+  "stage": 2,
+  "checkpoint": "logs/steer_v2/balanced_mirror/stage2/model_3998.pt",
+  "fps": 24,
+  "initial_speed_m_s": 0.0,
+  "initial_roll_deg": 0.0,
+  "seed": 42,
+  "action_smoothing": 1.0,
+  "physics_source": "original MJLab 1.3.0 / GPU MuJoCo-Warp checkpoint rollout; saved-pose replay is rendering only",
+  "columns": [
+    "case_index",
+    "time_s",
+    "target_v",
+    "actual_v",
+    "yaw_rate",
+    "roll_deg",
+    "terminated",
+    "failed_at"
+  ],
+  "cases": [
+    {
+      "name": "FORWARD",
+      "duration_s": 10.0,
+      "frames": 240,
+      "failed_at_s": null
+    },
+    {
+      "name": "REVERSE",
+      "duration_s": 12.0,
+      "frames": 288,
+      "failed_at_s": null
+    },
+    {
+      "name": "FORWARD TO REVERSE",
+      "duration_s": 15.0,
+      "frames": 360,
+      "failed_at_s": null
+    },
+    {
+      "name": "STOP",
+      "duration_s": 8.0,
+      "frames": 192,
+      "failed_at_s": null
+    }
+  ],
+  "rendering": "MuJoCo 3.10 EGL physical GPU 1; recorded qpos replay, no re-simulation"
+}

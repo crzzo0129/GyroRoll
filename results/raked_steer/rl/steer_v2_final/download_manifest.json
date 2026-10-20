@@ -1,0 +1,50 @@
+[
+  {
+    "filename": "final_comparison.mp4",
+    "sha": "25b94f3061c4bb7047e03e97c44639cfa50d438326d30d6ab66d4312b4516f60",
+    "size": 2647211,
+    "chunkSize": 250000,
+    "completed": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ]
+  },
+  {
+    "filename": "balanced_stage1.mp4",
+    "sha": "8915bb54037d496e5a24a8e617d3220e829a7a6fb4e942c1d29adb1b80405521",
+    "size": 1467436,
+    "chunkSize": 250000,
+    "completed": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  {
+    "filename": "steer_v2_final_reports.zip",
+    "sha": "7a8156f74a6c7a41eeb27cd96232c0e87be437d97746d81d980dd16891401198",
+    "size": 58941,
+    "chunkSize": 250000,
+    "completed": [
+      0
+    ]
+  }
+]

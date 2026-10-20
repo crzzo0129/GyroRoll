@@ -1,0 +1,37 @@
+[
+  {
+    "case": "stand_roll_+0.1",
+    "display_name": "静止，小偏差 +0.1°",
+    "excerpt_seconds": 7.970000000000996,
+    "failed_in_excerpt": false,
+    "held_final_frame_seconds": 1.6
+  },
+  {
+    "case": "stand_roll_+0.5",
+    "display_name": "静止，偏差 +0.5°",
+    "excerpt_seconds": 7.970000000000996,
+    "failed_in_excerpt": false,
+    "held_final_frame_seconds": 1.6
+  },
+  {
+    "case": "stand_roll_+1.0",
+    "display_name": "静止，偏差 +1°",
+    "excerpt_seconds": 0.7500000000000006,
+    "failed_in_excerpt": true,
+    "held_final_frame_seconds": 1.6
+  },
+  {
+    "case": "start_+0.5",
+    "display_name": "从静止起步至 +0.5 m/s",
+    "excerpt_seconds": 3.27999999999975,
+    "failed_in_excerpt": true,
+    "held_final_frame_seconds": 1.6
+  },
+  {
+    "case": "moving_-1.0_roll_+0.1",
+    "display_name": "已有倒车初速度 −1 m/s",
+    "excerpt_seconds": 14.969999999997142,
+    "failed_in_excerpt": false,
+    "held_final_frame_seconds": 1.6
+  }
+]

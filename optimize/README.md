@@ -31,9 +31,9 @@ python -m optimize.optimize_nested --iterations 12
 先按根目录 README 的命令回放已保存的控制器。重新执行六项验证：
 
 ```powershell
-.venv-mjlab/Scripts/python.exe optimize/validate_recovery.py --controller results/chamfer_recovery/controller.json
+.venv-mjlab/Scripts/python.exe optimize/validate_recovery.py --controller results/wheelbot_cargo/chamfer_recovery/controller.json
 ```
 
-初次实验将 2 / 1 ms 数据保存在 `results/chamfer_recovery/validation/`，0.5 ms 数据保存在 `validation_fine/`。`report_recovery.py` 读取这两个目录；报告中的通过数字必须来自完整回放，不能引用优化器的最小瞬时倾角。
+初次实验将 2 / 1 ms 数据保存在 `results/wheelbot_cargo/chamfer_recovery/validation/`，0.5 ms 数据保存在 `validation_fine/`。`report_recovery.py` 读取这两个目录；报告中的通过数字必须来自完整回放，不能引用优化器的最小瞬时倾角。
 
 `plan_recovery.py` 的早期 `swing_plan` / `capture_plan` 搜索分数仅用于探索，曾对滚轮而非飞轮施加动量代价；当前代码已按真实关节 DOF 修正。最终 MPC 的六例验收直接使用真实倾角、高度、角速度和持续时间，不依赖上述搜索分数。固定动作与时变 LQR 的失败回放也保留在结果目录供比较。

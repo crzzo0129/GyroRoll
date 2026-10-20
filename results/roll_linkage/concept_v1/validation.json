@@ -1,0 +1,18 @@
+{
+  "actuators": 2,
+  "linkage": "physical four-bar connect constraint",
+  "wheel_diameter_mm": 240,
+  "wheel_width_mm": 24,
+  "roll_limit_deg": 30,
+  "crank_length_mm": 55,
+  "connecting_rod_mm": 140,
+  "roll_axis_height_mm": 280,
+  "wheel_center_height_mm": 120,
+  "total_mass_kg": 1.5420000000000003,
+  "fixture_peak_closure_error_mm": 0.006415773139861189,
+  "fixture_peak_motor_torque_Nm": 0.5,
+  "fixture_peak_wheel_roll_deg": 23.22867168802825,
+  "free_dynamics_seconds": 2,
+  "balance_validated": false,
+  "preview": "fixed chassis, wheel suspended 30 mm; mechanism demonstration only"
+}

@@ -12,7 +12,7 @@ from probe_rise import Experiment,render
 
 
 def main():
-    folder=Path('results/chamfer_recovery')
+    folder=Path('results/wheelbot_cargo/chamfer_recovery')
     paths=sorted((folder/'validation').glob('dt_*.json'))+sorted((folder/'validation_fine').glob('dt_*.json'))
     # A later full validation can contain the same fine-step cases. Keep the
     # newest completed replay for each case rather than double-counting it.
@@ -103,7 +103,7 @@ th,td{{padding:12px 15px;border-bottom:1px solid #dce5e7;text-align:left}}pre{{b
 <h2>动作与电机实测</h2><img alt="倾角、两轮目标与实际转速、实际电机力矩" src="data:image/png;base64,{curve64}">
 <p>两个电机力矩上限均为 ±2.4 N·m；飞轮目标轮速 ±250 rad/s，滚轮目标轮速 ±35 rad/s。执行器与训练设置一致。目标转速边界不等于实际轮速的硬裁剪；惯性和接触可以使实际轮速短暂越界。</p>
 <h2>验证范围</h2><div class="note">本结果限于当前空载机身、平地、已知完整仿真状态和指定的侧放初态。动作包含明显翻滚与接触冲击，六例最大软接触侵入约 {max_penetration:.1f} mm。载物、坡地、摩擦/质量变化、传感噪声及实物尚未验证。预测计算尚未满足实时控制要求；当前用于可行性验证与生成示范轨迹。它不是训练好的 PPO，也尚未并入最终单一 policy。</div>
-<h2>本地复现</h2><pre>.venv-mjlab/Scripts/python.exe probe_rise.py --controller results/chamfer_recovery/controller.json --reference results/chamfer_recovery/reference.npz --feedback mpc --duration 15 --video results/chamfer_recovery/replay.mp4 --output results/chamfer_recovery/replay.json</pre>
+<h2>本地复现</h2><pre>.venv-mjlab/Scripts/python.exe probe_rise.py --controller results/wheelbot_cargo/chamfer_recovery/controller.json --reference results/wheelbot_cargo/chamfer_recovery/reference.npz --feedback mpc --duration 15 --video results/wheelbot_cargo/chamfer_recovery/replay.mp4 --output results/wheelbot_cargo/chamfer_recovery/replay.json</pre>
 <p>另一侧增加 <code>--roll -90</code>；细步长增加 <code>--timestep .001</code> 或 <code>--timestep .0005</code>。相同算法、参考和参数用于六例验证，预测模型使用各自的物理步长。</p>
 <p><a href="controller.json">控制参数</a> · <a href="summary.json">验证摘要</a> · <a href="geometry.xml">几何快照</a> · <a href="reference.npz">参考轨迹</a></p>
 <footer>相关单元/回归检查：17 项通过。MPC 每次 48 个候选、4 轮更新，固定随机种子 71。几何 SHA-256：{digest}</footer></main></html>'''

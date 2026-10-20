@@ -179,7 +179,7 @@ def main():
     parser.add_argument("--feedback-scale", type=float, default=1.)
     parser.add_argument("--model", type=Path, default=MODEL)
     parser.add_argument("--video", type=Path)
-    parser.add_argument("--output", type=Path, default=Path("results/local_rise/baseline.json"))
+    parser.add_argument("--output", type=Path, default=Path("results/wheelbot_cargo/local_rise/baseline.json"))
     args = parser.parse_args()
     schedule, capture_angle, yaw_gain, gyro_gain, roll_gyro_gain = None, 25., 0., 0., 0.
     if args.controller:

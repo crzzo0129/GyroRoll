@@ -2,9 +2,35 @@
 
 GyroRoll 是一个使用滚动轮与正交飞轮的两电机独轮机器人仿真项目。当前构型为 240 mm 开放滚动轮和上置的 166 mm 飞轮，滚轮上沿到飞轮下沿的竖直净距为 50 mm；基于 MJLab 1.3.0 的直接强化学习任务使用两路有符号目标轮速，学习前进/后退速度与转向角速度跟踪。训练在云端运行，配置与启动步骤见 [云端说明](CLOUD_README.md)。
 
-项目同时保留早期模型、传统控制器、转向机构对照与实验记录。当前新构型的 RL 策略尚未训练，旧控制器结果与新 RL 任务分开评估。
+项目同时保留早期模型、传统控制器、转向机构对照与实验记录。双飞轮与斜轴转向已完成一轮 RL 训练及评估；连杆摆轮已完成[自由机身 LQR 首轮验证](results/roll_linkage/lqr/level_torso_v2/report.html)，目前只有局部工况通过，尚未达到稳定载物的水平姿态要求。各历史章节的结果仅适用于对应模型与实验。
+
+## 项目导航
+
+**查看实验结果：[按模型分类的结果导航](results/index.html)** · [结果目录规范](results/README.md)
+
+| 模型 / 用途 | 模型与代码 | 实验结果 |
+|---|---|---|
+| 单飞轮载物机身及历史套轮 | `wheelbot/`、`miniwheelbot_rl/` | `results/wheelbot_cargo/` |
+| 早期单飞轮 | `wheelbot/`、`control.py` | `results/wheelbot_legacy/` |
+| 早期转向轮 | `steerbot/` | `results/steerbot_legacy/` |
+| 同向等速双飞轮 | `structure_rl/`，`twin_sync` | `results/twin_flywheel/` |
+| 斜轴转向 | `structure_rl/`，`raked_steer` | `results/raked_steer/` |
+| 连杆驱动 Roll 摆轮 | [roll_linkage/](roll_linkage/README.md) | `results/roll_linkage/` |
+| 跨模型对照 | `probe_structures.py` | `results/comparisons/` |
+
+训练检查点放在 `logs/`；辅助工具放在 [tools/](tools/README.md)；
+部署包、云端运行记录放在 `results/_shared/`。原始实验文件保留，
+2026-10-20 的目录迁移映射见 [整理记录](results/_shared/organization_20261020.json)。
 
 离线优化脚本统一放在 [`optimize/`](optimize/)，用途与运行方法见 [优化脚本说明](optimize/README.md)。从项目根目录使用 `python optimize/optimize_nested.py --help`，或 `python -m optimize.optimize_nested --help`。
+
+## 两种新结构的本地对照
+
+后续双飞轮按用户要求增加 [1:1 / −1:1 固定速比验证](results/twin_flywheel/coupling/README.md)。同向约束的实测速度残差达到数值精度量级；反向约束仍有约 0.0245 rad/s 残差，且直接 roll 控制作用抵消。此项与下方历史独立电机结果分开保存。
+
+2026-10-19 新增[双小飞轮与斜轴转向报告](results/comparisons/structure_concepts/report.html)：同一简化机身与 240×24 mm 圆截面滚轮，双飞轮前后向轴、左右布置；另一方案完全去掉飞轮，筛选斜轴与拖距。84 次有限力矩 CPU 回放覆盖 ±1° 初始 roll、2/1/0.5 ms 步长、静止/起步/行进/左右转弯/侧推/走停。双飞轮能平衡但航向尚未控制好；斜轴候选在已有初速下能跟踪转弯，零速静止与起步未通过。两者侧推后均未通过航向跟踪。报告保留失败视频、CSV、模型与控制器，不是生产几何或 PPO 结论。
+
+复现：`.venv-mjlab/Scripts/python.exe probe_structures.py --validate --render`。结构契约测试：`.venv-mjlab/Scripts/python.exe -m unittest tests.test_structure_concepts -v`。
 
 ## 早期对照构型
 
@@ -37,18 +63,18 @@ full 之后可用 `--stage full_robust --checkpoint FULL_RUN/model_XXXX.pt` 继�
 
 [结构预览](wheelbot/structure_preview.png)直接渲染实际模型，默认采用 Cover Removed 展示，依次为拆盖立体视图、正面和侧面。飞轮正面只保留一条白色径向刻度。生成的 XML 默认隐藏正面盖板及其饰面，普通查看和新模型录像也可直接看到飞轮；这只是显示设置，盖板质量和碰撞仍然生效。`wheelbot/appearance.py` 定义无质量、无碰撞的饰面；外壳、隔板、载物托盘、轴承支架均在生成器内定义真实质量和碰撞几何。盖板外观倒角，碰撞采用保守盒形。灯带、散热纹和托盘标记仅用于外观表达。
 
-[侧放接地对比](results/chamfer_rise/side_rest_comparison.png)：机器人从左右 90° 侧放自然静置 2 s 后，均停在约 76.56°，轮胎承担约 2.85 N（总重的 19.8%）。修改前自然侧躺约 88.77°，轮胎离地约 92.2 mm；修改后有真实轮地接触。2 / 1 / 0.5 ms 物理步长下均验证了接地。这里的侧躺指自然支撑姿态，并非强制维持精确 90°。沿用旧起身控制参数仍未成功；针对新支撑状态重新设计的控制验证见下文。
+[侧放接地对比](results/wheelbot_cargo/chamfer_rise/side_rest_comparison.png)：机器人从左右 90° 侧放自然静置 2 s 后，均停在约 76.56°，轮胎承担约 2.85 N（总重的 19.8%）。修改前自然侧躺约 88.77°，轮胎离地约 92.2 mm；修改后有真实轮地接触。2 / 1 / 0.5 ms 物理步长下均验证了接地。这里的侧躺指自然支撑姿态，并非强制维持精确 90°。沿用旧起身控制参数仍未成功；针对新支撑状态重新设计的控制验证见下文。
 
 ### 新机身的本地起身控制验证
 
 采用“两轮协同改变支撑 → 动态翻起 → 预测制动 → 平衡接管”。`wheelbot/recovery_control.py` 每 40 ms 用真实有限力矩速度伺服模型预测未来 0.4 s，修正两轮目标转速；3.2 s 参考动作结束后切入强 roll 阻尼、飞轮动量反馈和陀螺耦合补偿。电机上限为 2.4 N·m，目标速度为飞轮 ±250 rad/s、滚轮 ±35 rad/s。
 
-左右侧放 × 2 / 1 / 0.5 ms 物理步长，六项确定性回放均在 **4.09–4.20 s 达到连续稳定 1 s 的判据，并保持至 15 s 结束**。只播放固定动作或使用轨迹周围的时变 LQR 均未通过同样的六项检查。完整 [起身报告](results/chamfer_recovery/report.html)、[视频](results/chamfer_recovery/recovery.mp4) 和 [参数](results/chamfer_recovery/controller.json) 已保存。相关单元及回归检查共 17 项通过。
+左右侧放 × 2 / 1 / 0.5 ms 物理步长，六项确定性回放均在 **4.09–4.20 s 达到连续稳定 1 s 的判据，并保持至 15 s 结束**。只播放固定动作或使用轨迹周围的时变 LQR 均未通过同样的六项检查。完整 [起身报告](results/wheelbot_cargo/chamfer_recovery/report.html)、[视频](results/wheelbot_cargo/chamfer_recovery/recovery.mp4) 和 [参数](results/wheelbot_cargo/chamfer_recovery/controller.json) 已保存。相关单元及回归检查共 17 项通过。
 
 这是空载、平地、完整仿真状态观测的局部可行性实验；动作含明显翻滚和接触冲击，未验证载物、坡地或扰动随机化。预测计算尚未达到实时要求，也没有替换或训练 PPO。最终单一 policy 仍需独立训练与验收。
 
 ```powershell
-.venv-mjlab/Scripts/python.exe probe_rise.py --controller results/chamfer_recovery/controller.json --reference results/chamfer_recovery/reference.npz --feedback mpc --duration 15 --output results/chamfer_recovery/replay.json --video results/chamfer_recovery/replay.mp4
+.venv-mjlab/Scripts/python.exe probe_rise.py --controller results/wheelbot_cargo/chamfer_recovery/controller.json --reference results/wheelbot_cargo/chamfer_recovery/reference.npz --feedback mpc --duration 15 --output results/wheelbot_cargo/chamfer_recovery/replay.json --video results/wheelbot_cargo/chamfer_recovery/replay.mp4
 ```
 
 另一侧增加 `--roll -90`；细步长增加 `--timestep .001` 或 `--timestep .0005`。没有 `--reference ... --feedback mpc` 时只是固定动作回放，不代表最终控制方案。报告保存几何哈希与快照，旧几何不能直接套用这条轨迹。
@@ -75,13 +101,13 @@ py -3.12 -m venv .venv
 
 `run_nested.ps1` 打开带控制器的交互仿真；加 `-Headless` 可直接进行无窗口回放。反馈控制与几何测试不需要 PyTorch，回放 PPO checkpoint 和训练仍需要原有训练依赖。没有已训练的新布局 PPO 策略。
 
-历史同中心布局使用 20 rad/s 飞轮预旋转，1 m/s 无扰动直行回放 60 秒未跌倒，3–60 秒速度 RMSE 0.027 m/s，采样最大横滚角 0.004 rad；完整轨迹在 `results/wheelbot_nested_open/straight_60.json`。这些历史数据不代表当前上置布局。视频对应的 12 秒回放和轨迹在同目录的 `straight_12.json`。偏航/侧向误差按 `sim.py` 原有的 5.5–10.8 秒窗口计算。
+历史同中心布局使用 20 rad/s 飞轮预旋转，1 m/s 无扰动直行回放 60 秒未跌倒，3–60 秒速度 RMSE 0.027 m/s，采样最大横滚角 0.004 rad；完整轨迹在 `results/wheelbot_cargo/wheelbot_nested_open/straight_60.json`。这些历史数据不代表当前上置布局。视频对应的 12 秒回放和轨迹在同目录的 `straight_12.json`。偏航/侧向误差按 `sim.py` 原有的 5.5–10.8 秒窗口计算。
 
-历史同中心布局的 2 m/s 左右转向验收在质量/摩擦随机化下五种子均在约 3.7–3.9 秒加速阶段跌倒，完整验收 **0/5**。结果在 `results/wheelbot_nested_open/acceptance.json`。键盘/手柄转向入口用于实验；几何改变、直行不跌倒和完整操纵验收必须分开判断。`optimize/optimize_nested.py` 可通过统一的 `sim.py` 回放继续调参，候选先保存在 `results/nested_tuning/`，不会自动替换控制配置。
+历史同中心布局的 2 m/s 左右转向验收在质量/摩擦随机化下五种子均在约 3.7–3.9 秒加速阶段跌倒，完整验收 **0/5**。结果在 `results/wheelbot_cargo/wheelbot_nested_open/acceptance.json`。键盘/手柄转向入口用于实验；几何改变、直行不跌倒和完整操纵验收必须分开判断。`optimize/optimize_nested.py` 可通过统一的 `sim.py` 回放继续调参，候选先保存在 `results/wheelbot_cargo/nested_tuning/`，不会自动替换控制配置。
 
-早期 48 cm 布局留作历史对照：模型、配置和图片分别是 `wheelbot/nested_48cm_model.xml`、`wheelbot/nested_48cm_controller.json`、`wheelbot/nested_48cm_preview.png`；`results/wheelbot_nested/` 与 `results/nested_straight_60_summary.json` 均属于该旧布局，不是当前 24 cm 模型的结果。
+早期 48 cm 布局留作历史对照：模型、配置和图片分别是 `wheelbot/nested_48cm_model.xml`、`wheelbot/nested_48cm_controller.json`、`wheelbot/nested_48cm_preview.png`；`results/wheelbot_cargo/wheelbot_nested/` 与 `results/wheelbot_cargo/nested_straight_60_summary.json` 均属于该旧布局，不是当前 24 cm 模型的结果。
 
-上一个 24 cm 宽轮筒布局留存在 `wheelbot/nested_24cm_enclosed_model.xml`、`wheelbot/nested_24cm_enclosed_controller.json`、`wheelbot/nested_24cm_enclosed_preview.png`、`wheelbot/nested_24cm_enclosed_motion.mp4`；`results/wheelbot_nested_24cm/` 对应该旧布局。
+上一个 24 cm 宽轮筒布局留存在 `wheelbot/nested_24cm_enclosed_model.xml`、`wheelbot/nested_24cm_enclosed_controller.json`、`wheelbot/nested_24cm_enclosed_preview.png`、`wheelbot/nested_24cm_enclosed_motion.mp4`；`results/wheelbot_cargo/wheelbot_nested_24cm/` 对应该旧布局。
 
 以下是原 Linux 实验机的运行方式，`zhu_mjlab` 环境含 MuJoCo 3.6 / mjlab 1.2 / RSL-RL 5.0.1。所有命令从本目录执行：
 
@@ -139,15 +165,15 @@ $PY sim.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.js
 ```bash
 $PY accept.py wheelbot --checkpoint logs/rsl_rl/wheelbot_v2/RUN/model_XXX.pt --rotor-speed 110 --seeds 5 --video
 $PY accept.py wheelbot --controller thin --seeds 5 --video
-$PY accept.py wheelbot --controller thin --seeds 5 --mirror --kick-scale .6 --output-dir results/wheelbot_moderate_mirror
+$PY accept.py wheelbot --controller thin --seeds 5 --mirror --kick-scale .6 --output-dir results/wheelbot_legacy/wheelbot_moderate_mirror
 $PY accept.py steerbot --checkpoint logs/rsl_rl/steerbot_v2/RUN/model_XXX.pt --seeds 5 --video
-$PY accept.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.json --kick-scale .6 --seeds 5 --video --output-dir results/steerbot_moderate
-$PY accept.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.json --kick-scale .6 --mirror --seeds 5 --output-dir results/steerbot_moderate_mirror
-$PY accept.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.json --no-disturbance --test-turn-amplitude 0 --side-push-force 1 --side-push-duration .2 --seeds 5 --video --output-dir results/steerbot_side_force
-$PY accept.py steerbot --model steerbot/hill_model.xml --controller lqr --lqr-tuning steerbot/negative_candidate.json --no-disturbance --test-turn-amplitude 0 --seeds 5 --output-dir results/steerbot_hill_accept
+$PY accept.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.json --kick-scale .6 --seeds 5 --video --output-dir results/steerbot_legacy/steerbot_moderate
+$PY accept.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.json --kick-scale .6 --mirror --seeds 5 --output-dir results/steerbot_legacy/steerbot_moderate_mirror
+$PY accept.py steerbot --controller lqr --lqr-tuning steerbot/negative_candidate.json --no-disturbance --test-turn-amplitude 0 --side-push-force 1 --side-push-duration .2 --seeds 5 --video --output-dir results/steerbot_legacy/steerbot_side_force
+$PY accept.py steerbot --model steerbot/hill_model.xml --controller lqr --lqr-tuning steerbot/negative_candidate.json --no-disturbance --test-turn-amplitude 0 --seeds 5 --output-dir results/steerbot_legacy/steerbot_hill_accept
 $PY accept.py steerbot --controller optimized --seeds 5 --video
-$PY accept.py wheelbot --controller tilted --controller-params wheelbot/tilted_axis_probe.json --seeds 5 --video --output-dir results/wheelbot_tilt040
-$PY accept.py steerbot --controller optimized --trail .5 --head-mass .005 --controller-params steerbot/lightfork.json --seeds 5 --video --output-dir results/steerbot_lightfork
+$PY accept.py wheelbot --controller tilted --controller-params wheelbot/tilted_axis_probe.json --seeds 5 --video --output-dir results/wheelbot_legacy/wheelbot_tilt040
+$PY accept.py steerbot --controller optimized --trail .5 --head-mass .005 --controller-params steerbot/lightfork.json --seeds 5 --video --output-dir results/steerbot_legacy/steerbot_lightfork
 $PY generate_reports.py
 ```
 
