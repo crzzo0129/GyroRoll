@@ -7,11 +7,26 @@ import tempfile
 from unittest.mock import patch
 import torch
 
-from structure_rl.linkage_training import gate_cases,limit_cost,posture_reward,promotion_passed,candidate_acceptable
+from structure_rl.linkage_training import gate_cases,limit_cost,posture_reward,promotion_passed,candidate_acceptable,mixed_candidate_acceptable
 from structure_rl.linkage_seed import affine_seed,initialize_actor,grounded_height
 
 
 class LinkageTrainingTests(unittest.TestCase):
+    def test_mixed_selection_allows_progress_without_losing_passed_skills(self):
+        baseline={'phase':'tracking','duration_s':15.,'trials_per_case':16,
+            'cases':[{'name':name,'survival_rate':0.,'pass_rate':0.,
+                      'mean_survival_s':2.,'max_closure_error_m':.0001}
+                     for name,_,_ in gate_cases('tracking')]}
+        baseline['cases'][0].update(survival_rate=1.,pass_rate=1.,mean_survival_s=15.)
+        candidate=copy.deepcopy(baseline)
+        candidate['cases'][1]['mean_survival_s']=4.
+        candidate['cases'][2]['mean_survival_s']=1.5
+        self.assertTrue(mixed_candidate_acceptable(candidate,baseline))
+        candidate['cases'][0]['survival_rate']=.5
+        self.assertFalse(mixed_candidate_acceptable(candidate,baseline))
+        candidate=copy.deepcopy(baseline);candidate['cases'][1]['mean_survival_s']=1.
+        self.assertFalse(mixed_candidate_acceptable(candidate,baseline))
+
     def test_direct_tracking_launches_one_shared_policy_on_two_workers(self):
         from structure_rl.linkage_curriculum import main
         with tempfile.TemporaryDirectory() as temporary:

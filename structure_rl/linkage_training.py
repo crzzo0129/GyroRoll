@@ -80,3 +80,31 @@ def candidate_acceptable(candidate, baseline):
         if case['mean_survival_s']+.05<previous['mean_survival_s']:
             return False
     return True
+
+
+def mixed_candidate_acceptable(candidate, baseline):
+    """Permit tradeoffs among unfinished maneuvers while retaining passed skills."""
+    if candidate.get('controller','neural_policy')!='neural_policy':
+        return False
+    for key in ('phase','duration_s','trials_per_case','initial_tilt_bound_deg'):
+        if candidate.get(key)!=baseline.get(key):
+            return False
+    old={c['name']:c for c in baseline['cases']}
+    if len(candidate['cases'])!=len(old) or {c['name'] for c in candidate['cases']}!=set(old):
+        return False
+    def score(case, duration):
+        return case['survival_rate']+case['pass_rate']+case['mean_survival_s']/duration
+    previous_score=current_score=0.
+    for case in candidate['cases']:
+        previous=old[case['name']]
+        keys=('survival_rate','pass_rate','mean_survival_s','max_closure_error_m')
+        if not all(math.isfinite(c[k]) for c in (case,previous) for k in keys):
+            return False
+        if case['max_closure_error_m']>=.001:
+            return False
+        if previous['survival_rate']>=.9 and previous['pass_rate']>=.8:
+            if case['survival_rate']<.9 or case['pass_rate']<.8:
+                return False
+        current_score+=score(case,candidate['duration_s'])
+        previous_score+=score(previous,baseline['duration_s'])
+    return current_score+1e-8>=previous_score

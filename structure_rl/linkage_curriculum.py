@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from .linkage_training import promotion_passed,candidate_acceptable
+from .linkage_training import promotion_passed,candidate_acceptable,mixed_candidate_acceptable
 from .pipeline import latest_checkpoint
 
 
@@ -89,7 +89,8 @@ def main():
                 status.update(status='evaluating',candidate=str(candidate));save()
                 path=directory/'gate.json'
                 report=evaluate(candidate,phase,path,fraction)
-                accepted=baseline is None or candidate_acceptable(report,baseline)
+                accept=mixed_candidate_acceptable if a.direct_tracking else candidate_acceptable
+                accepted=baseline is None or accept(report,baseline)
                 # A new motion lesson must retain all earlier demonstrated skills.
                 guard_results={}
                 if accepted:
