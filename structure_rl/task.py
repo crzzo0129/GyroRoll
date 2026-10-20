@@ -11,12 +11,12 @@ from mjlab.utils.lab_api.math import quat_apply,quat_from_euler_xyz
 
 from miniwheelbot_rl.task import make_env_cfg,heading_rate
 from miniwheelbot_rl.settings import Settings
-from .model import MotorSettings,make_spec,MORPHOLOGIES,PHASES
+from .model import MotorSettings,make_spec,MORPHOLOGIES,PHASES,controlled_joints
 from .actions import StructureActionCfg
 
 
 def joint_ids(env,morphology):
-    names=('drive','left','right') if morphology=='twin_sync' else ('drive','steer')
+    names=controlled_joints(morphology)
     return env.scene['robot'].find_joints(names,preserve_order=True)[0]
 
 
@@ -25,12 +25,19 @@ def motor_state(env,morphology,settings):
     v=r.data.joint_vel[:,ids]
     if morphology=='twin_sync':
         return v/torch.tensor([settings.drive_limit,settings.rotor_limit,settings.rotor_limit],device=env.device)
+    if morphology=='roll_linkage':
+        passive=r.find_joints(('wheel_roll','passive_rod'),preserve_order=True)[0]
+        # Retain passive positions and rates: the physical closed loop is compliant.
+        return torch.cat((torch.stack((v[:,0]/settings.drive_limit,
+            r.data.joint_pos[:,ids[1]]/settings.linkage_limit,v[:,1]/10.),dim=1),
+            r.data.joint_pos[:,passive]/settings.linkage_limit,
+            r.data.joint_vel[:,passive]/10.),dim=1)
     return torch.stack((v[:,0]/settings.drive_limit,r.data.joint_pos[:,ids[1]]/settings.steer_limit,v[:,1]/10.),dim=1)
 
 
 def overspeed(env,morphology,settings):
     x=motor_state(env,morphology,settings)
-    if morphology=='raked_steer':x=x[:,(0,2)]
+    if morphology!='twin_sync':x=x[:,(0,2)]
     return (x.abs()-1).clamp_min(0).square().sum(dim=1)
 
 
@@ -41,6 +48,12 @@ def metric(env,name,morphology):
     if name=='roll_abs':
         g=r.data.projected_gravity_b
         return torch.atan2(-g[:,1],-g[:,2]).abs()
+    if name=='closure_error':
+        ids=r.find_sites(('rod_end','rocker_end'),preserve_order=True)[0]
+        return torch.linalg.vector_norm(r.data.site_pos_w[:,ids[0]]-r.data.site_pos_w[:,ids[1]],dim=1)
+    if name=='pitch_abs':
+        g=r.data.projected_gravity_b
+        return torch.atan2(g[:,0],torch.linalg.vector_norm(g[:,1:],dim=1)).abs()
     if name=='sync_error':
         ids=joint_ids(env,morphology)
         error=(r.data.joint_vel[:,ids[1]]-r.data.joint_vel[:,ids[2]]).abs()
@@ -61,7 +74,7 @@ def reset_robot(env,env_ids,morphology,phase,profile='baseline'):
     if hasattr(env,'_evaluation_roll'):angles[:,0]=env._evaluation_roll[env_ids]
     q=quat_from_euler_xyz(angles[:,0],angles[:,1],angles[:,2]);state[:,3:7]=q
     speed=torch.zeros(n,device=env.device)
-    if profile=='steer_v2':
+    if profile in ('steer_v2','linkage_v1') and phase!='warmup':
         from .steer_training import sample_initial_speed
         speed=sample_initial_speed(n,env.device)
     elif phase=='moving':speed.uniform_(.5,1.)
@@ -104,16 +117,21 @@ def pitch_angle_cost(env):
 
 def configuration(morphology,phase,num_envs,settings=MotorSettings(),model_path=None,play=False,profile='baseline'):
     if morphology not in MORPHOLOGIES or phase not in PHASES:raise ValueError((morphology,phase))
-    if profile not in ('baseline','steer_v2'):raise ValueError(profile)
+    if profile not in ('baseline','steer_v2','linkage_v1'):raise ValueError(profile)
     if profile=='steer_v2' and (morphology!='raked_steer' or phase!='tracking'):
         raise ValueError('steer_v2 requires raked_steer tracking')
-    cfg=make_env_cfg(num_envs,'tracking',settings=Settings(initial_height=.35,minimum_height=.22),play=play)
+    if profile=='linkage_v1' and morphology!='roll_linkage':
+        raise ValueError('linkage_v1 requires roll_linkage')
+    height=.42 if morphology=='roll_linkage' else .35
+    physics=(Settings(initial_height=height,minimum_height=.26,timestep=.001,decimation=10)
+             if morphology=='roll_linkage' else Settings(initial_height=height,minimum_height=.22))
+    cfg=make_env_cfg(num_envs,'tracking',settings=physics,play=play)
     actuators=[XmlActuatorCfg(target_names_expr=('drive',),command_field='velocity')]
     if morphology=='twin_sync':actuators.append(XmlActuatorCfg(target_names_expr=('left','right'),command_field='velocity'))
-    else:actuators.append(XmlActuatorCfg(target_names_expr=('steer',),command_field='position'))
+    else:actuators.append(XmlActuatorCfg(target_names_expr=(controlled_joints(morphology)[1],),command_field='position'))
     cfg.scene.entities['robot']=EntityCfg(spec_fn=partial(make_spec,morphology,settings,model_path),
         articulation=EntityArticulationInfoCfg(actuators=tuple(actuators)),
-        init_state=EntityCfg.InitialStateCfg(pos=(0,0,.35),joint_pos={'.*':0.},joint_vel={'.*':0.}))
+        init_state=EntityCfg.InitialStateCfg(pos=(0,0,height),joint_pos={'.*':0.},joint_vel={'.*':0.}))
     cfg.actions={'motors':StructureActionCfg(entity_name='robot',morphology=morphology,settings=settings)}
     terms=deepcopy(cfg.observations['actor'].terms)
     terms['wheel_velocity']=ObservationTermCfg(func=motor_state,params={'morphology':morphology,'settings':settings})
@@ -126,17 +144,23 @@ def configuration(morphology,phase,num_envs,settings=MotorSettings(),model_path=
     cmd.ranges.lin_vel_x=(.5,1.) if phase=='moving' else ((-.5,.5) if phase=='warmup' else (-1.,1.))
     yaw=.15 if phase=='warmup' else .3
     cmd.ranges.ang_vel_z=(-yaw,yaw)
-    if profile=='steer_v2':
+    if profile in ('steer_v2','linkage_v1'):
         cfg.rewards['yaw'].weight=4.
         cfg.rewards['pitch'].weight=-.05
         cfg.rewards['pitch_angle']=RewardTermCfg(func=pitch_angle_cost,weight=-.5)
         cfg.rewards['yaw_error']=RewardTermCfg(func=yaw_error_cost,weight=-.5)
         cfg.rewards['standing']=RewardTermCfg(func=standing_reward,weight=1.)
-        if not play:
+        if not play and phase=='tracking':
             from .steer_commands import BalancedSteeringCommandCfg
             cfg.commands['twist']=BalancedSteeringCommandCfg(entity_name='robot',
                 ranges=deepcopy(cmd.ranges),resampling_time_range=(4.,8.),rel_standing_envs=.2)
+    if morphology=='roll_linkage':
+        cfg.sim.mujoco.iterations=100
+        cfg.sim.mujoco.tolerance=1e-10
     cfg.metrics={n:MetricsTermCfg(func=metric,params={'name':n,'morphology':morphology}) for n in ('forward_mae','yaw_mae','roll_abs')}
+    if morphology=='roll_linkage':
+        for name in ('closure_error','pitch_abs'):
+            cfg.metrics[name]=MetricsTermCfg(func=metric,params={'name':name,'morphology':morphology})
     if morphology=='twin_sync':cfg.metrics['sync_error']=MetricsTermCfg(func=metric,params={'name':'sync_error','morphology':morphology},per_substep=True)
     cfg.sim.nconmax=128;cfg.sim.njmax=512
     cfg.viewer.width=960;cfg.viewer.height=544;cfg.viewer.distance=1.3

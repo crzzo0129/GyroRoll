@@ -47,7 +47,7 @@ def main():
     try:
         status['status'] = 'smoke'; save()
         run('smoke')
-        first = 'warmup' if args.morphology == 'twin_sync' else 'moving'
+        first = 'moving' if args.morphology == 'raked_steer' else 'warmup'
         checkpoint = None
         for phase, iterations in ((first, args.warmup_iterations), ('tracking', args.tracking_iterations)):
             status['status'] = 'training_' + phase; save()

@@ -14,11 +14,38 @@ import mujoco
 import numpy as np
 import torch
 
-from structure_rl.model import VERSION, SYNC_TOLERANCE_RAD_S, MotorSettings, load_manifest, make_spec, model_xml, source_model
+from structure_rl.model import VERSION, SYNC_TOLERANCE_RAD_S, MotorSettings, load_manifest, make_spec, model_xml, source_model, observation_dimension
 from structure_rl.pipeline import latest_checkpoint
 
 
 class StructureRLTests(unittest.TestCase):
+    def test_roll_linkage_physical_contract(self):
+        scene=mujoco.MjSpec()
+        scene.attach(make_spec('roll_linkage'),prefix='robot/',frame=scene.worldbody.add_frame())
+        attached=scene.compile()
+        self.assertEqual(attached.neq,1)
+        self.assertEqual(attached.eq_type[0],mujoco.mjtEq.mjEQ_CONNECT)
+        self.assertEqual(attached.nu,2)
+        self.assertEqual(attached.jnt_type[0],mujoco.mjtJoint.mjJNT_FREE)
+        self.assertEqual(observation_dimension('roll_linkage'),20)
+        model=mujoco.MjModel.from_xml_string(model_xml('roll_linkage',ground=True))
+        data=mujoco.MjData(model)
+        self.assertAlmostEqual(model.body('base').pos[2],.42)
+        self.assertAlmostEqual(model.actuator_ctrlrange[1,1],np.pi/6)
+        self.assertEqual(model.joint('linkage_motor').id,model.actuator_trnid[1,0])
+        # The wheel-roll and rod joints must remain passive.
+        self.assertNotIn(model.joint('wheel_roll').id,model.actuator_trnid[:,0])
+        self.assertNotIn(model.joint('passive_rod').id,model.actuator_trnid[:,0])
+        ids=[model.site(n).id for n in ('rod_end','rocker_end')]
+        max_error=0.
+        for step in range(200):
+            data.ctrl[:]=[2*np.sin(step*.01),.1*np.sin(step*.02)]
+            mujoco.mj_step(model,data)
+            self.assertTrue(np.isfinite(data.qvel).all())
+            self.assertTrue(np.all(np.abs(data.actuator_force)<=2.400001))
+            max_error=max(max_error,np.linalg.norm(data.site_xpos[ids[0]]-data.site_xpos[ids[1]]))
+        self.assertLess(max_error,.001)
+
     def test_servo_force_limits_and_sign(self):
         for kind in ('twin_sync', 'raked_steer'):
             m = mujoco.MjModel.from_xml_string(model_xml(kind, ground=True))
@@ -117,7 +144,8 @@ class StructureRLTests(unittest.TestCase):
         module = importlib.util.module_from_spec(spec)
         with patch.dict(sys.modules, {'mjlab.managers.action_manager': manager, spec.name: module}):
             spec.loader.exec_module(module)
-            for kind, indices in (('twin_sync', {'right': 0, 'drive': 1, 'left': 2}), ('raked_steer', {'steer': 0, 'drive': 1})):
+            for kind, indices in (('twin_sync', {'right': 0, 'drive': 1, 'left': 2}), ('raked_steer', {'steer': 0, 'drive': 1}),
+                                  ('roll_linkage', {'wheel_roll':0,'linkage_motor':1,'passive_rod':2,'drive':3})):
                 class Robot:
                     def __init__(self):
                         self.velocity = torch.zeros((2, len(indices)))
@@ -137,8 +165,12 @@ class StructureRLTests(unittest.TestCase):
                 if kind == 'twin_sync':
                     torch.testing.assert_close(robot.velocity[:, indices['left']], torch.tensor([-125., -250.]))
                     torch.testing.assert_close(robot.velocity[:, indices['left']], robot.velocity[:, indices['right']], rtol=0, atol=0)
-                else:
+                elif kind=='raked_steer':
                     torch.testing.assert_close(robot.position[:, indices['steer']], torch.tensor([-.35, -.7]))
+                else:
+                    torch.testing.assert_close(robot.position[:,indices['linkage_motor']],
+                                               torch.tensor([-np.pi/12,-np.pi/6],dtype=torch.float32))
+                    torch.testing.assert_close(robot.position[:,(0,2)],torch.zeros((2,2)))
                 term.reset(torch.tensor([0]))
                 torch.testing.assert_close(term.raw_action[0], torch.zeros(2))
                 self.assertNotEqual(float(term.raw_action[1, 0]), 0.)

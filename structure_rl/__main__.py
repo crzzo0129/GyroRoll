@@ -9,7 +9,7 @@ import math
 import os
 from pathlib import Path
 
-from .model import MORPHOLOGIES, PHASES, VERSION, SYNC_TOLERANCE_RAD_S, MotorSettings, load_manifest, source_model
+from .model import MORPHOLOGIES, PHASES, VERSION, SYNC_TOLERANCE_RAD_S, MotorSettings, load_manifest, source_model, observation_dimension
 
 
 def parser():
@@ -17,7 +17,7 @@ def parser():
     p.add_argument('mode', choices=('train', 'smoke', 'evaluate', 'video'))
     p.add_argument('--morphology', choices=MORPHOLOGIES)
     p.add_argument('--phase', choices=PHASES)
-    p.add_argument('--profile', choices=('baseline','steer_v2'))
+    p.add_argument('--profile', choices=('baseline','steer_v2','linkage_v1'))
     p.add_argument('--mirror-coeff', type=float, default=None,
                    help='Optional steering mirror loss coefficient; steer_v2 defaults to 1')
     p.add_argument('--warm-start', action='store_true', help='Load policy/value only; reset optimizer, iteration and exploration')
@@ -64,12 +64,12 @@ def build(args):
         model_path = args.checkpoint.parent / 'geometry.xml'
     if args.morphology is None:
         raise ValueError('--morphology is required when starting from scratch')
-    family = 'twin_flywheel' if args.morphology == 'twin_sync' else 'raked_steer'
+    family = 'twin_flywheel' if args.morphology == 'twin_sync' else args.morphology
     result_dir = Path('results') / family / 'rl'
     args.output = args.output or result_dir / 'evaluation.json'
     args.video = args.video or result_dir / 'video.mp4'
-    args.phase = args.phase or ('warmup' if args.morphology == 'twin_sync' else 'moving')
-    args.profile = args.profile or 'baseline'
+    args.phase = args.phase or ('moving' if args.morphology == 'raked_steer' else 'warmup')
+    args.profile = args.profile or ('linkage_v1' if args.morphology=='roll_linkage' else 'baseline')
     args.mirror_coeff = args.mirror_coeff if args.mirror_coeff is not None else (1. if args.profile=='steer_v2' else 0.)
     if not math.isfinite(args.mirror_coeff) or args.mirror_coeff < 0:
         raise ValueError('Mirror coefficient must be finite and nonnegative')
@@ -122,8 +122,9 @@ def build(args):
                 'warm_start':args.warm_start,'exploration_reset_std':.08 if args.warm_start else None,
                 'seed': args.seed, 'num_envs': args.num_envs, 'iterations_requested': args.iterations,
                 'source_checkpoint': str(args.checkpoint) if args.checkpoint else None,
-                'observation_dimension': 16, 'action_dimension': 2,
-                'action_order': ['drive_rad_s', 'shared_rotor_rad_s' if args.morphology == 'twin_sync' else 'steer_rad'],
+                'observation_dimension': observation_dimension(args.morphology), 'action_dimension': 2,
+                'action_order': ['drive_rad_s', {'twin_sync':'shared_rotor_rad_s',
+                    'raked_steer':'steer_rad','roll_linkage':'linkage_motor_rad'}[args.morphology]],
                 'command_order': ['forward_m_s', 'heading_rate_rad_s'],
                 'geometry_sha256': hashlib.sha256(geometry).hexdigest(),
                 'reward_weights': {k: v.weight for k, v in cfg.rewards.items()},
@@ -133,16 +134,21 @@ def build(args):
                 'physics_dt': cfg.sim.mujoco.timestep, 'policy_dt': env.step_dt,
                 'rotor_sync_validation_tolerance_rad_s': SYNC_TOLERANCE_RAD_S,
                 'algorithm': 'PPO; native finite-torque motor servos; no expert balance controller',
-                'initialization': ('half zero, quarter +0.3..0.9, quarter -0.3..0.9 m/s' if args.profile=='steer_v2' else
+                'initialization': ('half zero, quarter +0.3..0.9, quarter -0.3..0.9 m/s' if args.profile in ('steer_v2','linkage_v1') and args.phase!='warmup' else
                                    'moving: 0.5 to 1 m/s; tracking: half zero, half 0.8 m/s; warmup: zero'),
             }
-            if args.profile=='steer_v2':
+            if args.profile in ('steer_v2','linkage_v1') and args.phase=='tracking':
                 from .steer_training import TRAINING_REVISION
                 manifest['training_revision']=TRAINING_REVISION
                 manifest['commands'].update(sampling='20% stop, 20% forward straight, 20% reverse straight, 15% left, 15% right, 10% mixed maneuvers',
                                             resampling_seconds=[4,8],turn_speed_sign='equal forward/reverse probability',
                                             mixed_maneuvers='25% each forward straight/reverse straight/left/right; independent of actual velocity',
                                             nonzero_speed_magnitude=[.3,1.])
+            if args.morphology=='roll_linkage':
+                manifest.update(model_variant='level_torso_v2',training_revision='linkage_v1_20261020',
+                    passive_observation_order=['wheel_roll_rad/limit','passive_rod_rad/limit',
+                                               'wheel_roll_rad_s/10','passive_rod_rad_s/10'],
+                    mechanical_constraint='physical site-connect four-bar; free torso; two actuators')
             (log_dir / 'task.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
             (log_dir / 'agent.json').write_text(json.dumps(agent_config, indent=2), encoding='utf-8')
         runner = None
@@ -164,28 +170,33 @@ def build(args):
 
 def smoke(args, env, wrapped):
     import torch
-    from .task import joint_ids
+    from .task import joint_ids,metric
     robot = env.scene['robot']
     ids = joint_ids(env, args.morphology)
     assert wrapped.num_actions == 2
     maximum_sync = 0.
+    maximum_closure = 0.
     for step in range(100):
         # Exercise both signs and deliberately exceed policy bounds.
         actions = torch.zeros((env.num_envs, 2), device=env.device)
         actions[:, 0] = .1 if step % 20 < 10 else -.1
         actions[:, 1] = 1.5 if step % 20 < 10 else -1.5
         obs, reward, _, _ = wrapped.step(actions)
-        assert obs['actor'].shape == (env.num_envs, 16)
+        assert obs['actor'].shape == (env.num_envs, observation_dimension(args.morphology))
         assert torch.isfinite(obs['actor']).all() and torch.isfinite(reward).all()
         assert robot.data.actuator_force.abs().max() <= 2.4001
+        if args.morphology=='roll_linkage':
+            maximum_closure=max(maximum_closure,metric(env,'closure_error',args.morphology).max().item())
         if args.morphology == 'twin_sync':
             assert robot.data.actuator_force[:, 1:].abs().max() <= 1.2001
             maximum_sync = max(maximum_sync, (robot.data.joint_vel[:, ids[1]] - robot.data.joint_vel[:, ids[2]]).abs().max().item())
     if args.morphology == 'twin_sync':
         maximum_sync = max(maximum_sync, env._sync_peak.max().item())
     assert maximum_sync < SYNC_TOLERANCE_RAD_S, f'Rotor synchronization violation: {maximum_sync}'
+    assert maximum_closure < .001, f'Four-bar closure exceeds 1 mm: {maximum_closure}'
     print(json.dumps({'smoke_passed': True, 'morphology': args.morphology, 'steps': 100,
-                      'observation_dimension': 16, 'action_dimension': 2,
+                      'observation_dimension': observation_dimension(args.morphology), 'action_dimension': 2,
+                      'max_sampled_closure_error_m': maximum_closure,
                       'max_physics_substep_sync_error_rad_s': maximum_sync}, indent=2), flush=True)
 
 

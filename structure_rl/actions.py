@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import torch
 from mjlab.managers.action_manager import ActionTerm, ActionTermCfg
-from .model import MotorSettings
+from .model import MotorSettings,controlled_joints
 
 
 @dataclass(kw_only=True)
@@ -18,7 +18,7 @@ class StructureAction(ActionTerm):
         super().__init__(cfg,env)
         self._raw=torch.zeros((self.num_envs,2),device=self.device)
         self.applied=torch.zeros_like(self._raw)
-        names=('drive','left','right') if cfg.morphology=='twin_sync' else ('drive','steer')
+        names=controlled_joints(cfg.morphology)
         ids,self.target_names=self._entity.find_joints(names,preserve_order=True)
         self.ids=torch.tensor(ids,device=self.device,dtype=torch.long)
 
@@ -39,7 +39,8 @@ class StructureAction(ActionTerm):
             shared=self.applied[:,1:2]*s.rotor_limit
             self._entity.set_joint_velocity_target(shared.expand(-1,2),joint_ids=self.ids[1:])
         else:
-            self._entity.set_joint_position_target(self.applied[:,1:2]*s.steer_limit,joint_ids=self.ids[1:])
+            limit=s.linkage_limit if self.cfg.morphology=='roll_linkage' else s.steer_limit
+            self._entity.set_joint_position_target(self.applied[:,1:2]*limit,joint_ids=self.ids[1:])
 
     def reset(self,env_ids=None):
         ids=slice(None) if env_ids is None else env_ids
