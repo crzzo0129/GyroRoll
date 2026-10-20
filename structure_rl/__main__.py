@@ -17,13 +17,16 @@ def parser():
     p.add_argument('mode', choices=('train', 'smoke', 'evaluate', 'video'))
     p.add_argument('--morphology', choices=MORPHOLOGIES)
     p.add_argument('--phase', choices=PHASES)
-    p.add_argument('--profile', choices=('baseline','steer_v2','linkage_v1'))
+    p.add_argument('--profile', choices=('baseline','steer_v2','linkage_v1','linkage_v2','linkage_v3','linkage_v4'))
+    p.add_argument('--seed-only',action='store_true',help='Save the linkage_v3/v4 initialized neural policy without PPO updates')
     p.add_argument('--mirror-coeff', type=float, default=None,
                    help='Optional steering mirror loss coefficient; steer_v2 defaults to 1')
     p.add_argument('--warm-start', action='store_true', help='Load policy/value only; reset optimizer, iteration and exploration')
     p.add_argument('--checkpoint', type=Path)
     p.add_argument('--num-envs', type=int)
     p.add_argument('--iterations', type=int, default=3000)
+    p.add_argument('--learning-rate',type=float,help='Explicit PPO learning rate, including after optimizer resume')
+    p.add_argument('--motion-fraction',type=float,help='Linkage moving lesson fraction (0,1]; final tests use 1')
     p.add_argument('--seed', type=int, default=42)
     p.add_argument('--device', default='cuda:0')
     p.add_argument('--run-dir', type=Path, help='New directory for this training run')
@@ -58,6 +61,10 @@ def build(args):
         args.morphology = manifest['morphology']
         args.phase = args.phase or manifest['phase']
         args.profile = args.profile or manifest.get('training_profile','baseline')
+        if (args.profile=='linkage_v4') != (manifest.get('training_profile')=='linkage_v4'):
+            raise ValueError('ReLU linkage_v4 checkpoints cannot be loaded with an ELU profile')
+        if args.motion_fraction is None:
+            args.motion_fraction=manifest.get('motion_fraction',1.)
         if args.mirror_coeff is None:
             args.mirror_coeff = manifest.get('mirror_loss_coefficient')
         settings = MotorSettings(**manifest['motors'])
@@ -69,7 +76,10 @@ def build(args):
     args.output = args.output or result_dir / 'evaluation.json'
     args.video = args.video or result_dir / 'video.mp4'
     args.phase = args.phase or ('moving' if args.morphology == 'raked_steer' else 'warmup')
-    args.profile = args.profile or ('linkage_v1' if args.morphology=='roll_linkage' else 'baseline')
+    args.profile = args.profile or ('linkage_v2' if args.morphology=='roll_linkage' else 'baseline')
+    args.motion_fraction=args.motion_fraction if args.motion_fraction is not None else 1.
+    if not math.isfinite(args.motion_fraction) or not 0<args.motion_fraction<=1:
+        raise ValueError('motion-fraction must be in (0,1]')
     args.mirror_coeff = args.mirror_coeff if args.mirror_coeff is not None else (1. if args.profile=='steer_v2' else 0.)
     if not math.isfinite(args.mirror_coeff) or args.mirror_coeff < 0:
         raise ValueError('Mirror coefficient must be finite and nonnegative')
@@ -81,8 +91,15 @@ def build(args):
         raise RuntimeError('CUDA is unavailable')
     wp.config.kernel_cache_dir = str(Path('.cache/warp_structure').resolve())
     configure_torch_backends()
+    if args.profile in ('linkage_v3','linkage_v4'):
+        # TF32 truncation breaks cancellation in the high-gain initialized MLP.
+        # Keep both training and replay on the same full FP32 inference path.
+        torch.set_float32_matmul_precision('highest')
+        torch.backends.cuda.matmul.allow_tf32=False
+        torch.backends.cudnn.allow_tf32=False
     replay = args.mode in ('evaluate', 'video')
-    cfg = configuration(args.morphology, args.phase, args.num_envs, settings, model_path, replay, args.profile)
+    cfg = configuration(args.morphology, args.phase, args.num_envs, settings, model_path, replay, args.profile,
+                        motion_fraction=args.motion_fraction)
     cfg.seed = args.seed
     if replay:
         cfg.auto_reset = False
@@ -100,6 +117,28 @@ def build(args):
         agent.experiment_name = 'structure_' + args.morphology
         if args.profile=='steer_v2':
             agent.algorithm.learning_rate=1e-4
+            agent.algorithm.schedule='fixed'
+        if args.profile=='linkage_v2':
+            from .linkage_training import DISTRIBUTION
+            agent.actor.distribution_cfg=dict(DISTRIBUTION)
+            agent.algorithm.entropy_coef=.005
+            agent.algorithm.gamma=.995
+            agent.algorithm.learning_rate=3e-4
+            agent.algorithm.schedule='fixed'
+            agent.num_steps_per_env=64
+        if args.profile in ('linkage_v3','linkage_v4'):
+            agent.actor.activation='relu' if args.profile=='linkage_v4' else 'elu'
+            agent.actor.obs_normalization=False
+            agent.actor.distribution_cfg={'class_name':'miniwheelbot_rl.distributions:BoundedMeanGaussianDistribution',
+                'init_std':.01,'min_std':.005,'max_std':.04}
+            agent.algorithm.entropy_coef=.001
+            agent.algorithm.gamma=.995
+            agent.algorithm.lam=.99
+            agent.algorithm.learning_rate=1e-6 if args.profile=='linkage_v4' else 1e-5
+            agent.algorithm.schedule='fixed'
+            agent.num_steps_per_env=128
+        if args.learning_rate is not None:
+            agent.algorithm.learning_rate=args.learning_rate
             agent.algorithm.schedule='fixed'
         agent_config=asdict(agent)
         if args.mirror_coeff:
@@ -121,6 +160,8 @@ def build(args):
                 'training_profile':args.profile,'mirror_loss_coefficient':args.mirror_coeff,
                 'warm_start':args.warm_start,'exploration_reset_std':.08 if args.warm_start else None,
                 'seed': args.seed, 'num_envs': args.num_envs, 'iterations_requested': args.iterations,
+                'learning_rate':agent.algorithm.learning_rate,
+                'motion_fraction':args.motion_fraction,
                 'source_checkpoint': str(args.checkpoint) if args.checkpoint else None,
                 'observation_dimension': observation_dimension(args.morphology), 'action_dimension': 2,
                 'action_order': ['drive_rad_s', {'twin_sync':'shared_rotor_rad_s',
@@ -137,7 +178,7 @@ def build(args):
                 'initialization': ('half zero, quarter +0.3..0.9, quarter -0.3..0.9 m/s' if args.profile in ('steer_v2','linkage_v1') and args.phase!='warmup' else
                                    'moving: 0.5 to 1 m/s; tracking: half zero, half 0.8 m/s; warmup: zero'),
             }
-            if args.profile in ('steer_v2','linkage_v1') and args.phase=='tracking':
+            if args.profile in ('steer_v2','linkage_v1','linkage_v2','linkage_v3','linkage_v4') and args.phase=='tracking':
                 from .steer_training import TRAINING_REVISION
                 manifest['training_revision']=TRAINING_REVISION
                 manifest['commands'].update(sampling='20% stop, 20% forward straight, 20% reverse straight, 15% left, 15% right, 10% mixed maneuvers',
@@ -149,14 +190,43 @@ def build(args):
                     passive_observation_order=['wheel_roll_rad/limit','passive_rod_rad/limit',
                                                'wheel_roll_rad_s/10','passive_rod_rad_s/10'],
                     mechanical_constraint='physical site-connect four-bar; free torso; two actuators')
+            if args.profile=='linkage_v2':
+                from .linkage_training import REVISION,RESET_TILT,DISTRIBUTION
+                manifest.update(training_revision=REVISION,reset_tilt_rad=RESET_TILT[args.phase],
+                    initialization='rest' if args.phase!='tracking' else 'half rest, quarter forward, quarter reverse',
+                    exploration=dict(DISTRIBUTION),entropy_coefficient=.005,discount_factor=.995)
+            if args.profile in ('linkage_v3','linkage_v4'):
+                from .linkage_training import RESET_TILT
+                manifest.update(training_revision=f'{args.profile}_trainable_lqr_seed_20261020',actor_activation=agent.actor.activation,
+                    reset_tilt_rad=RESET_TILT[args.phase],actor_observation_normalization=False,
+                    initialization='grounded, rest' if args.phase!='tracking' else 'grounded, half rest / quarter forward / quarter reverse',
+                    initialization_only=args.seed_only,exploration=dict(agent.actor.distribution_cfg),
+                    matmul_precision='highest_fp32_no_tf32',
+                    algorithm='PPO; all MLP weights trainable; local LQR weight initialization only; no runtime LQR or external stabilization',
+                    entropy_coefficient=.001,discount_factor=.995,gae_lambda=.99)
+            if args.profile in ('linkage_v2','linkage_v3','linkage_v4') and args.phase=='moving':
+                manifest['reset_tilt_rad']*=1/3+2/3*args.motion_fraction
             (log_dir / 'task.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
             (log_dir / 'agent.json').write_text(json.dumps(agent_config, indent=2), encoding='utf-8')
         runner = None
         if args.mode != 'smoke':
             runner = MjlabOnPolicyRunner(wrapped, agent_config, str(log_dir) if log_dir else None, args.device)
+            if args.profile=='linkage_v2' and args.checkpoint is None:
+                # Start near zero targets; learning, not an expert controller, supplies feedback.
+                last=[m for m in runner.alg.actor.modules() if isinstance(m,torch.nn.Linear)][-1]
+                with torch.no_grad():
+                    last.weight.mul_(.01)
+                    last.bias.zero_()
+            if args.profile in ('linkage_v3','linkage_v4') and args.checkpoint is None:
+                from .linkage_seed import initialize_actor
+                initialize_actor(runner.alg.actor, activation='relu' if args.profile=='linkage_v4' else 'elu')
             if args.checkpoint:
                 load_cfg={'actor':True,'critic':True,'optimizer':False,'iteration':False} if args.warm_start else None
                 runner.load(str(args.checkpoint),load_cfg=load_cfg)
+                if args.learning_rate is not None:
+                    runner.alg.learning_rate=args.learning_rate
+                    for group in runner.alg.optimizer.param_groups:
+                        group['lr']=args.learning_rate
                 if args.warm_start:
                     from .steer_training import reset_exploration
                     reset_exploration(runner.alg.actor)
@@ -205,10 +275,14 @@ def main():
     args.num_envs = args.num_envs if args.num_envs is not None else {'train': 256, 'smoke': 4, 'evaluate': 8, 'video': 1}[args.mode]
     if args.num_envs < 1 or args.iterations < 1 or not math.isfinite(args.duration) or args.duration <= 3:
         raise ValueError('Positive num-envs/iterations and finite duration > 3 s are required')
+    if args.learning_rate is not None and (not math.isfinite(args.learning_rate) or args.learning_rate<=0):
+        raise ValueError('Learning rate must be finite and positive')
     if not all(math.isfinite(x) for x in (args.speed, args.turn, args.initial_speed)):
         raise ValueError('Commands and initial speed must be finite')
     if args.mode in ('evaluate', 'video') and args.checkpoint is None:
         raise ValueError('Replay requires --checkpoint from structure_rl')
+    if args.seed_only and (args.mode!='train' or args.profile not in ('linkage_v3','linkage_v4') or args.checkpoint is not None):
+        raise ValueError('--seed-only requires train --profile linkage_v3/v4 without checkpoint')
     if args.mode == 'video' and (args.num_envs != 1 or (args.video is not None and args.video.suffix.lower() != '.mp4')):
         raise ValueError('Video requires --num-envs 1 and an .mp4 path')
     if os.name == 'nt':
@@ -221,6 +295,10 @@ def main():
             smoke(args, env, wrapped)
         elif args.mode == 'train':
             print(f'Run directory: {log_dir.resolve()}', flush=True)
+            if args.seed_only:
+                runner.save(str(log_dir/'model_0.pt'))
+                print('INITIALIZED_NEURAL_POLICY_SAVED (zero PPO updates)',flush=True)
+                return
             runner.learn(num_learning_iterations=args.iterations, init_at_random_ep_len=False)
             (log_dir / 'complete.json').write_text(json.dumps({'completed': True, 'iterations_requested': args.iterations}), encoding='utf-8')
         elif args.mode == 'evaluate':

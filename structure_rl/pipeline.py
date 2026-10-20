@@ -27,6 +27,8 @@ def main():
     p.add_argument('--seed', type=int, default=42)
     p.add_argument('--device', default='cuda:0')
     args = p.parse_args()
+    if args.morphology=='roll_linkage':
+        p.error('Use python -m structure_rl.linkage_curriculum --output <new-directory>; linkage training requires evaluation gates')
     if min(args.warmup_iterations, args.tracking_iterations, args.num_envs) < 1:
         raise ValueError('Iteration and environment counts must be positive')
     root = args.output_root / args.morphology / args.run_name

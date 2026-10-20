@@ -6,6 +6,77 @@
 
 ## 强化学习速度跟踪
 
+### 当前实验：linkage_v4，初始化后继续 PPO
+
+2026-10-20 的迭代发现：纯 PPO 的 V1/V2 都没有学会站立；V3 将局部 LQR
+反馈初始化为普通 MLP 权重后，GPU 默认 TF32 精度会破坏高增益反馈。
+关闭 TF32、使用完整 FP32 后，同一网络在 ±0.1° 初始 Roll/Pitch 的 16 个
+独立站立测试中全部维持 12 秒。这个结果来自初始化，不能称为 RL 已学会速度跟踪。
+
+V4 使用 ReLU 的正负通道表示线性反馈，避免 V3 的大偏置相消。
+全部网络参数仍参与 PPO 更新；运行时只有神经网络，没有外接 LQR、隐藏力、
+姿态锁定或额外执行器。2 次 PPO 更新、学习率 1e-6 后，站立测试仍 16/16 通过。
+同一模型在 ±0.3 m/s 起步测试中仍失败，说明运动能力尚未验证成功。
+
+- 保持 V2 的奖励与真实物理模型。探索 std 初始 0.01、范围 0.005–0.04，
+  熵系数 0.001、gamma 0.995、lambda 0.99、每次采集 128 步。
+- 只在 reset 时按轮胎最低点放置机器人，补偿约 0.579 mm 静态接触压缩；
+  运动过程中没有高度修正。另有 `--airborne-reset` 检查离地释放的鲁棒性。
+- `--graded-moving` 将运动课程拆为 10%、25%、50%、100%：训练速度范围分别
+  ±0.04/0.10/0.20/0.40 m/s；独立测试为 ±0.03/0.075/0.15/0.30 m/s。
+  初始倾角从 ±0.12° 逐步到 ±0.3°，速度误差阈值同比缩小。
+  小课程通过只记作 `lesson_passed`，不算最终运动阶段 `promote`。
+- 每轮评估退化则回退到上一份保留模型（包含优化器状态）并将学习率减半；
+  接受新模型前还复查所有已通过课程。达到预算或学习率下限会停为
+  `needs_revision`，不会自动把失败策略推进下一阶段。
+- tracking 最终仍测试停车、前进、倒车、前后行驶时的左右转，以及前进切倒车；
+  每条命令 16 次、15 秒，验收标准不因早期课程而降低。
+
+可复现命令（新目录，GPU0）：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 /opt/mjlab-venv/bin/python -u -m structure_rl train \
+  --morphology roll_linkage --profile linkage_v4 --phase warmup \
+  --seed-only --num-envs 256 --run-dir logs/linkage_v4_seed
+CUDA_VISIBLE_DEVICES=0 /opt/mjlab-venv/bin/python -u -m structure_rl.linkage_curriculum \
+  --profile linkage_v4 --checkpoint logs/linkage_v4_seed/model_0.pt \
+  --output logs/linkage_v4_gated --graded-moving --num-envs 256 \
+  --learning-rate 1e-6 --block-iterations 10 --max-blocks 24
+```
+
+V3 使用 ELU，V4 使用 ReLU；不能把 V3 checkpoint 改配置名后当 V4 加载。
+`--seed-only` 保存的是零次 PPO 更新的初始化模型，不生成训练完成标记。
+
+### 历史实验：linkage_v2，按评估结果升级
+
+V1 在 2500 次 warmup 后独立评估全部失败，但旧流程仍按迭代数进入 tracking。
+故已停下 V1 作为对照；其诊断显示输入摇臂目标接近 −30° 后侧倒，
+不是电机力矩饱和。V2 保持几何、2.4 Nm 电机、20 维观测和两个动作不变：
+
+- warmup 仅零速度命令，初始 Roll/Pitch ±0.1°；moving 从静止学 ±0.4 m/s，
+  初始倾角 ±0.3°；tracking 才启用完整混合命令和移动初始状态。
+- 增加直立附近敏感的姿态奖励 +4、存活奖励 +2、摆角超出 65% 范围的软惩罚 −2。
+  摔倒惩罚提高到 −100，动作变化惩罚先降低至 −0.02；其他姿态惩罚保留。
+- 探索标准差初始 0.08，范围 0.04–0.15；熵系数 0.005，折扣 0.995，
+  每次采集 64 步；新策略输出层缩小至接近零目标，没有 LQR 或额外稳定器。
+- 每 300 次迭代做独立确定性评估，每条命令 16 次从静止起步；
+  站立评估 12 秒，运动评估 15 秒。每条命令存活率 ≥90%、通过率 ≥80%、
+  闭环误差 <1 mm 才升级；单次通过同时要求速度/转向误差及 Roll/Pitch
+  RMS <5°、峰值 <20°。训练回报不作为升级依据。
+- 每阶段最多 8 个区间。未通过则以 `needs_revision` 停下并保留模型，
+  不会继续扩大任务。通过课程不等于完成载物或现实可行性验证。
+
+```bash
+CUDA_VISIBLE_DEVICES=0 /opt/mjlab-venv/bin/python -u -m structure_rl.linkage_curriculum \
+  --output logs/roll_linkage_v2 --num-envs 256 \
+  --block-iterations 300 --max-blocks 8
+```
+
+每个区间保存 `task.json`、模型、`gate.json`；根目录 `status.json` 保存升级历史。
+旧 `structure_rl.pipeline --morphology roll_linkage` 入口已阻止无门槛升级。
+
+### 历史基线：linkage_v1
+
 使用 `model_level_torso.xml`，配置 `linkage_v1`。机身自由运动，
 物理四连杆 connect 约束保持不变，只有滚轮速度和输入摇臂角度两个主动输入。
 动作裁剪到 ±1 后分别映射为 ±35 rad/s 和 ±30°，两电机力矩上限均为 2.4 Nm。
@@ -30,14 +101,7 @@ Roll 角度平方 −2、Pitch 角度平方 −0.5、动作变化平方 −0.1�
 沿用环境按策略步长积分奖励的实现；Roll/Pitch 目标作用在上方躯干。
 记录速度误差、转向误差、躯干姿态和闭环端点距离。
 
-```bash
-CUDA_VISIBLE_DEVICES=0 /opt/mjlab-venv/bin/python -u -m structure_rl.pipeline \
-  --morphology roll_linkage --num-envs 256 \
-  --warmup-iterations 2500 --tracking-iterations 5000 \
-  --run-name level_torso_v2_tracking
-```
-
-该入口先做 GPU 冒烟检查，再串行训练两阶段并评估，训练状态保存在
+旧实验先做 GPU 冒烟检查，再串行训练两阶段并评估，训练状态保存在
 `logs/structure_rl/roll_linkage/level_torso_v2_tracking/status.json`。
 “已接入”不代表训练或可行性验证已经成功；以评估报告和视频为准。
 

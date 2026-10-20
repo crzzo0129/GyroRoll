@@ -9,9 +9,10 @@ def main():
     root = Path(__file__).resolve().parents[2]
     files = [root / name for name in (
         'requirements-mjlab.txt', 'result_paths.py',
-        'tests/test_structure_rl.py', 'tests/test_steer_training.py',
+        'tests/test_structure_rl.py', 'tests/test_steer_training.py', 'tests/test_linkage_training.py',
         'tools/cloud/render_structure_checkpoint.py',
         'tools/cloud/package_roll_linkage.py',
+        'structure_rl/linkage_seed_gains.json',
     )]
     for directory in ('miniwheelbot_rl', 'structure_rl', 'roll_linkage', 'wheelbot'):
         files.extend(p for p in (root / directory).rglob('*')
@@ -19,7 +20,7 @@ def main():
     files = sorted(set(files))
     manifest = {
         'morphology': 'roll_linkage', 'model_variant': 'level_torso_v2',
-        'profile': 'linkage_v1', 'mjlab': '1.3.0',
+        'profiles': ['linkage_v2','linkage_v3','linkage_v4'], 'mjlab': '1.3.0',
         'files': {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in files},
     }
